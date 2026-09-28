@@ -1,6 +1,6 @@
 # Plano de implementação do TCC: detecção de doenças pulmonares em raio X de tórax
 
-**Revisão 2.1 — 27/09/2026.** O que mudou em relação à versão anterior está no Apêndice A.
+**Revisão 2.2 — 28/09/2026.** O que mudou em relação às versões anteriores está no Apêndice A.
 
 > **Para o Claude Code:** este arquivo é a especificação do projeto. Leia inteiro antes de começar.
 > Trabalhe **uma fase por vez**, na ordem. Ao terminar cada fase, confira os critérios de aceite,
@@ -47,7 +47,7 @@ Se as contagens da Fase 1 derem muito diferentes disso, o parsing está errado.
 | Framework | PyTorch + torchvision |
 | Modelo | DenseNet-121, pesos ImageNet, última camada trocada por `Linear(1024, N)` multi-label (sigmoid) |
 | Dataset principal | NIH ChestX-ray14 (112.120 imagens, 14 rótulos + "No Finding") |
-| Dataset complementar | CheXpert (opcional, Fase 7) |
+| Dataset complementar | CheXpert, só como validação externa (Fase 7, no escopo desde 28/09/2026) |
 | Divisão | 70% treino / 15% validação / 15% teste |
 | Pré-processamento | resize 224×224, normalização (média/desvio do ImageNet), imagem cinza replicada em 3 canais |
 | Data augmentation (só treino) | rotação pequena, espelhamento horizontal, ajuste de brilho |
@@ -78,12 +78,14 @@ A divisão 70/15/15 é feita sobre os pacientes, com seed fixa, e salva em CSV.
 O `split.py` também sabe gerar a divisão oficial do NIH (`train_val_list.txt` / `test_list.txt`,
 com a validação tirada de dentro do train_val por paciente), escolhida por
 `split.strategy: patient_random | official` no YAML. O padrão é `patient_random`; o split oficial
-só é usado se o orientador pedir ou no experimento opcional E5.
+é usado só no experimento E5 e fica em pasta própria, `data/splits/official`. Cada pasta de split
+tem um `split_info.json` com as configurações, e o `split.py` se recusa a sobrescrever um split feito
+com outras configurações.
 
 **3.2 Treinar nas 14 classes, destacar as 3 do TCC.** Igual ao CheXNet: o modelo prevê as 14
 doenças, todas as AUCs são reportadas, e a análise da monografia foca em Pneumonia, Atelectasis e
-Effusion. Isso facilita comparar com a literatura. Se o orientador preferir só 3 classes, basta
-mudar a lista de classes no YAML.
+Effusion. Isso facilita comparar com a literatura. **Confirmado em 28/09/2026** (pergunta 1 da
+seção 9). Se um dia for preciso treinar só nas 3 classes, basta mudar a lista de classes no YAML.
 
 **3.3 Desbalanceamento:** `pos_weight` por classe no `BCEWithLogitsLoss` (negativos/positivos do
 treino), com um experimento de comparação sem pesos. Observação para a monografia: a AUC depende só
@@ -150,8 +152,9 @@ seção 2.
 é envolvido numa classe própria com `nn.ReLU(inplace=False)` como módulo, que vira a camada-alvo
 natural do Grad-CAM (Fase 4).
 
-**3.12 Prioridades.** Cada entrega tem prioridade (essencial / importante / se sobrar tempo),
-definida na seção 6.1. Se o prazo apertar, os opcionais caem primeiro.
+**3.12 Prioridades.** Cada entrega tem prioridade (essencial / importante / complementar),
+definida na seção 6.1. Os complementares estão no escopo e são feitos por último; se o prazo apertar,
+são os primeiros a ser reconsiderados (a decisão de cortar é do Rodrigo).
 
 **3.13 Ambiente de treino (em aberto; decidir antes da Fase 2).** As fases 0 e 1 não precisam de
 GPU: rodam no seu computador, em CPU, com a amostra do Kaggle. O código é o mesmo em qualquer
@@ -184,7 +187,9 @@ tcc-chest-xray/
 │   ├── paths/                   # local.yaml, colab.yaml, kaggle.yaml (só caminhos)
 │   └── experiments/             # e1_baseline.yaml, e2_posweight.yaml, e3_noaug.yaml, ...
 ├── data/                        # NÃO versionado; só data/splits/ é versionado
-│   └── splits/                  # train.csv, val.csv, test.csv
+│   └── splits/                  # train.csv, val.csv, test.csv, split_info.json; official/ (E5)
+├── docs/
+│   └── textos_monografia.md     # rascunhos de texto para a monografia (origem dos dados etc.)
 ├── src/chestxray/
 │   ├── __init__.py
 │   ├── config.py                # carrega YAML com herança (base → experimento)
@@ -396,14 +401,19 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
   | E2 | E1 + `pos_weight` | essencial |
   | E3 | Melhor entre E1 e E2 (pela validação), sem data augmentation | importante |
   | E-seeds | Melhor entre E1 e E2 repetida com mais 2 seeds (3 no total) | importante |
-  | E4 | Melhor entre E1 e E2, treinada do zero (sem ImageNet) | se sobrar tempo |
-  | E5 | Melhor entre E1 e E2, no split oficial do NIH | se sobrar tempo |
+  | E4 | Melhor entre E1 e E2, treinada do zero (sem ImageNet) | complementar |
+  | E5 | Melhor entre E1 e E2, no split oficial do NIH | complementar |
 
   - E4 converge devagar; com o mesmo `max_epochs` e early stopping, o resultado mostra o custo de
     não usar transfer learning com o mesmo orçamento, não o limite da arquitetura. Dizer isso na
     monografia.
   - E5 tem outro conjunto de teste: vai numa tabela separada, comparada com trabalhos que usam o
-    split oficial, e não lado a lado com E1–E4.
+    split oficial, e não lado a lado com E1–E4. O YAML do E5 usa `split.strategy: official` e
+    `paths.splits_dir: data/splits/official`. Visto na revisão da Fase 1: o split oficial não repete
+    pacientes (71.255 / 15.269 / 25.596 imagens), mas o teste oficial é bem mais "doente" que o resto
+    (Efusão 18,2% contra 11,9% no total; Atelectasia 12,8% contra 10,3%; Pneumonia 2,2% contra 1,3%).
+    Isso reprova o critério de 20% da Fase 1 (que vale só para o split principal) e mexe muito na
+    AUPRC, que depende da prevalência: no E5, comparar AUPRC sempre com a prevalência ao lado.
 - Tabela final: por experimento, AUC média (14 classes), AUC e AUPRC das 3 classes com IC95%,
   épocas até o early stopping e tempo de treino. Mais uma tabela de diferenças pareadas
   (E2−E1, E3−melhor, E4−melhor) com IC95%.
@@ -433,7 +443,10 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
 - Bounding boxes: `BBox_List_2017.csv` (~1.000 caixas, incluindo as 3 doenças do TCC, em
   coordenadas de 1024×1024; escalar para 224). Usar **só imagens que caíram no teste**. Desenhar a
   caixa do radiologista junto com o heatmap.
-- (Se sobrar tempo) métrica simples de localização, o *pointing game*: porcentagem dos casos em que
+- Atenção: no `BBox_List_2017.csv` a infiltração se chama `Infiltrate` (não `Infiltration`). São 984
+  caixas em 880 imagens; 153 caixas caíram no nosso teste, 22 de Atelectasia, 20 de Efusão e 20 de
+  Pneumonia.
+- (Complementar) métrica simples de localização, o *pointing game*: porcentagem dos casos em que
   o ponto máximo do heatmap cai dentro da caixa, por classe.
 
 **Critérios de aceite**
@@ -502,9 +515,9 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
 - Quem clonar o repositório reproduz as tabelas a partir dos CSVs de predição seguindo o README,
   sem GPU; com GPU, reproduz também o treino.
 
-### Fase 7 (opcional): validação externa no CheXpert
+### Fase 7 (complementar): validação externa no CheXpert
 
-Só fazer se as fases 0–6 estiverem prontas e houver tempo.
+No escopo desde 28/09/2026; feita depois das fases 0–6.
 - Usar apenas o **conjunto de validação do CheXpert** (rotulado por consenso de radiologistas, sem
   rótulos incertos) para testar o modelo treinado no NIH, sem treinar nada no CheXpert. O download
   exige cadastro na Stanford; eu faço.
@@ -522,7 +535,7 @@ Só fazer se as fases 0–6 estiverem prontas e houver tempo.
 |---|---|
 | **Essencial** (sem isso não há defesa) | Fases 0–2; E1 e E2; Fase 3 (métricas, IC, comparação com a literatura); galeria Grad-CAM; demo Gradio funcionando |
 | **Importante** | E3; 3 seeds da configuração final; subgrupos; calibração (curva e recalibração por Platt scaling); bounding boxes; Hugging Face Spaces |
-| **Se sobrar tempo** | E4; E5; pointing game; Fase 7 |
+| **Complementar** (no escopo desde 28/09/2026; feito por último) | E4; E5; pointing game; Fase 7 |
 
 ### 6.2 Cronograma relativo
 
@@ -538,17 +551,17 @@ porque não depende de resultado.
 | 4 | Fase 3; E3 e seeds | — | Sim |
 | 5 | Fases 4 e 5 | Resultados: tabelas | Pouco |
 | 6 | Fase 6; Hugging Face Spaces | Resultados e discussão | Não |
-| 7 | Folga ou opcionais (E4, E5, Fase 7) | Conclusão, resumo, revisão ABNT | Só nos opcionais |
+| 7 | Complementares: E4, E5, pointing game, Fase 7 (CheXpert) | Conclusão, resumo, revisão ABNT | Sim (E4 e E5) |
 | 8+ | Revisão com o orientador, slides, ensaio da defesa | Ajustes finais | Não |
 
 Ou seja: cerca de 7 semanas de trabalho até a monografia ficar pronta para o orientador revisar.
 
 **Marcos**
 - **Fim da semana 2 (antes da Fase 2):**
-  - ambiente de treino escolhido (3.13);
-  - respostas do orientador às perguntas 1, 2 e 6 da seção 9.
+  - ambiente de treino escolhido (3.13): medido com 1 época do E1 no começo da Fase 2;
+  - perguntas 1, 2 e 6 da seção 9: **resolvidas em 28/09/2026**.
 - **Fim da semana 5:** congelamento dos experimentos essenciais e importantes. Depois disso, só
-  opcionais, análise e escrita.
+  complementares, análise e escrita.
 
 **Quando a data de entrega (D) for definida**, contar de trás para frente e registrar na seção 10:
 - D − 1 semana: monografia completa; só revisão ABNT e ajustes.
@@ -556,7 +569,7 @@ Ou seja: cerca de 7 semanas de trabalho até a monografia ficar pronta para o or
 - D − 4 a 5 semanas: fases 4 e 5 prontas.
 
 Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar pela lista da 6.1
-(opcionais primeiro, depois os itens "importante").
+(complementares primeiro, depois os itens "importante").
 
 ## 7. Regras de trabalho para o Claude Code
 
@@ -579,26 +592,30 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | Data de entrega mais cedo que o previsto | Cortar pela 6.1; a Metodologia já estará escrita |
 | AUC abaixo da literatura | Esperado com divisão por paciente e rótulos ruidosos: reportar com IC e discutir; nunca ajustar olhando o teste |
 | Orientador pede só 3 classes | Trocar a lista de classes no YAML e retreinar E1 e E2 |
-| Atraso no cronograma | Seguir a 6.1: os opcionais caem primeiro |
+| Atraso no cronograma | Seguir a 6.1: os complementares são os primeiros a ser reconsiderados |
 | Demo falha no dia da defesa | Hugging Face Spaces → app rodando no seu computador → vídeo |
 
 ## 9. Perguntas em aberto
 
 1. Treinar nas 14 classes e destacar 3 (padrão deste plano) ou treinar só nas 3?
-   **Recomendação:** 14, para comparar com a literatura; a análise continua focada nas 3. *Antes da Fase 2.*
+   **Resolvido (28/09/2026):** 14 classes, para comparar com a literatura; a análise continua focada nas 3.
 2. Divisão própria 70/15/15 por paciente ou lista oficial de teste do NIH (`test_list.txt`)?
-   **Recomendação:** manter a própria (decisão do TCC 1; o CheXNet também usou divisão própria) e,
-   se sobrar tempo, rodar o E5 no split oficial para uma comparação direta. *Antes da Fase 2.*
+   **Resolvido (28/09/2026):** a divisão própria é a principal (decisão do TCC 1; o CheXNet também
+   usou divisão própria), e o E5 no split oficial entra no escopo para a comparação direta.
 3. A interface Gradio basta como "sistema", ou a banca espera outra forma de entrega?
    **Recomendação:** Gradio publicado no Hugging Face Spaces, com vídeo de backup.
 4. CheXpert entra no escopo ou fica como trabalho futuro?
-   **Recomendação:** só como validação externa opcional (Fase 7); treinar no CheXpert fica como trabalho futuro.
+   **Resolvido (28/09/2026):** entra como validação externa (Fase 7, complementar); treinar no
+   CheXpert fica como trabalho futuro. O download exige cadastro na Stanford, feito pelo Rodrigo.
 5. Monografia em LaTeX ou Word? **Resolvido pela Fase 6** (figuras e tabelas nos dois formatos).
    Falta só confirmar o modelo ABNT exigido pela UVV.
-6. É preciso parecer do Comitê de Ética para usar uma base pública e anonimizada? Normalmente não,
-   mas confirmar com o orientador; de todo jeito, a monografia deve ter um parágrafo sobre origem e
-   anonimização dos dados. *Antes da Fase 2.*
+6. É preciso parecer do Comitê de Ética para usar uma base pública e anonimizada?
+   **Resolvido (28/09/2026):** não. A monografia descreve a origem e a anonimização dos dados;
+   rascunho em `docs/textos_monografia.md`.
 7. (Rodrigo) Onde treinar: Colab, Kaggle ou GPU NVIDIA própria (ver 3.13)? *Antes da Fase 2.*
+   **Em andamento:** candidata principal é a RTX 2060 deste PC (~7–9 min por época, estimado);
+   medir 1 época real do E1 no começo da Fase 2 e, se quiser comparar, no PC com a RTX 4060
+   (basta copiar o `data/nih256.tar`).
 8. (Rodrigo) Datas de entrega da monografia e da defesa. Quando definidas, aplicar a contagem
    regressiva da 6.2 e registrar as datas na seção 10.
 
@@ -621,6 +638,10 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Amostra do Kaggle isolada em `data/sample/` (`configs/paths/local_sample.yaml`) | Splits, tabelas e figuras da amostra não se misturam com os reais, que são versionados |
 | 28/09/2026 | Divisão final: `patient_random`, seed 42 → 78.486 / 16.812 / 16.822 imagens (70,00 / 14,99 / 15,00%). Estratificação multirrótulo não foi necessária | Passou no critério de prevalência de primeira: maior diferença relativa de 17,5% (Pneumonia na validação: 1,50% contra 1,28% no total); Atelectasia 3,6%, Efusão 6,3%. Nenhuma outra seed foi testada |
 | 28/09/2026 | EDA em `src/chestxray/eda.py` (o notebook só chama e comenta) e figuras já no padrão da Fase 6 (português, vírgula decimal, PNG 300 dpi + PDF), via `src/chestxray/plotting.py` | Lógica testável e sem retrabalho na Fase 6 |
+| 28/09/2026 | Perguntas 1, 2, 4 e 6 da seção 9 resolvidas seguindo as recomendações: 14 classes; divisão própria como principal; CheXpert só como validação externa; sem parecer do Comitê de Ética, com a origem dos dados descrita na monografia | Decisão do Rodrigo |
+| 28/09/2026 | Os itens "se sobrar tempo" (E4, E5, pointing game, Fase 7) passam a se chamar "complementares" e entram no escopo; continuam por último na ordem de execução | Decisão do Rodrigo |
+| 28/09/2026 | `split_info.json` em cada pasta de split, e o `split.py` recusa sobrescrever um split feito com outras configurações; o split oficial (E5) vai para `data/splits/official` | Revisão da Fase 1: rodar o split oficial com a configuração padrão teria apagado a divisão principal |
+| 28/09/2026 | 3 imagens sem anatomia visível (00007160_002, rotulada Atelectasis; 00010007_121 e 00012249_001, No Finding) ficam no dataset | Defeito da própria base, não do pré-processamento; 3 em 112.120 (2 no treino, 1 na validação, 0 no teste) não mudam os resultados, e manter o conjunto completo preserva a comparação com a literatura. Citar na monografia como exemplo de ruído |
 
 ## 11. Referências
 
@@ -679,3 +700,16 @@ Adicionadas na revisão 2 (conferir volume, páginas e DOI antes de usar na mono
 - Cronograma sem datas: semanas relativas ao início, marcos relativos e contagem regressiva para
   aplicar quando a data de entrega (D) for definida.
 - Fases 0 e 1 marcadas como sem necessidade de GPU, para começar já.
+
+### Revisão 2.2 (28/09/2026)
+
+- Fase 3: recalibração dos escores por Platt scaling (ajustada só na validação). Fase 5: frase de
+  resumo acima da tabela, nunca "Normal", e "probabilidade estimada" só se a calibração se
+  sustentar no teste.
+- Perguntas 1, 2, 4 e 6 da seção 9 resolvidas; os itens "se sobrar tempo" viraram "complementares"
+  e entraram no escopo (E4, E5, pointing game, Fase 7).
+- Notas da execução das Fases 0 e 1: kaggle CLI 1.6.17 (a 1.7 guarda o download inteiro na
+  memória); divisão por paciente buscando as proporções de imagens; `split_info.json` protege o
+  split principal, e o E5 vai para `data/splits/official`; o teste do split oficial é mais "doente"
+  (afeta a AUPRC do E5); rótulo `Infiltrate` no arquivo de caixas; 3 imagens sem anatomia mantidas.
+- Nova pasta `docs/` com rascunhos de texto para a monografia.

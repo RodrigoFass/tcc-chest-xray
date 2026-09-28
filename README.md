@@ -120,7 +120,7 @@ python -m chestxray.eda
 |---|---|---|
 | `download` | Baixa o zip pelo kaggle CLI, sem extrair | `raw_dir` (`E:/datasets/nih`) |
 | `preprocess` | Lê cada PNG de dentro do zip (ou de uma pasta), converte para cinza 256×256 e empacota tudo num tar. Roda em paralelo e pode ser interrompido: na próxima vez continua de onde parou | `data_dir/images/`, `data_dir/manifest.csv` e `data/nih256.tar` |
-| `split` | Lê os rótulos, divide 70/15/15 por paciente (seed fixa) e confere as prevalências | `data/splits/*.csv` (versionados) e `results/tables/prevalencia_splits.csv` |
+| `split` | Lê os rótulos, divide 70/15/15 por paciente (seed fixa) e confere as prevalências. Não sobrescreve um split feito com outras configurações (ver `split_info.json`); o split oficial do NIH, usado no E5, vai para `data/splits/official` | `data/splits/*.csv` e `split_info.json` (versionados) e `results/tables/prevalencia_splits.csv` |
 | `eda` | Figuras e tabelas da análise exploratória | `results/figures/eda_*.{png,pdf}` e `results/tables/eda_*.csv` |
 
 O notebook [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb) roda a EDA e comenta cada figura. Para
@@ -137,6 +137,7 @@ acumulam em `data_dir`; no fim, copie os CSVs de metadados para `data_dir` e rod
 ```
 configs/            base.yaml, debug.yaml, paths/ (por ambiente), experiments/
 data/               não versionado, exceto data/splits/
+docs/               rascunhos de texto para a monografia (origem dos dados, divisão etc.)
 src/chestxray/      pacote Python (config, utils, data/, models/, ...)
 app/                interface Gradio (Fase 5)
 notebooks/          EDA, treino no ambiente escolhido, resultados
