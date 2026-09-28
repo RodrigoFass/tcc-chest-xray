@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from importlib import metadata
 from pathlib import Path
 
 from chestxray.config import load_config
@@ -51,6 +52,18 @@ def has_kaggle_credentials() -> bool:
         return True
     config_dir = Path(os.environ.get("KAGGLE_CONFIG_DIR", Path.home() / ".kaggle"))
     return (config_dir / "kaggle.json").is_file()
+
+
+def check_kaggle_version() -> None:
+    """Refuse kaggle 1.7.x: it reads the whole archive into memory before writing it,
+    which fails for the ~42 GB dataset (it is fine for the 4 GB sample)."""
+    try:
+        version = metadata.version("kaggle")
+    except metadata.PackageNotFoundError:
+        return  # a CLI from another environment; nothing to check
+    if version.startswith("1.7."):
+        sys.exit(f"kaggle {version} loads the whole download into memory (~42 GB for the full "
+                 "dataset). Install the pinned version: pip install kaggle==1.6.17")
 
 
 def count_zip_images(zip_path: Path) -> int:
@@ -92,6 +105,8 @@ def main(argv: list[str] | None = None) -> None:
             "Kaggle credentials not found. Save kaggle.json in ~/.kaggle/ or set "
             "KAGGLE_USERNAME and KAGGLE_KEY (see README, section 'Dados')."
         )
+    if not args.sample:
+        check_kaggle_version()
     dataset, expected = DATASETS["sample" if args.sample else "full"]
     dest = Path(load_config(args.config, args.paths)["paths"]["raw_dir"])
     zip_path = download(dataset, dest, force=args.force)

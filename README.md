@@ -87,7 +87,9 @@ seja executado.
    **fora do repositório**. Ele é uma senha: nunca o versione nem o cole em lugar nenhum.
 
 Por que "Legacy": os tokens novos ("API Tokens") exigem o kaggle CLI 1.8 ou mais novo, que só roda em
-Python 3.11+. Com o Python 3.10 do projeto, o CLI é o 1.7.4.5, que usa o `kaggle.json`.
+Python 3.11+. O projeto usa o kaggle CLI **1.6.17**, que lê o `kaggle.json`. Não use a série 1.7: ela
+carrega o download inteiro na memória antes de gravar o arquivo, o que esgota a RAM com os ~42 GB do
+dataset completo (o `download.py` recusa essa versão).
 
 No Colab, em vez do arquivo, crie os *Secrets* `KAGGLE_USERNAME` e `KAGGLE_KEY` e exporte-os como
 variáveis de ambiente. Num notebook do Kaggle não é preciso baixar nada: anexe o dataset
