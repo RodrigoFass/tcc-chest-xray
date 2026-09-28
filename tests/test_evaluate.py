@@ -136,3 +136,32 @@ def test_inference_matches_between_split_and_single_image(tmp_path):
         image = Image.open(data / "images" / preds.loc[i, "image"])
         single = inf.predict_image(model, trained_cfg, image)
         assert np.allclose(single, preds.loc[i, [f"score_{c}" for c in CLASSES]].to_numpy(float), atol=1e-5)
+
+
+def test_seeds_summary_reports_mean_and_sd(tmp_path):
+    runs = tmp_path / "results" / "runs"
+    dirs = []
+    for seed, strength in ((42, 1.5), (43, 1.4), (44, 1.6)):
+        run_dir = make_run(runs, f"exp_seed{seed}", strength=strength)
+        cfg = yaml.safe_load((run_dir / "config.yaml").read_text(encoding="utf-8"))
+        cfg["seed"] = seed
+        (run_dir / "config.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
+        ev.evaluate_run(run_dir, "test", tmp_path / "results", n_boot=20)
+        dirs.append(run_dir)
+    display = ev.seeds_summary(dirs, tmp_path / "results")
+    numeric = pd.read_csv(tmp_path / "results" / "tables" / "seeds_test.csv")
+    per_run = numeric["auc_media"][:3]
+    assert numeric["auc_media"][3] == pytest.approx(per_run.mean())
+    assert numeric["auc_media_dp"][3] == pytest.approx(per_run.std(ddof=1))
+    assert "±" in display.iloc[-1]["AUC média"] and "Pneumonia: AUPRC" in display.columns
+    with pytest.raises(SystemExit):
+        ev.seeds_summary([dirs[0], dirs[0]], tmp_path / "results")
+
+
+def test_training_curves_figure(tmp_path):
+    run_dir = tmp_path / "results" / "runs" / "exp"
+    run_dir.mkdir(parents=True)
+    pd.DataFrame({"epoch": [1, 2, 3], "lr": [1e-4, 1e-4, 1e-5], "train_loss": [0.2, 0.15, 0.1],
+                  "val_loss": [0.18, 0.16, 0.17], "val_auc_mean": [0.7, 0.8, 0.78]}).to_csv(run_dir / "log.csv", index=False)
+    ev.main(["--curves", str(run_dir)])
+    assert (tmp_path / "results" / "figures" / "curvas_treino_exp.pdf").exists()

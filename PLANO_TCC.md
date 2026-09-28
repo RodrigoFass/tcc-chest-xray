@@ -2,7 +2,7 @@
 
 **Revisão 2.2 — 28/09/2026.** O que mudou em relação às versões anteriores está no Apêndice A.
 
-> **Para o Claude Code:** este arquivo é a especificação do projeto. Leia inteiro antes de começar.
+> **Para quem for implementar:** este arquivo é a especificação do projeto. Leia inteiro antes de começar.
 > Trabalhe **uma fase por vez**, na ordem. Ao terminar cada fase, confira os critérios de aceite,
 > faça um commit e pare para eu revisar antes de seguir para a próxima.
 > Código e comentários podem ser em inglês; mensagens para mim, README e textos da monografia em português.
@@ -108,7 +108,7 @@ para 224.
 **3.5 Código em pacote Python + notebooks finos.** Toda a lógica fica em `src/chestxray`,
 instalada com `pip install -e .` (via `pyproject.toml`), para `python -m chestxray.train` funcionar
 em qualquer lugar. Os notebooks (Colab ou Kaggle) só clonam o repositório, instalam e chamam os scripts.
-Assim o Claude Code testa tudo localmente em CPU com um subconjunto pequeno. Em ambientes
+Assim dá para testar tudo localmente em CPU com um subconjunto pequeno. Em ambientes
 gerenciados (Colab, Kaggle), **não reinstalar torch/torchvision** (usar as versões que já vêm,
 que casam com o CUDA da máquina); as demais dependências têm versão fixada, e as versões usadas
 em cada treino ficam registradas. Nenhum caminho fixo no código (`/content`, `/kaggle`, etc.):
@@ -571,7 +571,7 @@ Ou seja: cerca de 7 semanas de trabalho até a monografia ficar pronta para o or
 Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar pela lista da 6.1
 (complementares primeiro, depois os itens "importante").
 
-## 7. Regras de trabalho para o Claude Code
+## 7. Regras de trabalho para a implementação
 
 - Rodar `pytest` e o treino com `configs/debug.yaml` antes de cada commit que mexer em dados ou treino.
 - Nunca versionar imagens, checkpoints, o `kaggle.json` ou qualquer credencial.
@@ -654,6 +654,14 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Split oficial do E5 gerado em `data/splits/official`: 71.255 / 15.269 / 25.596 imagens, sem paciente repetido (val tirada do `train_val_list.txt` por paciente, na proporção 70:15) | Prevalências do teste oficial acima do resto, como visto na revisão da Fase 1 |
 | 28/09/2026 | `train.py --config a b c` treina uma fila de experimentos; uma falha não interrompe os seguintes | Fila da Fase 3 roda numa noite só, com um comando |
 | 28/09/2026 | `--restart` no `train.py` (apaga a execução anterior do experimento), para uso em debug; `results/runs/debug/` fora do git | O treino de debug precisa poder rodar de novo; nos experimentos reais a regra de nunca sobrescrever continua valendo |
+| 28/09/2026 | Código das Fases 4, 5 e 7 escrito e testado antes dos treinos da fila (sessão na nuvem, sem GPU nem imagens); rodar com o `best.pt` fica para o PC | Adiantar o que não depende do PC enquanto a fila da Fase 3 não roda |
+| 28/09/2026 | Grad-CAM: camada padrão `relu`, `denseblock4` comparada; a escolha final sai do pointing game e das figuras `camadas_foco` | Critério objetivo além do visual; um teste confere que Grad-CAM na `relu` é igual ao CAM |
+| 28/09/2026 | Galeria: VP e FP de maior escore, FN de menor escore, no máximo 1 imagem por paciente, desempate pelo nome | Critério fixo e declarado, para as figuras não parecerem escolhidas a dedo; sem repetir paciente |
+| 28/09/2026 | Pointing game por imagem (várias caixas da mesma classe contam uma vez), IC95% de Wilson e o centro da imagem como referência trivial | Poucas caixas por classe (~20): Wilson se comporta bem com n pequeno; o centro mostra se o acerto é melhor que o acaso |
+| 28/09/2026 | App carrega um pacote exportado (`app/model/`: pesos, config, calibração, exemplos), fora do git; o Space instala o pacote `chestxray` do GitHub | O Space não precisa do dataset nem dos resultados; pesos nunca versionados no git |
+| 28/09/2026 | App mostra o escore recalibrado (Platt) e o limiar na mesma escala; o nome ("escore do modelo" ou "probabilidade estimada") é escolhido na exportação (`--label`) | Segue a Fase 5; a decisão depende das curvas de calibração do teste |
+| 28/09/2026 | CheXpert: 7 classes em comum (Atelectasis, Cardiomegaly, Effusion ← Pleural Effusion, Pneumonia, Pneumothorax, Consolidation, Edema); imagens não quadradas redimensionadas para quadrado (`--fit resize`, padrão) ou com bordas pretas (`--fit pad`) | Igual ao que o app faz com qualquer imagem; `pad` fica como verificação de sensibilidade |
+| 28/09/2026 | `evaluate --seeds` resume as 3 seeds (média ± desvio padrão amostral) | Plano 3.9 |
 
 ## 11. Referências
 

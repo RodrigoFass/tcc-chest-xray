@@ -20,9 +20,10 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | 1 | Dados (download, pré-processamento, divisão, EDA) | pronta |
 | 2 | Modelo e treino | pronta; E1 e E2 treinados |
 | 3 | Avaliação e experimentos | E1 e E2 avaliados (E1 escolhido); E3–E5 e seeds prontos para treinar |
-| 4 | Grad-CAM | — |
-| 5 | Demonstração (Gradio) | — |
-| 6 | Material para a monografia | — |
+| 4 | Grad-CAM | código e testes prontos; falta rodar com o `best.pt` do E1 |
+| 5 | Demonstração (Gradio) | código e testes prontos; falta exportar o modelo e publicar no Hugging Face |
+| 6 | Material para a monografia | notebook de resultados e rascunho dos capítulos em `docs/monografia/` |
+| 7 | Validação externa (CheXpert) | código e testes prontos; falta baixar o CheXpert |
 
 ## Instalação local
 
@@ -192,14 +193,91 @@ lado a lado, com diferenças pareadas de AUC (as mesmas reamostragens bootstrap 
 python -m chestxray.evaluate --compare results/runs/e1_baseline results/runs/e2_posweight --pairs e2_posweight:e1_baseline
 ```
 
+Para resumir as 3 seeds da configuração final (média ± desvio padrão):
+
+```bash
+python -m chestxray.evaluate --seeds results/runs/e1_baseline results/runs/e1_baseline_seed43 results/runs/e1_baseline_seed44
+```
+
+O notebook [notebooks/03_results.ipynb](notebooks/03_results.ipynb) roda, na ordem, tudo o que vem
+depois dos treinos (predições, avaliação, comparações, seeds, Grad-CAM, pacote do app e CheXpert),
+pulando o que ainda não tiver o que precisa.
+
+## Grad-CAM
+
+```bash
+python -m chestxray.gradcam --config configs/experiments/e1_baseline.yaml
+```
+
+Precisa do `best.pt`, das imagens e da avaliação de teste (usa o `preds_test.csv` e o limiar do
+`calibration.json`). Gera em `results/figures/e1_baseline/gradcam/` e `results/tables/e1_baseline/`:
+
+- **Galeria** (`galeria_<classe>`): para cada doença do TCC, verdadeiros positivos, falsos positivos e
+  falsos negativos no limiar de Youden da validação. **Critério de escolha, fixo:** os 3 verdadeiros
+  positivos e os 3 falsos positivos de **maior** escore e os 3 falsos negativos de **menor** escore, no
+  máximo uma imagem por paciente, desempate pelo nome do arquivo. A lista fica em `gradcam_selecao.csv`.
+- **Camadas** (`camadas_foco`): as duas camadas-alvo candidatas lado a lado. A padrão é a ReLU final
+  (`relu`); nessa arquitetura o Grad-CAM nela é igual ao CAM do CheXNet, o que um teste confere.
+- **Caixas do radiologista** (`caixas_<classe>`): todas as imagens de teste com caixa no
+  `BBox_List_2017.csv`, com o heatmap, a caixa e o pico do mapa (verde se cair dentro da caixa).
+- **Pointing game** (`pointing_game`): porcentagem de imagens em que o pico do mapa cai dentro da caixa,
+  por doença e camada, com IC95% de Wilson e a taxa que o simples centro da imagem obteria.
+
+## Demonstração
+
+1. Exportar o modelo para o app (pesos, calibração e algumas imagens de teste como exemplo; a pasta
+   `app/model/` nunca vai para o git). O comando já confere que o app reproduz o `preds_test.csv`:
+
+   ```bash
+   python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model
+   ```
+
+   O valor aparece como "escore do modelo". Use `--label probability` ("probabilidade estimada")
+   **só** se as curvas de calibração do teste, depois do Platt, ficarem perto da diagonal nas 3 classes
+   do TCC, e registre a decisão na seção 10 do plano.
+
+2. Rodar localmente (backup para a defesa; `--share` gera um link público temporário):
+
+   ```bash
+   python app/app.py
+   ```
+
+3. Publicar no Hugging Face Spaces (CPU gratuita): crie uma conta no Hugging Face, crie o Space em
+   <https://huggingface.co/new-space> (SDK **Gradio**, hardware **CPU basic**) e envie a pasta `app/`
+   (com o `app/model/` já exportado) usando um token de escrita:
+
+   ```bash
+   pip install -U huggingface_hub
+   hf auth login
+   hf upload <seu-usuario>/<nome-do-space> app . --repo-type space
+   ```
+
+   O Space instala o pacote `chestxray` direto deste repositório (`app/requirements.txt`); depois do
+   merge, troque `@main` pelo commit usado na defesa. Spaces gratuitos "dormem" sem uso: abra o link
+   alguns minutos antes da apresentação.
+
+## Validação externa no CheXpert
+
+Usa só o conjunto de **validação** do CheXpert (rótulos por consenso de radiologistas, sem incerteza),
+com o modelo treinado no NIH, sem treinar nada. Só imagens frontais e as 7 classes que existem nos dois
+datasets. O download exige cadastro na Stanford.
+
+```bash
+python -m chestxray.external --config configs/experiments/e1_baseline.yaml --chexpert-root E:/datasets/chexpert
+```
+
+Gera `results/runs/e1_baseline/preds_chexpert.csv`, `metrics_chexpert.json`, a tabela
+`validacao_externa_chexpert` (AUC no CheXpert ao lado da AUC no teste do NIH) e a figura
+`roc_foco_chexpert`. Classes com menos de 30 casos são marcadas com † (sem conclusão sobre elas).
+
 ## Estrutura
 
 ```
 configs/            base.yaml, debug.yaml, paths/ (por ambiente), experiments/
 data/               não versionado, exceto data/splits/
-docs/               rascunhos de texto para a monografia (origem dos dados, divisão etc.)
+docs/               rascunhos de texto para a monografia; docs/monografia/ tem os capítulos
 src/chestxray/      pacote Python (config, utils, data/, models/, ...)
-app/                interface Gradio (Fase 5)
+app/                interface Gradio (Fase 5) e arquivos do Hugging Face Space
 notebooks/          EDA, treino no ambiente escolhido, resultados
 results/            runs/, figures/, tables/
 tests/              pytest

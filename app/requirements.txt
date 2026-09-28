@@ -1,0 +1,7 @@
+# Requirements of the Hugging Face Space (CPU). The chestxray package comes from GitHub;
+# after merging, replace "main" with the commit of the version used in the defense.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.3
+torchvision>=0.18
+grad-cam==1.5.7
+chestxray @ git+https://github.com/RodrigoFass/tcc-chest-xray.git@main
