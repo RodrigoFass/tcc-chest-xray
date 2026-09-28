@@ -6,7 +6,10 @@
 Reads ``Data_Entry_2017.csv`` (or the Kaggle sample's ``sample_labels.csv``) from
 ``data_dir`` and turns "Finding Labels" (joined by ``|``) into one binary column per
 class, named exactly as in the CSV; "No Finding" means all zeros. Writes
-``<splits_dir>/{train,val,test}.csv`` and ``<results_dir>/tables/prevalencia_splits.csv``.
+``<splits_dir>/{train,val,test}.csv``, ``<splits_dir>/split_info.json`` (the settings and
+sizes; a split made with other settings is never overwritten) and
+``<results_dir>/tables/prevalencia_splits[_official].csv``. The official split (E5) goes to
+its own folder, ``data/splits/official``, set through ``paths.splits_dir``.
 
 Strategies (``split.strategy``):
 
@@ -21,6 +24,7 @@ Strategies (``split.strategy``):
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import re
 from pathlib import Path
@@ -38,6 +42,7 @@ NO_FINDING = "No Finding"
 SPLITS = ("train", "val", "test")
 SPLIT_NAMES_PT = {"train": "treino", "val": "val", "test": "teste"}
 META_COLUMNS = ["image", "patient_id", "age", "sex", "view"]
+SPLIT_INFO = "split_info.json"
 
 # Section 1 of the plan: used to check the label parsing on the full dataset
 REFERENCE_COUNTS = {
@@ -198,6 +203,31 @@ def check_reference_counts(df: pd.DataFrame, classes: list[str]) -> list[str]:
     return problems
 
 
+def split_settings(split_cfg: dict, labels_file: Path) -> dict:
+    """Everything that defines a split: the same settings always give the same split."""
+    return {
+        "strategy": split_cfg["strategy"],
+        "seed": split_cfg["seed"],
+        "fractions": {s: split_cfg[f"{s}_frac"] for s in SPLITS},
+        "labels_file": labels_file.name,
+    }
+
+
+def check_existing_split(splits_dir: Path, settings: dict) -> None:
+    """Refuse to overwrite a split made with other settings, e.g. the official split (E5)
+    written over the main one, or another seed tried until the checks pass."""
+    info_path = splits_dir / SPLIT_INFO
+    if not info_path.exists():
+        return
+    previous = json.loads(info_path.read_text(encoding="utf-8"))["settings"]
+    if previous != settings:
+        raise SystemExit(
+            f"{splits_dir} already holds a split made with {previous}; refusing to overwrite it "
+            f"with {settings}. Point paths.splits_dir to another folder "
+            f"(for E5: data/splits/official)."
+        )
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config", default="configs/base.yaml")
@@ -236,16 +266,25 @@ def main(argv: list[str] | None = None) -> None:
     if shared:
         raise RuntimeError(f"{len(shared)} patients appear in more than one split")
 
+    settings = split_settings(split_cfg, labels_file)
     splits_dir = Path(paths["splits_dir"])
+    check_existing_split(splits_dir, settings)
     splits_dir.mkdir(parents=True, exist_ok=True)
     for name in SPLITS:
         part = df[split == name][[*META_COLUMNS[:2], *classes, *META_COLUMNS[2:]]]
         part.to_csv(splits_dir / f"{name}.csv", index=False)
+    info = {
+        "settings": settings,
+        "images": {s: int((split == s).sum()) for s in SPLITS},
+        "patients": {s: int(df.loc[split == s, "patient_id"].nunique()) for s in SPLITS},
+    }
+    (splits_dir / SPLIT_INFO).write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
 
     table = prevalence_table(df, split, classes)
     tables_dir = Path(paths["results_dir"]) / "tables"
     tables_dir.mkdir(parents=True, exist_ok=True)
-    table.to_csv(tables_dir / "prevalencia_splits.csv", index=False)
+    table_name = "prevalencia_splits.csv" if strategy == "patient_random" else f"prevalencia_splits_{strategy}.csv"
+    table.to_csv(tables_dir / table_name, index=False)
 
     shares = table.set_index("classe").loc["Imagens"]
     logger.info("Images: train %.2f%%, val %.2f%%, test %.2f%% (strategy %s, seed %d)",
@@ -258,7 +297,7 @@ def main(argv: list[str] | None = None) -> None:
         logger.warning("Prevalence differs by more than 20%%: %s", failure)
     if not failures:
         logger.info("Prevalence of %s within 20%% across splits", ", ".join(focus))
-    logger.info("Wrote %s and %s", splits_dir, tables_dir / "prevalencia_splits.csv")
+    logger.info("Wrote %s and %s", splits_dir, tables_dir / table_name)
 
 
 if __name__ == "__main__":

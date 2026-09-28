@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import numpy as np
@@ -104,6 +105,17 @@ def test_prevalence_table_and_failures():
     assert len(failures) == 2  # val (50% vs 25%) and test (0% vs 25%)
 
 
+def test_split_made_with_other_settings_is_never_overwritten(tmp_path):
+    settings = sp.split_settings(CFG["split"], Path("Data_Entry_2017.csv"))
+    sp.check_existing_split(tmp_path, settings)  # nothing there yet
+    (tmp_path / sp.SPLIT_INFO).write_text(json.dumps({"settings": settings}), encoding="utf-8")
+    sp.check_existing_split(tmp_path, settings)  # same settings: re-running is fine
+    with pytest.raises(SystemExit, match="refusing to overwrite"):
+        sp.check_existing_split(tmp_path, {**settings, "seed": 7})
+    with pytest.raises(SystemExit, match="data/splits/official"):
+        sp.check_existing_split(tmp_path, {**settings, "strategy": "official"})
+
+
 # Acceptance checks for Phase 1, run on the versioned splits once they exist
 SPLITS_DIR = Path(CFG["paths"]["splits_dir"])
 real_splits = pytest.mark.skipif(not (SPLITS_DIR / "train.csv").exists(), reason="splits not generated yet")
@@ -128,6 +140,13 @@ def test_saved_splits_proportions(saved_splits):
     assert 0.69 <= sizes["train"] / total <= 0.71
     assert 0.14 <= sizes["val"] / total <= 0.16
     assert 0.14 <= sizes["test"] / total <= 0.16
+
+
+@real_splits
+def test_saved_splits_match_the_config(saved_splits):
+    info = json.loads((SPLITS_DIR / sp.SPLIT_INFO).read_text(encoding="utf-8"))
+    assert info["settings"] == sp.split_settings(CFG["split"], Path("Data_Entry_2017.csv"))
+    assert info["images"] == {name: len(df) for name, df in saved_splits.items()}
 
 
 @real_splits

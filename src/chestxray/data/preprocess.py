@@ -56,6 +56,8 @@ _size: int = 256
 
 
 def detect_source(input_path: Path) -> str:
+    if not input_path.exists():
+        raise FileNotFoundError(f"{input_path} not found: download it first or pass --input")
     if input_path.is_dir():
         return "dir"
     if zipfile.is_zipfile(input_path):
