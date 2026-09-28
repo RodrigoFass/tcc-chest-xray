@@ -20,7 +20,8 @@ Outputs: ``<run>/metrics_<split>.json``, tables (CSV, Markdown and LaTeX) in
 ``--compare`` writes the side-by-side table of experiments and the paired differences
 (both models scored on the same bootstrap samples) to ``results/tables/``. ``--seeds`` summarizes
 repetitions of one configuration with different training seeds (plan 3.9): each run and the
-mean ± standard deviation across runs, in ``results/tables/seeds_<split>``.
+mean ± standard deviation across runs, in ``results/tables/seeds_<split>``. ``--curves`` plots the
+training curves of the given runs (``results/figures/curvas_treino_<runs>``).
 """
 
 from __future__ import annotations
@@ -35,6 +36,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import yaml
+from matplotlib.ticker import MaxNLocator
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import precision_recall_curve, roc_curve
 
@@ -510,6 +512,38 @@ def seeds_summary(run_dirs: list[Path], results_dir: Path, split: str = "test") 
     return display
 
 
+def plot_training_curves(run_dirs: list[Path]) -> plt.Figure:
+    """One panel per run with the training and validation loss (each run has its own scale:
+    with ``pos_weight`` the loss is not comparable), and one panel with the mean validation AUC
+    of all runs, marking the chosen epoch (best mean validation AUC) and each learning-rate cut."""
+    colors = [*FOCUS_COLORS, "#8a5ab8", "#b8475a", "#6b6b6b"]
+    fig, axes = plt.subplots(1, len(run_dirs) + 1, figsize=(4.6 * (len(run_dirs) + 1), 4.4), squeeze=False)
+    ax_auc = axes[0, -1]
+    for ax, color, run_dir in zip(axes[0], colors, run_dirs):
+        log = pd.read_csv(run_dir / "log.csv")
+        name = run_dir.name
+        ax.plot(log["epoch"], log["train_loss"], "--", color=color, label="treino")
+        ax.plot(log["epoch"], log["val_loss"], "-", color=color, label="validação")
+        ax.set_title(f"Perda: {name}")
+        ax.set_ylabel("Perda (BCE)")
+        ax_auc.plot(log["epoch"], log["val_auc_mean"], "-o", ms=3, color=color, label=name)
+        best = log.loc[log["val_auc_mean"].idxmax()]
+        ax_auc.plot(best["epoch"], best["val_auc_mean"], "*", ms=14, color=color)
+        for epoch in log.loc[log["lr"].diff() < 0, "epoch"]:
+            ax_auc.axvline(epoch, color=color, ls=":", lw=0.8)
+    ax_auc.set_title("AUC média de validação")
+    ax_auc.set_ylabel("AUC média (14 classes)")
+    ax_auc.plot([], [], "*", ms=10, color="grey", label="época escolhida")
+    ax_auc.plot([], [], ":", color="grey", label="redução da taxa")
+    for ax in axes[0]:
+        ax.set_xlabel("Época")
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.legend(fontsize=8)
+        use_decimal_comma(ax.yaxis)
+    fig.tight_layout()
+    return fig
+
+
 def _seed_label(column: str) -> str:
     if column == "auc_media":
         return "AUC média"
@@ -523,6 +557,7 @@ def main(argv: list[str] | None = None) -> None:
     mode.add_argument("--run", type=Path, help="run folder (results/runs/<experiment>)")
     mode.add_argument("--compare", type=Path, nargs="+", help="run folders to put side by side")
     mode.add_argument("--seeds", type=Path, nargs="+", help="runs of one configuration with different seeds")
+    mode.add_argument("--curves", type=Path, nargs="+", help="runs whose training curves go in one figure")
     parser.add_argument("--split", choices=["val", "test"], default="test")
     parser.add_argument("--pairs", nargs="*", default=[], help="paired differences as A:B (A minus B)")
     parser.add_argument("--results-dir", type=Path, help="default: the folder above results/runs")
@@ -530,10 +565,17 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     setup_logging()
 
-    first_run = args.run or (args.compare or args.seeds)[0]
+    first_run = args.run or (args.compare or args.seeds or args.curves)[0]
     results_dir = args.results_dir or first_run.resolve().parent.parent
     if args.run:
         evaluate_run(args.run, args.split, results_dir, args.bootstrap)
+    elif args.curves:
+        setup_style()
+        fig = plot_training_curves(args.curves)
+        stem = results_dir / "figures" / ("curvas_treino_" + "_".join(r.name for r in args.curves))
+        save_figure(fig, stem)
+        plt.close(fig)
+        logger.info("Wrote %s.png/.pdf", stem)
     elif args.seeds:
         logger.info("Seeds (%s):\n%s", args.split, seeds_summary(args.seeds, results_dir, args.split).to_string(index=False))
     else:

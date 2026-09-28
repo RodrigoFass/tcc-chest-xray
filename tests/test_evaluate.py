@@ -156,3 +156,12 @@ def test_seeds_summary_reports_mean_and_sd(tmp_path):
     assert "±" in display.iloc[-1]["AUC média"] and "Pneumonia: AUPRC" in display.columns
     with pytest.raises(SystemExit):
         ev.seeds_summary([dirs[0], dirs[0]], tmp_path / "results")
+
+
+def test_training_curves_figure(tmp_path):
+    run_dir = tmp_path / "results" / "runs" / "exp"
+    run_dir.mkdir(parents=True)
+    pd.DataFrame({"epoch": [1, 2, 3], "lr": [1e-4, 1e-4, 1e-5], "train_loss": [0.2, 0.15, 0.1],
+                  "val_loss": [0.18, 0.16, 0.17], "val_auc_mean": [0.7, 0.8, 0.78]}).to_csv(run_dir / "log.csv", index=False)
+    ev.main(["--curves", str(run_dir)])
+    assert (tmp_path / "results" / "figures" / "curvas_treino_exp.pdf").exists()
