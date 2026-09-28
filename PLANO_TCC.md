@@ -613,9 +613,9 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
    **Resolvido (28/09/2026):** não. A monografia descreve a origem e a anonimização dos dados;
    rascunho em `docs/textos_monografia.md`.
 7. (Rodrigo) Onde treinar: Colab, Kaggle ou GPU NVIDIA própria (ver 3.13)? *Antes da Fase 2.*
-   **Em andamento:** candidata principal é a RTX 2060 deste PC (~7–9 min por época, estimado);
-   medir 1 época real do E1 no começo da Fase 2 e, se quiser comparar, no PC com a RTX 4060
-   (basta copiar o `data/nih256.tar`).
+   **Resolvido (28/09/2026): RTX 2060 deste PC.** A 1ª época real do E1 levou 8,8 min
+   (~178 img/s com o cuDNN determinístico da seção 3.6). A comparação com o PC da RTX 4060 continua
+   opcional (basta copiar o `data/nih256.tar`), mas não é necessária.
 8. (Rodrigo) Datas de entrega da monografia e da defesa. Quando definidas, aplicar a contagem
    regressiva da 6.2 e registrar as datas na seção 10.
 
@@ -648,6 +648,7 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | `log.csv` reescrito a cada época a partir do histórico salvo no `last.pt` | Retomada sem linha duplicada nem faltando; um teste confirma que treino interrompido e retomado dá o mesmo resultado do treino direto (CPU) |
 | 28/09/2026 | No Windows, o treino chama `SetThreadExecutionState` para o PC não suspender | Não altera configuração do sistema; vale só enquanto o processo roda |
 | 28/09/2026 | YAMLs do E3, E4, E5 e das seeds extras criados na Fase 3, depois da escolha entre E1 e E2 pela validação | Todos partem do vencedor, que ainda não existe |
+| 28/09/2026 | Ambiente de treino (3.13): RTX 2060 deste PC, batch 32, fp16 | 1ª época do E1 em 8,8 min (~178 img/s; 3,5 GB de memória de vídeo; 97% de uso da GPU). Com ~10–15 épocas por treino, os 5 treinos essenciais e importantes cabem em ~8–10 h de GPU, e os complementares em mais ~6 h: sem custo nem cota de Colab/Kaggle |
 | 28/09/2026 | `--restart` no `train.py` (apaga a execução anterior do experimento), para uso em debug; `results/runs/debug/` fora do git | O treino de debug precisa poder rodar de novo; nos experimentos reais a regra de nunca sobrescrever continua valendo |
 
 ## 11. Referências
