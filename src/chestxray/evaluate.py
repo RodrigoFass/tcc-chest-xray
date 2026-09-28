@@ -4,6 +4,8 @@
     python -m chestxray.evaluate --run results/runs/e1_baseline --split test
     python -m chestxray.evaluate --compare results/runs/e1_baseline results/runs/e2_posweight \
         --pairs e2_posweight:e1_baseline
+    python -m chestxray.evaluate --seeds results/runs/e1_baseline results/runs/e1_baseline_seed43 \
+        results/runs/e1_baseline_seed44
 
 For one run and split: AUC-ROC per class and the mean over the 14 classes, with 95% CIs from
 a patient bootstrap (plan 3.9); AUPRC next to the prevalence; ROC and precision-recall
@@ -16,7 +18,9 @@ evaluation also covers subgroups (sex, age, view) and the comparison with the li
 Outputs: ``<run>/metrics_<split>.json``, tables (CSV, Markdown and LaTeX) in
 ``results/tables/<experiment>/`` and figures (PNG and PDF) in ``results/figures/<experiment>/``.
 ``--compare`` writes the side-by-side table of experiments and the paired differences
-(both models scored on the same bootstrap samples) to ``results/tables/``.
+(both models scored on the same bootstrap samples) to ``results/tables/``. ``--seeds`` summarizes
+repetitions of one configuration with different training seeds (plan 3.9): each run and the
+mean ± standard deviation across runs, in ``results/tables/seeds_<split>``.
 """
 
 from __future__ import annotations
@@ -474,11 +478,51 @@ def compare_runs(run_dirs: list[Path], pairs: list[tuple[str, str]], results_dir
     return experiments[1], differences[1]
 
 
+def seeds_summary(run_dirs: list[Path], results_dir: Path, split: str = "test") -> pd.DataFrame:
+    """Each seed's AUC (mean of the 14 classes and the focus classes) and AUPRC, then the mean
+    and sample standard deviation across seeds. The spread shows how much of a difference
+    between experiments could come from the training seed alone."""
+    rows = []
+    for run_dir in run_dirs:
+        cfg = yaml.safe_load((run_dir / "config.yaml").read_text(encoding="utf-8"))
+        m = json.loads((run_dir / f"metrics_{split}.json").read_text(encoding="utf-8"))
+        focus = cfg["data"]["focus_classes"]
+        row = {"experimento": cfg["experiment"], "seed": cfg["seed"], "auc_media": m["mean_auc"]["value"]}
+        for c in focus:
+            row[f"auc_{c}"] = m["classes"][c]["auc"]
+            row[f"auprc_{c}"] = m["classes"][c]["auprc"]
+        rows.append(row)
+    numeric = pd.DataFrame(rows)
+    if numeric["seed"].duplicated().any():
+        raise SystemExit("Two runs share the same seed; --seeds expects one run per seed")
+    values = [c for c in numeric.columns if c.startswith(("auc", "auprc"))]
+    stats = {"experimento": "média ± desvio padrão", "seed": ""}
+    display_rows = [{"Execução": r["experimento"], "Seed": str(r["seed"]),
+                     **{_seed_label(c): fmt(r[c]) for c in values}} for r in rows]
+    for c in values:
+        mean, sd = numeric[c].mean(), numeric[c].std(ddof=1)
+        stats[c], stats[f"{c}_dp"] = mean, sd
+    display_rows.append({"Execução": "Média ± desvio padrão", "Seed": "",
+                         **{_seed_label(c): f"{fmt(stats[c])} ± {fmt(stats[f'{c}_dp'])}" for c in values}})
+    numeric = pd.concat([numeric, pd.DataFrame([stats])], ignore_index=True)
+    display = pd.DataFrame(display_rows)
+    save_table(numeric, display, results_dir / "tables" / f"seeds_{split}")
+    return display
+
+
+def _seed_label(column: str) -> str:
+    if column == "auc_media":
+        return "AUC média"
+    metric, name = column.split("_", 1)
+    return f"{pt(name)}: {metric.upper()}"
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--run", type=Path, help="run folder (results/runs/<experiment>)")
     mode.add_argument("--compare", type=Path, nargs="+", help="run folders to put side by side")
+    mode.add_argument("--seeds", type=Path, nargs="+", help="runs of one configuration with different seeds")
     parser.add_argument("--split", choices=["val", "test"], default="test")
     parser.add_argument("--pairs", nargs="*", default=[], help="paired differences as A:B (A minus B)")
     parser.add_argument("--results-dir", type=Path, help="default: the folder above results/runs")
@@ -486,10 +530,12 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     setup_logging()
 
-    first_run = args.run or args.compare[0]
+    first_run = args.run or (args.compare or args.seeds)[0]
     results_dir = args.results_dir or first_run.resolve().parent.parent
     if args.run:
         evaluate_run(args.run, args.split, results_dir, args.bootstrap)
+    elif args.seeds:
+        logger.info("Seeds (%s):\n%s", args.split, seeds_summary(args.seeds, results_dir, args.split).to_string(index=False))
     else:
         pairs = [tuple(p.split(":")) for p in args.pairs]
         table, diffs = compare_runs(args.compare, pairs, results_dir, args.split, args.bootstrap)

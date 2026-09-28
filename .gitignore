@@ -33,3 +33,6 @@ Thumbs.db
 
 # Debug training runs (python -m chestxray.train --config configs/debug.yaml)
 results/runs/debug/
+
+# Demo model bundle (python -m chestxray.demo): weights and NIH example images
+app/model/

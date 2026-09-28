@@ -654,6 +654,14 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Split oficial do E5 gerado em `data/splits/official`: 71.255 / 15.269 / 25.596 imagens, sem paciente repetido (val tirada do `train_val_list.txt` por paciente, na proporção 70:15) | Prevalências do teste oficial acima do resto, como visto na revisão da Fase 1 |
 | 28/09/2026 | `train.py --config a b c` treina uma fila de experimentos; uma falha não interrompe os seguintes | Fila da Fase 3 roda numa noite só, com um comando |
 | 28/09/2026 | `--restart` no `train.py` (apaga a execução anterior do experimento), para uso em debug; `results/runs/debug/` fora do git | O treino de debug precisa poder rodar de novo; nos experimentos reais a regra de nunca sobrescrever continua valendo |
+| 28/09/2026 | Código das Fases 4, 5 e 7 escrito e testado antes dos treinos da fila (sessão na nuvem, sem GPU nem imagens); rodar com o `best.pt` fica para o PC | Adiantar o que não depende do PC enquanto a fila da Fase 3 não roda |
+| 28/09/2026 | Grad-CAM: camada padrão `relu`, `denseblock4` comparada; a escolha final sai do pointing game e das figuras `camadas_foco` | Critério objetivo além do visual; um teste confere que Grad-CAM na `relu` é igual ao CAM |
+| 28/09/2026 | Galeria: VP e FP de maior escore, FN de menor escore, no máximo 1 imagem por paciente, desempate pelo nome | Critério fixo e declarado, para as figuras não parecerem escolhidas a dedo; sem repetir paciente |
+| 28/09/2026 | Pointing game por imagem (várias caixas da mesma classe contam uma vez), IC95% de Wilson e o centro da imagem como referência trivial | Poucas caixas por classe (~20): Wilson se comporta bem com n pequeno; o centro mostra se o acerto é melhor que o acaso |
+| 28/09/2026 | App carrega um pacote exportado (`app/model/`: pesos, config, calibração, exemplos), fora do git; o Space instala o pacote `chestxray` do GitHub | O Space não precisa do dataset nem dos resultados; pesos nunca versionados no git |
+| 28/09/2026 | App mostra o escore recalibrado (Platt) e o limiar na mesma escala; o nome ("escore do modelo" ou "probabilidade estimada") é escolhido na exportação (`--label`) | Segue a Fase 5; a decisão depende das curvas de calibração do teste |
+| 28/09/2026 | CheXpert: 7 classes em comum (Atelectasis, Cardiomegaly, Effusion ← Pleural Effusion, Pneumonia, Pneumothorax, Consolidation, Edema); imagens não quadradas redimensionadas para quadrado (`--fit resize`, padrão) ou com bordas pretas (`--fit pad`) | Igual ao que o app faz com qualquer imagem; `pad` fica como verificação de sensibilidade |
+| 28/09/2026 | `evaluate --seeds` resume as 3 seeds (média ± desvio padrão amostral) | Plano 3.9 |
 
 ## 11. Referências
 
