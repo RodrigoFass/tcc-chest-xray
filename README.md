@@ -17,7 +17,7 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | Fase | Conteúdo | Situação |
 |---|---|---|
 | 0 | Esqueleto do projeto | pronta |
-| 1 | Dados (download, pré-processamento, divisão, EDA) | pronta com a amostra; falta o dataset completo |
+| 1 | Dados (download, pré-processamento, divisão, EDA) | pronta (aguardando revisão) |
 | 2 | Modelo e treino | — |
 | 3 | Avaliação e experimentos | — |
 | 4 | Grad-CAM | — |

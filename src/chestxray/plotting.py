@@ -66,5 +66,5 @@ def save_figure(fig: plt.Figure, stem: str | Path) -> list[Path]:
     stem.parent.mkdir(parents=True, exist_ok=True)
     outputs = [stem.with_suffix(".png"), stem.with_suffix(".pdf")]
     fig.savefig(outputs[0], dpi=300)
-    fig.savefig(outputs[1])
+    fig.savefig(outputs[1], metadata={"CreationDate": None})  # same bytes on every re-run
     return outputs

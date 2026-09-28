@@ -619,6 +619,7 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Divisão `patient_random`: pacientes embaralhados com a seed e acumulados inteiros até 70% e 85% das **imagens** | O critério de aceite mede proporções de imagens; como há pacientes com mais de 100 imagens, sortear 70% dos pacientes desviaria essas proporções |
 | 28/09/2026 | Zip bruto no HD (`E:/datasets/nih`); imagens processadas no SSD (`data/nih256`) | O C: tem ~45 GB livres; o E: tem ~800 GB |
 | 28/09/2026 | Amostra do Kaggle isolada em `data/sample/` (`configs/paths/local_sample.yaml`) | Splits, tabelas e figuras da amostra não se misturam com os reais, que são versionados |
+| 28/09/2026 | Divisão final: `patient_random`, seed 42 → 78.486 / 16.812 / 16.822 imagens (70,00 / 14,99 / 15,00%). Estratificação multirrótulo não foi necessária | Passou no critério de prevalência de primeira: maior diferença relativa de 17,5% (Pneumonia na validação: 1,50% contra 1,28% no total); Atelectasia 3,6%, Efusão 6,3%. Nenhuma outra seed foi testada |
 | 28/09/2026 | EDA em `src/chestxray/eda.py` (o notebook só chama e comenta) e figuras já no padrão da Fase 6 (português, vírgula decimal, PNG 300 dpi + PDF), via `src/chestxray/plotting.py` | Lógica testável e sem retrabalho na Fase 6 |
 
 ## 11. Referências

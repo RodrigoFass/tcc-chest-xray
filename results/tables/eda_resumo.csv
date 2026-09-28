@@ -1,0 +1,14 @@
+metrica,valor
+Imagens,112120.0
+Pacientes,30805.0
+Imagens sem achados (%),53.83606849803782
+Imagens com 2 ou mais doenças (%),18.547984302533
+Imagens por paciente: mediana,1.0
+Imagens por paciente: máximo,184.0
+Pacientes com 1 imagem (%),56.81869826326895
+Idade: mediana (anos),49.0
+Idade: 1º quartil (anos),35.0
+Idade: 3º quartil (anos),59.0
+Idades acima de 100 anos (excluídas do gráfico),16.0
+Imagens de pacientes do sexo feminino (%),43.50695683196575
+Exames AP (%),39.966107741705315
