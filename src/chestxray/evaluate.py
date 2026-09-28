@@ -268,7 +268,8 @@ def plot_calibration_focus(test: Predictions, focus: list[str], thresholds: dict
 
 
 def plot_subgroups(rows: list[dict], focus: list[str], metrics: dict) -> plt.Figure:
-    fig, axes = plt.subplots(1, len(focus), figsize=(4.3 * len(focus), 4.8), sharey=True)
+    # No shared y axis: each panel labels its subgroups with that class's own case counts
+    fig, axes = plt.subplots(1, len(focus), figsize=(5.2 * len(focus), 4.8))
     for ax, color, c in zip(np.atleast_1d(axes), FOCUS_COLORS, focus):
         sel = [r for r in rows if r["classe"] == c]
         y = np.arange(len(sel))[::-1]
