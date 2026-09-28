@@ -14,7 +14,7 @@ função de perda não melhorou a AUC e piorou a calibração; o modelo sem pond
 calibrado. O desempenho foi menor nos exames em incidência anteroposterior, típicos de pacientes mais
 graves. [PREENCHER: uma frase sobre o Grad-CAM e o *pointing game*; uma frase sobre o CheXpert.] O modelo
 foi disponibilizado numa interface web de demonstração, que mostra o valor de cada doença, o limiar de
-decisão e um mapa de calor Grad-CAM.
+decisão e um mapa de calor Grad-CAM. [CONFERIR: manter esta frase só depois de publicar a interface.]
 
 **Palavras-chave:** aprendizado profundo; radiografia de tórax; redes neurais convolucionais; DenseNet;
 Grad-CAM.
@@ -37,6 +37,7 @@ ranking, most exams flagged by the model do not have the disease. Class weightin
 did not improve AUC and worsened calibration; the unweighted model was well calibrated after training.
 Performance was lower on anteroposterior exams, typical of more severely ill patients. [TO FILL: one
 sentence on Grad-CAM and the pointing game; one sentence on CheXpert.] The model was made available in a
-web demo that shows each disease's score, the decision threshold and a Grad-CAM heatmap.
+web demo that shows each disease's score, the decision threshold and a Grad-CAM heatmap. [TO CHECK: keep
+this sentence only after the demo is published.]
 
 **Keywords:** deep learning; chest radiography; convolutional neural networks; DenseNet; Grad-CAM.

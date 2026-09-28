@@ -1,12 +1,17 @@
 # 1 INTRODUÇÃO
 
-A radiografia de tórax é o exame de imagem mais realizado no mundo. Ela é barata, rápida, amplamente
+A radiografia de tórax é o exame de imagem mais realizado no mundo [CONFERIR: citar fonte. Candidata,
+a verificar antes de usar: RAOOF, S. et al. Interpretation of plain chest roentgenogram. **Chest**,
+v. 141, n. 2, p. 545-558, 2012]. Ela é barata, rápida, amplamente
 disponível e expõe o paciente a uma dose baixa de radiação, o que a torna o primeiro exame na
 investigação de queixas respiratórias, no acompanhamento de pacientes internados e na triagem de
 doenças como pneumonia, derrame pleural e tuberculose. A interpretação dessas imagens, porém, está
 longe de ser simples: estruturas anatômicas se sobrepõem numa projeção bidimensional, achados
 diferentes produzem aspectos parecidos, e a leitura depende da experiência de quem laudou. A
-variabilidade entre radiologistas na interpretação de radiografias de tórax é bem documentada, e em
+variabilidade entre radiologistas na interpretação de radiografias de tórax é bem documentada
+[CONFERIR: citar fonte. Candidata, a verificar antes de usar: HOPSTAKEN, R. M. et al. Inter-observer
+variation in the interpretation of chest radiographs for pneumonia in community-acquired lower
+respiratory tract infections. **Clinical Radiology**, v. 59, n. 8, p. 743-752, 2004], e em
 muitas regiões simplesmente não há radiologistas suficientes para laudar todos os exames em tempo
 hábil [CONFERIR: se quiser um número sobre a distribuição de radiologistas no Brasil, citar uma fonte
 como a Demografia Médica no Brasil (CFM/USP)].

@@ -16,20 +16,21 @@ aprendizado inicial dez vezes menor ($10^{-4}$ contra $10^{-3}$), lotes de 32 im
 transformações de aumento de dados e escolha do modelo pela AUC de validação, e não pela perda. Por isso,
 a leitura correta não é que um modelo seja melhor que o outro, mas que a abordagem, reproduzida de forma
 independente e com um protocolo documentado, chega **à mesma faixa de desempenho** relatada pelo CheXNet.
-Esse é um resultado relevante por si só, porque indica que o desempenho do CheXNet não dependia de
-detalhes específicos da divisão ou do treino dos autores.
+Esse é um resultado relevante por si só, porque sugere que o desempenho do CheXNet não dependia apenas
+de detalhes específicos da divisão ou do treino dos autores, ainda que uma única reprodução não baste
+para afirmar isso.
 
 As três classes em que os resultados divergem merecem um comentário. A efusão pleural ficou acima do
 CheXNet (0,886 contra 0,864). Uma hipótese, que este trabalho não testou diretamente, é a decisão de não
 recortar as bordas da imagem na avaliação, preservando os seios costofrênicos, onde a efusão aparece
 primeiro (Seção 3.3); outra é simplesmente a diferença entre os conjuntos de teste. A infiltração e o
 enfisema ficaram abaixo. A infiltração é a classe de rótulo mais inespecífico do conjunto e a de menor
-AUC em todos os trabalhos; diferenças pequenas de protocolo mudam seu resultado com facilidade.
+AUC nos trabalhos citados; diferenças pequenas de protocolo mudam seu resultado com facilidade.
 
 ## 5.2 Pneumonia: boa ordenação, pouca utilidade isolada
 
-A pneumonia teve a menor AUC entre as três doenças estudadas (0,751), como em todos os trabalhos com esse
-conjunto. Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
+A pneumonia teve a menor AUC entre as três doenças estudadas (0,751), como nos trabalhos citados
+(WANG et al., 2017; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
 imagem de uma pneumonia pode ser idêntica à de uma atelectasia, de um edema ou de uma hemorragia, e o
 laudo que originou o rótulo muitas vezes dependeu de informações que não estão na imagem. Segundo, os
 rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros, e Oakden-Rayner
@@ -163,8 +164,9 @@ registrá-las porque são frequentemente omitidas em trabalhos da área:
   experimentos usam bootstrap pareado;
 - a AUPRC e a prevalência acompanham a AUC, para não esconder o problema das classes raras;
 - a configuração final foi repetida com três sementes, para separar efeito da configuração de variação
-  aleatória;
+  aleatória [CONFERIR: manter depois do treino das sementes 43 e 44];
 - as imagens da galeria de mapas de calor foram escolhidas por uma regra fixa, e a localização foi
-  medida contra marcações de radiologistas e comparada com uma referência trivial;
+  medida contra marcações de radiologistas e comparada com uma referência trivial [CONFERIR: manter
+  depois de rodar o Grad-CAM oficial];
 - o código tem testes automáticos, e cada experimento registra a configuração, as versões das bibliotecas
   e o *commit* usado.

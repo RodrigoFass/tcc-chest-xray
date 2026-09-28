@@ -168,10 +168,10 @@ ReLU, *pooling* médio global e camada linear.
 
 O treino usou a entropia cruzada binária (BCE) média sobre as 14 classes, o otimizador Adam com taxa de
 aprendizado inicial de $10^{-4}$ e demais parâmetros padrão, e lotes de 32 imagens. A taxa de
-aprendizado é dividida por 10 sempre que a AUC média de validação não melhora por uma época
-(*ReduceLROnPlateau*, com paciência 1). O treino para quando a AUC média de validação não melhora por 5
-épocas (parada antecipada), com limite de 30 épocas, e o modelo guardado é o da época com a maior AUC
-média de validação.
+aprendizado é dividida por 10 sempre que a AUC média de validação passa duas épocas seguidas sem melhorar
+(*ReduceLROnPlateau* com paciência 1: uma época sem melhora é tolerada, e a segunda provoca a redução).
+O treino para quando a AUC média de validação não melhora por 5 épocas (parada antecipada), com limite
+de 30 épocas, e o modelo guardado é o da época com a maior AUC média de validação.
 
 A escolha da AUC média de validação como critério, em vez da perda de validação usada pelo CheXNet,
 alinha o critério de parada com a métrica que o trabalho reporta. A perda de validação também não é
@@ -324,16 +324,17 @@ d) um aviso fixo: "Protótipo acadêmico. Não usar para diagnóstico.", com a o
 O valor exibido é o escore recalibrado por *Platt scaling*, e o limiar é mostrado na mesma escala. Ele
 é chamado de [PREENCHER: "probabilidade estimada" ou "escore do modelo", conforme a decisão da Seção 4.5],
 com a observação de que a calibração vale para a população do NIH. O modelo exportado para a interface
-reproduz os escores da avaliação com diferença máxima de [PREENCHER: valor do `check_bundle`, ≤ 10⁻⁴]
-nas imagens de teste conferidas, e cada análise leva cerca de [PREENCHER: tempo medido no Space] segundos
-em CPU (cerca de 0,5 s com 2 núcleos, medido em ambiente de desenvolvimento).
+reproduz os escores da avaliação com diferença máxima de 3,6 × 10⁻⁷ nas três imagens de teste
+conferidas (o critério era 10⁻⁴), e cada análise, incluindo o mapa de calor, levou entre 0,3 e 0,4 s em
+CPU no computador de desenvolvimento (Intel Core i5-10400F) [PREENCHER: e cerca de X s no Hugging Face
+Spaces].
 
 ## 3.12 Ambiente e reprodutibilidade
 
 O treino foi feito num computador pessoal com uma GPU NVIDIA GeForce RTX 2060, em Windows, com Python
 3.10.11, PyTorch 2.14.0 (CUDA 12.6) e torchvision 0.29.0. A primeira época do E1 levou 8,8 minutos
-(cerca de 168 imagens de treino por segundo, com o cuDNN determinístico), e as seguintes, cerca de
-6,3 minutos (225 imagens por segundo); o E1 completo, com 13 épocas, levou 85,5 minutos. As versões de todas as bibliotecas e o *commit* do código ficam
+(cerca de 168 imagens de treino por segundo, com o cuDNN determinístico), a segunda, 7,5 minutos, e,
+a partir da terceira, cerca de 6,3 minutos (225 imagens por segundo); o E1 completo, com 13 épocas, levou 85,5 minutos. As versões de todas as bibliotecas e o *commit* do código ficam
 registrados junto com cada experimento.
 
 O código é organizado como um pacote Python, com configurações em YAML, e tem testes automáticos (mais

@@ -19,8 +19,8 @@ na 13ª época, depois de 85,5 minutos. A perda de treino continuou caindo até 
 cumpriu o papel de evitar esse sobreajuste.
 
 O E2, com ponderação de classes, teve curva de validação mais irregular, atingiu o máximo (0,833) na 14ª
-época e parou na 19ª, depois de 121,7 minutos. A perda de validação do E2 subiu a partir da oitava época
-enquanto a AUC ainda melhorava, o que ilustra por que a perda não é um bom critério de parada quando a
+época e parou na 19ª, depois de 121,7 minutos. A perda de validação do E2 passou a subir depois da
+oitava época (de 0,941 para 1,087 na 19ª), enquanto a AUC ainda melhorava até a 14ª, o que ilustra por que a perda não é um bom critério de parada quando a
 função de perda é ponderada: ela passa a refletir a escala dos escores, e não só a ordenação dos exames.
 
 **Figura 2 – Curvas de treino do E1 e do E2**
@@ -158,8 +158,9 @@ os pontos dos escores brutos ficam próximos da diagonal, e o Brier praticamente
 recalibração (de 0,0776 para 0,0771 na efusão, de 0,0763 para 0,0757 na atelectasia e de 0,0113 para
 0,0112 na pneumonia). A recalibração corrige principalmente a faixa de escores mais altos, em que o
 modelo bruto superestimava a chance de doença (por exemplo, na atelectasia, a última faixa tinha escore
-médio de 0,45 e 38% de casos; depois do Platt, 0,38). Na pneumonia, os escores recalibrados não passam de
-cerca de 5% mesmo na faixa mais alta, coerente com a baixa prevalência.
+médio de 0,45 e 38% de casos; depois do Platt, 0,38). Na pneumonia, mesmo a faixa de escores mais altos
+tem escore recalibrado médio de cerca de 5% (e 4,4% de casos), coerente com a baixa prevalência; exames
+individuais chegam a 24%.
 
 **Tabela 6 – Escore de Brier no teste, antes e depois da recalibração**
 
@@ -364,7 +365,7 @@ do limiar, mostrando a frase de resumo, a tabela e o mapa de calor.]
 
 Fonte: elaborado pelo autor.
 
-A exportação do modelo para a interface foi conferida contra as predições da avaliação: nas imagens de
-teste verificadas, a diferença máxima entre os escores da interface e os do arquivo de predições foi de
-[PREENCHER: valor impresso por `python -m chestxray.demo`]. [PREENCHER: tempo de resposta medido no Space
-e link.]
+A exportação do modelo para a interface foi conferida contra as predições da avaliação: nas três imagens
+de teste verificadas, a diferença máxima entre os escores da interface e os do arquivo de predições foi
+de 3,6 × 10⁻⁷ (o critério era 10⁻⁴). Cada análise, com o mapa de calor, levou entre 0,3 e 0,4 s em CPU no
+computador de desenvolvimento. [PREENCHER: tempo de resposta medido no Space e link.]
