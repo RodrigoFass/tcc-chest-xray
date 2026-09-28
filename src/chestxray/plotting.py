@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from matplotlib.axis import Axis
 from matplotlib.ticker import FuncFormatter
@@ -58,6 +59,25 @@ def use_decimal_comma(*axes: Axis) -> None:
     """Tick labels with decimal comma and dot as thousands separator."""
     for axis in axes:
         axis.set_major_formatter(FuncFormatter(_tick_label))
+
+
+def markdown_table(table: pd.DataFrame) -> str:
+    lines = ["| " + " | ".join(map(str, table.columns)) + " |",
+             "|" + "|".join("---" for _ in table.columns) + "|"]
+    lines += ["| " + " | ".join(str(v) for v in row) + " |" for row in table.itertuples(index=False)]
+    return "\n".join(lines) + "\n"
+
+
+def save_table(numeric: pd.DataFrame, display: pd.DataFrame, stem: str | Path) -> list[Path]:
+    """Save ``<stem>.csv`` from the numeric table (dot decimal, for reuse) and ``<stem>.md`` and
+    ``<stem>.tex`` from the display table (formatted in Portuguese, for the monograph)."""
+    stem = Path(stem)
+    stem.parent.mkdir(parents=True, exist_ok=True)
+    outputs = [stem.with_suffix(".csv"), stem.with_suffix(".md"), stem.with_suffix(".tex")]
+    numeric.to_csv(outputs[0], index=False)
+    outputs[1].write_text(markdown_table(display), encoding="utf-8")
+    outputs[2].write_text(display.to_latex(index=False, escape=True), encoding="utf-8")
+    return outputs
 
 
 def save_figure(fig: plt.Figure, stem: str | Path) -> list[Path]:
