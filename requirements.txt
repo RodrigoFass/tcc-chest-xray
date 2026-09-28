@@ -1,0 +1,18 @@
+# Direct dependencies, pinned for reproducibility (latest versions that support Python 3.10).
+# torch/torchvision only have a minimum version: install the build that matches your CUDA
+# first (see README); on Colab/Kaggle keep the preinstalled one.
+torch>=2.3
+torchvision>=0.18
+
+numpy==2.2.6
+pandas==2.3.3
+scikit-learn==1.7.2
+matplotlib==3.10.9
+seaborn==0.13.2
+pillow==12.3.0
+pyyaml==6.0.3
+tqdm==4.70.1
+grad-cam==1.5.7
+gradio==6.28.0
+kaggle==1.7.4.5
+pytest==9.1.1

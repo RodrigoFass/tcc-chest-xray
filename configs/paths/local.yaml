@@ -1,0 +1,5 @@
+# Local machine (Windows or Linux). Relative paths resolve against the repository root.
+paths:
+  data_dir: data               # preprocessed images (extracted nih256.tar) and metadata
+  runs_dir: results/runs       # logs, resolved configs and predictions (versioned, no .pt)
+  checkpoint_dir: checkpoints  # last.pt / best.pt, never versioned

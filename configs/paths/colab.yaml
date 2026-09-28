@@ -1,0 +1,7 @@
+# Google Colab. At the start of each session nih256.tar is copied from Drive and
+# extracted to the local disk. Runs and checkpoints are written to Drive so they survive
+# the end of the session; copy the run folders (without .pt) to results/runs afterwards.
+paths:
+  data_dir: /content/data
+  runs_dir: /content/drive/MyDrive/tcc-chest-xray/runs
+  checkpoint_dir: /content/drive/MyDrive/tcc-chest-xray/checkpoints

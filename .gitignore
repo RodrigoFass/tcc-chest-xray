@@ -1,0 +1,32 @@
+# Data: nothing under data/ is versioned except the split CSVs
+data/*
+!data/splits/
+!data/splits/**
+
+# Model weights and packed datasets
+checkpoints/
+*.pt
+*.pth
+*.tar
+
+# Credentials
+kaggle.json
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

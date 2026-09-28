@@ -1,0 +1,14 @@
+# Quick end-to-end check on CPU: 200 images, 1 epoch.
+extends: base.yaml
+
+experiment: debug
+
+data:
+  max_images: 200
+
+train:
+  device: cpu
+  max_epochs: 1
+  batch_size: 8
+  num_workers: 0
+  amp: false

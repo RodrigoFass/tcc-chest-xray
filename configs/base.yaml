@@ -1,0 +1,71 @@
+# Base configuration: every experiment extends this file and overrides only what changes.
+# Machine-specific locations (data_dir, runs_dir, checkpoint_dir) are not set here; they
+# come from configs/paths/<env>.yaml. Relative paths resolve against the repository root.
+
+experiment: base
+seed: 42  # training seed (the E-seeds runs change only this)
+
+paths:
+  splits_dir: data/splits  # versioned split CSVs
+  results_dir: results     # versioned tables and figures
+
+data:
+  # The 14 NIH ChestX-ray14 labels, spelled exactly as in Data_Entry_2017.csv
+  classes:
+    - Atelectasis
+    - Cardiomegaly
+    - Effusion
+    - Infiltration
+    - Mass
+    - Nodule
+    - Pneumonia
+    - Pneumothorax
+    - Consolidation
+    - Edema
+    - Emphysema
+    - Fibrosis
+    - Pleural_Thickening
+    - Hernia
+  # Classes the monograph focuses on; all classes above are still trained and reported
+  focus_classes: [Pneumonia, Atelectasis, Effusion]
+  stored_size: 256   # images are preprocessed once to 256x256 grayscale
+  image_size: 224    # network input
+  max_images: null   # cap on images per split, for debug runs (null = all)
+
+split:
+  strategy: patient_random  # patient_random | official
+  train_frac: 0.70
+  val_frac: 0.15
+  test_frac: 0.15
+  seed: 42  # kept apart from the training seed so every run shares the same split
+
+augmentation:  # training only
+  enabled: true
+  crop_scale: [0.85, 1.0]   # RandomResizedCrop
+  crop_ratio: [0.95, 1.05]
+  hflip_p: 0.5
+  rotation_degrees: 10
+  brightness: 0.2
+
+model:
+  name: densenet121
+  pretrained: true         # ImageNet weights; false only for E4
+  memory_efficient: false  # DenseNet checkpointing, for GPUs with little memory
+
+train:
+  device: auto        # auto | cpu | cuda
+  max_epochs: 30
+  batch_size: 32
+  num_workers: 4
+  amp: true           # used only on GPU
+  lr: 1.0e-4          # keep the ".0": YAML reads 1e-4 as a string
+  scheduler:          # ReduceLROnPlateau on the mean validation AUC
+    factor: 0.1
+    patience: 1
+  early_stopping_patience: 5
+  pos_weight: false       # true in E2
+  pos_weight_max: null    # optional cap on pos_weight (Hernia is ~500)
+
+eval:
+  bootstrap_samples: 1000
+  bootstrap_seed: 42
