@@ -2,7 +2,7 @@
 
 **Revisão 2.2 — 28/09/2026.** O que mudou em relação às versões anteriores está no Apêndice A.
 
-> **Para o Claude Code:** este arquivo é a especificação do projeto. Leia inteiro antes de começar.
+> **Para quem for implementar:** este arquivo é a especificação do projeto. Leia inteiro antes de começar.
 > Trabalhe **uma fase por vez**, na ordem. Ao terminar cada fase, confira os critérios de aceite,
 > faça um commit e pare para eu revisar antes de seguir para a próxima.
 > Código e comentários podem ser em inglês; mensagens para mim, README e textos da monografia em português.
@@ -108,7 +108,7 @@ para 224.
 **3.5 Código em pacote Python + notebooks finos.** Toda a lógica fica em `src/chestxray`,
 instalada com `pip install -e .` (via `pyproject.toml`), para `python -m chestxray.train` funcionar
 em qualquer lugar. Os notebooks (Colab ou Kaggle) só clonam o repositório, instalam e chamam os scripts.
-Assim o Claude Code testa tudo localmente em CPU com um subconjunto pequeno. Em ambientes
+Assim dá para testar tudo localmente em CPU com um subconjunto pequeno. Em ambientes
 gerenciados (Colab, Kaggle), **não reinstalar torch/torchvision** (usar as versões que já vêm,
 que casam com o CUDA da máquina); as demais dependências têm versão fixada, e as versões usadas
 em cada treino ficam registradas. Nenhum caminho fixo no código (`/content`, `/kaggle`, etc.):
@@ -571,7 +571,7 @@ Ou seja: cerca de 7 semanas de trabalho até a monografia ficar pronta para o or
 Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar pela lista da 6.1
 (complementares primeiro, depois os itens "importante").
 
-## 7. Regras de trabalho para o Claude Code
+## 7. Regras de trabalho para a implementação
 
 - Rodar `pytest` e o treino com `configs/debug.yaml` antes de cada commit que mexer em dados ou treino.
 - Nunca versionar imagens, checkpoints, o `kaggle.json` ou qualquer credencial.
