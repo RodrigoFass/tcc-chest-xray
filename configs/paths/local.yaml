@@ -1,5 +1,6 @@
 # Local machine (Windows or Linux). Relative paths resolve against the repository root.
 paths:
-  data_dir: data               # preprocessed images (extracted nih256.tar) and metadata
+  raw_dir: E:/datasets/nih     # Kaggle zips (data.zip ~42 GB, sample.zip), never extracted
+  data_dir: data/nih256        # preprocessed 256x256 images, metadata CSVs, manifest
   runs_dir: results/runs       # logs, resolved configs and predictions (versioned, no .pt)
   checkpoint_dir: checkpoints  # last.pt / best.pt, never versioned

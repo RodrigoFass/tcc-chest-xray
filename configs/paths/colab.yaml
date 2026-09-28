@@ -2,6 +2,7 @@
 # extracted to the local disk. Runs and checkpoints are written to Drive so they survive
 # the end of the session; copy the run folders (without .pt) to results/runs afterwards.
 paths:
-  data_dir: /content/data
+  raw_dir: /content/raw  # only if preprocessing runs on Colab
+  data_dir: /content/data/nih256
   runs_dir: /content/drive/MyDrive/tcc-chest-xray/runs
   checkpoint_dir: /content/drive/MyDrive/tcc-chest-xray/checkpoints

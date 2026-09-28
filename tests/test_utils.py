@@ -54,9 +54,14 @@ def test_environment_info(tmp_path):
 
 def test_setup_logging_writes_file(tmp_path):
     log_file = tmp_path / "logs" / "train.log"
-    logger = setup_logging(log_file)
+    setup_logging(log_file)
     logging.getLogger("chestxray.some_module").info("hello from a submodule")
-    for handler in logger.handlers:
+    logging.getLogger("__main__").info("hello from a script")
+    for handler in logging.getLogger().handlers:
         handler.flush()
-    assert "hello from a submodule" in log_file.read_text(encoding="utf-8")
+    text = log_file.read_text(encoding="utf-8")
+    assert "hello from a submodule" in text and "hello from a script" in text
+
     setup_logging()  # closes the file handler so tmp_path can be removed on Windows
+    ours = [h for h in logging.getLogger().handlers if getattr(h, "_chestxray", False)]
+    assert len(ours) == 1 and not isinstance(ours[0], logging.FileHandler)

@@ -1,7 +1,8 @@
-# Kaggle Notebooks. Provisional: data_dir is settled in Phase 1, once it is decided
-# whether preprocessing runs on Kaggle or nih256.tar is uploaded as a Kaggle dataset.
-# Files under /kaggle/working are kept as the notebook output when the version is saved.
+# Kaggle Notebooks. Provisional until a Kaggle environment is actually used: the attached
+# NIH dataset is read-only under /kaggle/input (check the exact folder name in the
+# notebook's data panel). Files under /kaggle/working are kept as the notebook output.
 paths:
-  data_dir: /kaggle/working/data
+  raw_dir: /kaggle/input/data  # attached dataset; preprocess with --source dir
+  data_dir: /kaggle/working/nih256
   runs_dir: /kaggle/working/runs
   checkpoint_dir: /kaggle/working/checkpoints

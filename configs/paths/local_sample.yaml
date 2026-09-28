@@ -1,0 +1,10 @@
+# Development with the Kaggle sample (~5,600 images) on the local machine. Everything it
+# produces lives under data/sample/, which is not versioned, so the sample's splits,
+# tables and figures never mix with the real ones.
+paths:
+  raw_dir: E:/datasets/nih
+  data_dir: data/sample/nih256
+  splits_dir: data/sample/splits
+  results_dir: data/sample/results
+  runs_dir: data/sample/runs
+  checkpoint_dir: data/sample/checkpoints

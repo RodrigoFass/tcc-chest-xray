@@ -58,17 +58,17 @@ def get_device(preference: str = "auto") -> torch.device:
 
 
 def setup_logging(log_file: str | Path | None = None, level: int = logging.INFO) -> logging.Logger:
-    """Configure the package logger to write to stdout and, optionally, to a file.
+    """Send log records to stdout and, optionally, to a file.
 
-    Modules log through ``logging.getLogger(__name__)``, which propagates here.
-    Calling this again replaces the previous handlers (and closes their files).
+    Configures the root logger, so that modules run as scripts (whose logger is named
+    ``__main__``) are covered too. Calling this again replaces only the handlers it added
+    before (closing their files) and leaves others, such as pytest's, alone.
     """
-    logger = logging.getLogger(LOGGER_NAME)
-    for handler in logger.handlers:
+    root = logging.getLogger()
+    for handler in [h for h in root.handlers if getattr(h, "_chestxray", False)]:
         handler.close()
-    logger.handlers.clear()
-    logger.setLevel(level)
-    logger.propagate = False
+        root.removeHandler(handler)
+    root.setLevel(level)
 
     formatter = logging.Formatter(LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
     handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
@@ -77,8 +77,9 @@ def setup_logging(log_file: str | Path | None = None, level: int = logging.INFO)
         handlers.append(logging.FileHandler(log_file, encoding="utf-8"))
     for handler in handlers:
         handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    return logger
+        handler._chestxray = True
+        root.addHandler(handler)
+    return logging.getLogger(LOGGER_NAME)
 
 
 def get_git_commit(repo_dir: str | Path | None = None) -> str | None:
