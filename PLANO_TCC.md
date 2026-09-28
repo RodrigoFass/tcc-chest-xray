@@ -349,6 +349,15 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
   - curvas ROC das 3 classes do TCC (uma figura) e das 14 (grade); curvas precisão-revocação das 3;
   - matriz de confusão das 3 classes do TCC;
   - curva de calibração (reliability diagram) e Brier score das 3 classes;
+  - recalibração dos escores por *Platt scaling*: por classe, uma regressão logística de uma
+    variável sobre o logit, ajustada **só na validação** e aplicada no teste. Os parâmetros ficam em
+    `results/runs/<exp>/calibration.json`. Curva de calibração e Brier score antes e depois,
+    no teste. A transformação é crescente: não muda a AUC nem a ordem dos escores, e o limiar de
+    Youden continua sendo o mesmo ponto de corte, só convertido para a escala calibrada. Não usar
+    regressão isotônica: com poucas dezenas de positivos nas classes raras (Hernia), ela
+    sobreajusta. Objetivo: permitir que a interface mostre o valor como probabilidade (Fase 5).
+    Limitação a citar: a probabilidade calibrada vale para a prevalência do NIH; em outra
+    população, com outra prevalência, ela deixa de valer;
   - análise por subgrupo nas 3 classes: sexo, faixa etária (<40, 40–60, >60 anos) e posição
     PA × AP, com IC95%. Mostra se o modelo funciona igual para todos e expõe um possível atalho:
     exames AP costumam ser de pacientes acamados, mais graves;
@@ -405,6 +414,8 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
 - O modelo final é escolhido **só pela validação**, e a escolha fica registrada na seção 10 antes
   de rodar o teste. Nenhum hiperparâmetro é ajustado olhando o teste.
 - Tabela final com todos os experimentos lado a lado e tabela de diferenças pareadas.
+- `calibration.json` ajustado só com a validação; curvas de calibração e Brier score no teste,
+  antes e depois da recalibração.
 
 ### Fase 4: Interpretabilidade (Grad-CAM)
 
@@ -436,6 +447,10 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
 **Fazer**
 - `app/app.py` com Gradio, usando `inference.py` e `gradcam.py`:
   - upload de PNG/JPG (DICOM fica fora do escopo);
+  - frase de resumo acima da tabela. Com achados: "Achados acima do limiar: Efusão,
+    Atelectasia". Sem achados: "Nenhum achado acima do limiar entre as 14 doenças avaliadas".
+    **Nunca** "Normal", "Saudável" ou "Sem doença": o modelo só conhece 14 doenças (não vê
+    tuberculose, fraturas etc.) e todo limiar deixa passar falsos negativos;
   - tabela com o escore das 14 doenças, as 3 do TCC em destaque, cada uma com o limiar da
     validação e a indicação "acima/abaixo do limiar";
   - heatmap Grad-CAM da doença escolhida;
@@ -443,8 +458,12 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
   - aviso fixo e visível: "Protótipo acadêmico. Não usar para diagnóstico.", mais uma nota de que
     imagens muito diferentes das do NIH (foto de tela, criança, incidência lateral) geram
     resultados sem sentido.
-- Chamar a saída de **"escore do modelo"**, não "probabilidade": com `pos_weight`, o valor não é
-  uma probabilidade calibrada (ver a curva de calibração da Fase 3).
+- Mostrar o escore recalibrado da Fase 3. Se, no teste, a curva de calibração depois do Platt
+  scaling ficar próxima da diagonal nas 3 classes do TCC, a interface chama o valor de
+  **"probabilidade estimada"**, com a nota de que ela vale para a população do NIH; a decisão vai
+  para a seção 10. Caso contrário, ou se a recalibração não for feita, chamar de
+  **"escore do modelo"**, não "probabilidade": com `pos_weight`, o valor bruto não é uma
+  probabilidade calibrada.
 - Publicar no Hugging Face Spaces (Gradio, CPU gratuita), com só o `state_dict` do modelo
   (~30 MB) num repositório de modelo do Hugging Face ou via Git LFS no Space. Spaces gratuitos
   "dormem" sem uso: abrir o link alguns minutos antes da defesa.
@@ -452,7 +471,9 @@ Cada fase tem entregáveis e critérios de aceite. Só avance quando todos os cr
 - Gravar um vídeo curto da demo (plano C).
 
 **Critérios de aceite**
-- Com `best.pt`, 3 imagens do teste dão os mesmos escores do `preds_test.csv` (tolerância 1e-4).
+- Com `best.pt`, 3 imagens do teste dão os mesmos escores brutos do `preds_test.csv` (tolerância
+  1e-4), e os valores exibidos batem com o `calibration.json` aplicado a esses escores.
+- A frase de resumo aparece nos dois casos (com e sem achados acima do limiar).
 - Resposta em até ~5 s por imagem em CPU, com Grad-CAM.
 - Link do Space abrindo numa janela anônima.
 
@@ -500,7 +521,7 @@ Só fazer se as fases 0–6 estiverem prontas e houver tempo.
 | Nível | Entregas |
 |---|---|
 | **Essencial** (sem isso não há defesa) | Fases 0–2; E1 e E2; Fase 3 (métricas, IC, comparação com a literatura); galeria Grad-CAM; demo Gradio funcionando |
-| **Importante** | E3; 3 seeds da configuração final; subgrupos; calibração; bounding boxes; Hugging Face Spaces |
+| **Importante** | E3; 3 seeds da configuração final; subgrupos; calibração (curva e recalibração por Platt scaling); bounding boxes; Hugging Face Spaces |
 | **Se sobrar tempo** | E4; E5; pointing game; Fase 7 |
 
 ### 6.2 Cronograma relativo
@@ -591,6 +612,8 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Versões exatas só no `requirements.txt`; o `pyproject.toml` exige apenas versões mínimas | Assim o `pip install -e .` não troca pacotes pré-instalados do Colab/Kaggle; as versões reais de cada treino ficam registradas por `utils.save_environment_info` |
 | 28/09/2026 | Versões fixadas = as mais novas que ainda suportam Python 3.10 (numpy 2.2, pandas 2.3, scikit-learn 1.7) | Mantém o "Python 3.10+" da seção 2; as mesmas versões têm wheels para 3.11–3.13 (Colab/Kaggle) |
 | 28/09/2026 | Arquivos de `configs/paths/` só podem ter a seção `paths`; caminhos relativos são resolvidos a partir da raiz do repositório | Hiperparâmetros não podem variar escondidos por ambiente; notebooks rodam de dentro de `notebooks/` e quebrariam caminhos relativos à pasta atual |
+| 28/09/2026 | Recalibração dos escores por Platt scaling (por classe, ajustada na validação), prioridade "importante"; a interface só chama o valor de "probabilidade estimada" se a calibração no teste ficar boa | Pedido do Rodrigo: poder ler o número como chance, com base em evidência |
+| 28/09/2026 | Frase de resumo na interface; nunca "Normal" ou "Sem doença" | O modelo só conhece 14 doenças e há falsos negativos |
 
 ## 11. Referências
 
