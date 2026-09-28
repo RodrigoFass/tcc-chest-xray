@@ -17,7 +17,7 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | Fase | Conteúdo | Situação |
 |---|---|---|
 | 0 | Esqueleto do projeto | pronta |
-| 1 | Dados (download, pré-processamento, divisão, EDA) | — |
+| 1 | Dados (download, pré-processamento, divisão, EDA) | pronta com a amostra; falta o dataset completo |
 | 2 | Modelo e treino | — |
 | 3 | Avaliação e experimentos | — |
 | 4 | Grad-CAM | — |
@@ -76,6 +76,59 @@ Os caminhos que dependem da máquina (`data_dir`, `runs_dir`, `checkpoint_dir`) 
 `configs/paths/<ambiente>.yaml` (`local`, `colab`, `kaggle`), que só pode conter a seção `paths`.
 Caminhos relativos são resolvidos a partir da raiz do repositório, de onde quer que o comando
 seja executado.
+
+## Dados
+
+### 1. Credenciais do Kaggle
+
+1. Crie uma conta em [kaggle.com](https://www.kaggle.com) e abra **Settings → API**.
+2. Clique em **Create Legacy API Key**. O navegador baixa um arquivo `kaggle.json`.
+3. Salve o arquivo em `~/.kaggle/kaggle.json` (no Windows, `C:\Users\<você>\.kaggle\kaggle.json`),
+   **fora do repositório**. Ele é uma senha: nunca o versione nem o cole em lugar nenhum.
+
+Por que "Legacy": os tokens novos ("API Tokens") exigem o kaggle CLI 1.8 ou mais novo, que só roda em
+Python 3.11+. Com o Python 3.10 do projeto, o CLI é o 1.7.4.5, que usa o `kaggle.json`.
+
+No Colab, em vez do arquivo, crie os *Secrets* `KAGGLE_USERNAME` e `KAGGLE_KEY` e exporte-os como
+variáveis de ambiente. Num notebook do Kaggle não é preciso baixar nada: anexe o dataset
+"NIH Chest X-rays" ao notebook e use a pasta dele como `--input` no pré-processamento.
+
+### 2. Baixar, pré-processar, dividir e explorar
+
+Comece pela amostra do Kaggle (~5.600 imagens, 4,2 GB), que fica isolada em `data/sample/` e nunca
+se mistura com os resultados reais:
+
+```bash
+python -m chestxray.data.download --sample
+python -m chestxray.data.preprocess --input E:/datasets/nih/sample.zip --paths configs/paths/local_sample.yaml
+python -m chestxray.data.split --paths configs/paths/local_sample.yaml
+python -m chestxray.eda --paths configs/paths/local_sample.yaml
+```
+
+Depois, o dataset completo (~42 GB de download), com os caminhos de `configs/paths/local.yaml`:
+
+```bash
+python -m chestxray.data.download
+python -m chestxray.data.preprocess
+python -m chestxray.data.split
+python -m chestxray.eda
+```
+
+| Etapa | O que faz | Onde grava |
+|---|---|---|
+| `download` | Baixa o zip pelo kaggle CLI, sem extrair | `raw_dir` (`E:/datasets/nih`) |
+| `preprocess` | Lê cada PNG de dentro do zip (ou de uma pasta), converte para cinza 256×256 e empacota tudo num tar. Roda em paralelo e pode ser interrompido: na próxima vez continua de onde parou | `data_dir/images/`, `data_dir/manifest.csv` e `data/nih256.tar` |
+| `split` | Lê os rótulos, divide 70/15/15 por paciente (seed fixa) e confere as prevalências | `data/splits/*.csv` (versionados) e `results/tables/prevalencia_splits.csv` |
+| `eda` | Figuras e tabelas da análise exploratória | `results/figures/eda_*.{png,pdf}` e `results/tables/eda_*.csv` |
+
+O notebook [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb) roda a EDA e comenta cada figura. Para
+abri-lo com a amostra, defina `CHESTXRAY_PATHS=local_sample.yaml` antes de iniciar o Jupyter
+(`jupyter notebook`).
+
+Plano B, se faltar disco: baixe os 12 pacotes oficiais do NIH (link abaixo) e rode o
+`preprocess --no-tar --input <pasta do pacote>` para cada um, apagando o pacote depois. As imagens se
+acumulam em `data_dir`; no fim, copie os CSVs de metadados para `data_dir` e rode o `preprocess` uma
+última vez sem `--no-tar`, para gerar o tar.
 
 ## Estrutura
 

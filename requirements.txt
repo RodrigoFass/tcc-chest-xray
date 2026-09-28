@@ -16,3 +16,8 @@ grad-cam==1.5.7
 gradio==6.28.0
 kaggle==1.7.4.5
 pytest==9.1.1
+
+# Local Jupyter for the notebooks (Colab/Kaggle already have it)
+notebook==7.6.3
+nbconvert==7.17.1
+ipykernel==7.3.0
