@@ -63,21 +63,25 @@ def count_zip_images(zip_path: Path) -> int:
         return len({n.rsplit("/", 1)[-1] for n in zf.namelist() if n.lower().endswith(".png")})
 
 
-def download(dataset: str, dest: Path) -> Path:
+def download(dataset: str, dest: Path, force: bool = False) -> Path:
     """Download ``dataset`` into ``dest`` as ``<name>.zip`` and return the zip path."""
     dest.mkdir(parents=True, exist_ok=True)
     cmd = [find_kaggle_cli(), "datasets", "download", "-d", dataset, "-p", str(dest)]
+    if force:
+        cmd.append("--force")
     logger.info("Running: %s", " ".join(cmd))
     subprocess.run(cmd, check=True)
     zip_path = dest / f"{dataset.split('/')[-1]}.zip"
     if not zipfile.is_zipfile(zip_path):
-        raise RuntimeError(f"{zip_path} is missing or not a valid zip file")
+        # e.g. an interrupted download that the CLI now considers up to date
+        raise RuntimeError(f"{zip_path} is missing or incomplete; run again with --force")
     return zip_path
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--sample", action="store_true", help="download the ~5,600-image sample")
+    parser.add_argument("--force", action="store_true", help="download again even if the zip exists")
     parser.add_argument("--config", default="configs/base.yaml")
     parser.add_argument("--paths", default="configs/paths/local.yaml")
     args = parser.parse_args(argv)
@@ -90,7 +94,7 @@ def main(argv: list[str] | None = None) -> None:
         )
     dataset, expected = DATASETS["sample" if args.sample else "full"]
     dest = Path(load_config(args.config, args.paths)["paths"]["raw_dir"])
-    zip_path = download(dataset, dest)
+    zip_path = download(dataset, dest, force=args.force)
 
     n_images = count_zip_images(zip_path)
     logger.info("%s: %.2f GB, %d PNG images", zip_path, zip_path.stat().st_size / 1e9, n_images)

@@ -67,6 +67,27 @@ def test_rerun_skips_finished_images(fake_zip, tmp_path):
     assert [p.stat().st_mtime_ns for p in images[1:]] == mtimes[1:]
 
 
+def test_interrupted_run_keeps_progress(fake_zip, tmp_path, monkeypatch):
+    data_dir = tmp_path / "nih256"
+    real_process = pp._process_one
+    done = []
+
+    def interrupted_after_one(task):
+        if done:
+            raise KeyboardInterrupt  # Ctrl+C while converting the second image
+        done.append(task)
+        return real_process(task)
+
+    monkeypatch.setattr(pp, "_process_one", interrupted_after_one)
+    with pytest.raises(KeyboardInterrupt):
+        pp.convert_images(fake_zip, data_dir, size=SIZE)
+    assert len(pp.read_manifest(data_dir / pp.MANIFEST_NAME)) == 1
+
+    monkeypatch.setattr(pp, "_process_one", real_process)
+    manifest = pp.convert_images(fake_zip, data_dir, size=SIZE)
+    assert len(manifest) == 3 and all(row["status"] == "ok" for row in manifest.values())
+
+
 def test_parallel_and_folder_source_match_serial_zip(fake_zip, tmp_path):
     serial, parallel, from_dir = tmp_path / "serial", tmp_path / "parallel", tmp_path / "from_dir"
     pp.convert_images(fake_zip, serial, size=SIZE, workers=1)

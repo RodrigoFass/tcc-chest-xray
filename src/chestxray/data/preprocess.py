@@ -170,26 +170,27 @@ def convert_images(
     zip_arg = str(input_path) if source == "zip" else None
     init_args = (zip_arg, str(out_dir), size)
     new_file = not manifest_path.exists()
+    # Rows are appended as images finish, so an interrupted run (Ctrl+C, crash) keeps its
+    # progress; images whose row was not written yet are simply converted again next time.
     with manifest_path.open("a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=MANIFEST_COLUMNS)
         if new_file:
             writer.writeheader()
-        if workers > 1:
-            pool = mp.Pool(workers, initializer=_init_worker, initargs=init_args)
-            results = pool.imap_unordered(_process_one, todo, chunksize=32)
-        else:
-            pool = None
-            _init_worker(*init_args)
-            results = map(_process_one, todo)
-        try:
+
+        def record(results) -> None:
             for row in tqdm(results, total=len(todo), desc="Converting", unit="img"):
                 writer.writerow(row)
                 manifest[row["image"]] = row
-        finally:
-            if pool is not None:
-                pool.close()
-                pool.join()
-            else:
+
+        if workers > 1:
+            # Leaving the block terminates the workers, also on Ctrl+C
+            with mp.Pool(workers, initializer=_init_worker, initargs=init_args) as pool:
+                record(pool.imap_unordered(_process_one, todo, chunksize=32))
+        else:
+            _init_worker(*init_args)
+            try:
+                record(map(_process_one, todo))
+            finally:
                 _close_worker()
     write_manifest(manifest, manifest_path)
 
