@@ -1,0 +1,22 @@
+{
+  "settings": {
+    "strategy": "official",
+    "seed": 42,
+    "fractions": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "labels_file": "Data_Entry_2017.csv"
+  },
+  "images": {
+    "train": 71255,
+    "val": 15269,
+    "test": 25596
+  },
+  "patients": {
+    "train": 23031,
+    "val": 4977,
+    "test": 2797
+  }
+}

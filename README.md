@@ -18,8 +18,8 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 |---|---|---|
 | 0 | Esqueleto do projeto | pronta |
 | 1 | Dados (download, pré-processamento, divisão, EDA) | pronta |
-| 2 | Modelo e treino | pronta (aguardando revisão); E1 e E2 treinados |
-| 3 | Avaliação e experimentos | — |
+| 2 | Modelo e treino | pronta; E1 e E2 treinados |
+| 3 | Avaliação e experimentos | E1 e E2 avaliados (E1 escolhido); E3–E5 e seeds prontos para treinar |
 | 4 | Grad-CAM | — |
 | 5 | Demonstração (Gradio) | — |
 | 6 | Material para a monografia | — |
@@ -155,6 +155,41 @@ python -m chestxray.train --config configs/experiments/e1_baseline.yaml
 
 ```bash
 python -m chestxray.train --config configs/debug.yaml --restart
+```
+
+- Vários experimentos em fila, um depois do outro (por exemplo, durante a noite). Se um falhar, os
+  seguintes rodam mesmo assim; rodar o mesmo comando de novo retoma o que ficou pela metade e pula
+  o que já terminou. A fila da Fase 3 (E3, as duas seeds extras, E4 e E5; ~8–9 h na RTX 2060):
+
+```bash
+python -m chestxray.train --config configs/experiments/e3_noaug.yaml configs/experiments/e1_seed43.yaml configs/experiments/e1_seed44.yaml configs/experiments/e4_scratch.yaml configs/experiments/e5_official.yaml
+```
+
+  O E5 usa a divisão oficial do NIH, gerada uma vez com
+  `python -m chestxray.data.split --config configs/experiments/e5_official.yaml`.
+
+## Avaliação
+
+As predições são geradas uma vez, em fp32; a avaliação roda só a partir delas, em CPU, e não
+precisa das imagens. O modelo final é escolhido **só pela validação**, antes de gerar as predições
+de teste (plano, seção 10).
+
+```bash
+python -m chestxray.inference --config configs/experiments/e1_baseline.yaml --splits val
+```
+
+```bash
+python -m chestxray.evaluate --run results/runs/e1_baseline --split val
+```
+
+Depois da escolha registrada, o mesmo para o teste (`--splits test` e `--split test`). A
+avaliação de teste usa a validação para o limiar de cada classe e para a recalibração (Platt,
+gravada em `calibration.json`), e grava `metrics_test.json`, tabelas em `results/tables/<experimento>/`
+(CSV, Markdown e LaTeX) e figuras em `results/figures/<experimento>/`. Para comparar experimentos
+lado a lado, com diferenças pareadas de AUC (as mesmas reamostragens bootstrap para os dois):
+
+```bash
+python -m chestxray.evaluate --compare results/runs/e1_baseline results/runs/e2_posweight --pairs e2_posweight:e1_baseline
 ```
 
 ## Estrutura

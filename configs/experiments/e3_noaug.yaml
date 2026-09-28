@@ -1,0 +1,7 @@
+# E3 (important): the winner of E1 vs E2 (E1, chosen on validation) without data augmentation.
+extends: e1_baseline.yaml
+
+experiment: e3_noaug
+
+augmentation:
+  enabled: false

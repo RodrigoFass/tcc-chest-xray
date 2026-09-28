@@ -132,6 +132,31 @@ def test_pos_weight_run(cfg):
     assert tr.train(cfg)["epochs"] == 1
 
 
+def test_queue_runs_every_config_even_after_a_failure(cfg, tmp_path):
+    """``--config a b c``: each experiment runs in turn; a broken one does not stop the rest."""
+    import yaml
+
+    base = ROOT / "configs" / "base.yaml"
+    paths_file = tmp_path / "paths.yaml"
+    paths_file.write_text(yaml.safe_dump({"paths": cfg["paths"]}), encoding="utf-8")
+    overrides = {"data": {"image_size": 64}, "model": {"pretrained": False}, "train": {
+        "device": "cpu", "amp": False, "batch_size": 8, "num_workers": 0, "max_epochs": 1}}
+    configs = []
+    for name, extra in (("first", {}), ("broken", {"model": {"name": "resnet"}}), ("last", {})):
+        body = {"extends": str(base), "experiment": name, **overrides}
+        for key, value in extra.items():
+            body[key] = {**body.get(key, {}), **value}
+        path = tmp_path / f"{name}.yaml"
+        path.write_text(yaml.safe_dump(body), encoding="utf-8")
+        configs.append(str(path))
+
+    with pytest.raises(SystemExit, match="broken"):
+        tr.main(["--config", *configs, "--paths", str(paths_file)])
+    runs = Path(cfg["paths"]["runs_dir"])
+    assert (runs / "first" / "summary.json").exists() and (runs / "last" / "summary.json").exists()
+    assert not (runs / "broken" / "summary.json").exists()
+
+
 @pytest.mark.slow
 def test_model_can_overfit_a_few_images(cfg):
     """Sanity check from the plan: the pipeline learns (training loss falls near zero)."""

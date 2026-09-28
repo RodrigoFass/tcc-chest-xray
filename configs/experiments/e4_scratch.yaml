@@ -1,0 +1,9 @@
+# E4 (complementary): E1 trained from scratch, without ImageNet weights. Same max_epochs and
+# early stopping, so it shows the cost of skipping transfer learning with the same budget,
+# not the limit of the architecture.
+extends: e1_baseline.yaml
+
+experiment: e4_scratch
+
+model:
+  pretrained: false

@@ -332,13 +332,27 @@ def _train(cfg: dict, run_dir: Path, ckpt_dir: Path) -> dict:
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--config", required=True)
+    parser.add_argument("--config", nargs="+", required=True,
+                        help="one or more experiment configs, trained one after the other")
     parser.add_argument("--paths", default="configs/paths/local.yaml")
     parser.add_argument("--restart", action="store_true",
                         help="delete this experiment's run and checkpoints first (for debug runs)")
     args = parser.parse_args(argv)
     setup_logging()
-    train(load_config(args.config, args.paths), restart=args.restart)
+    if args.restart and len(args.config) > 1:
+        parser.error("--restart works with a single config")
+
+    # A queue (e.g. overnight): a failing experiment is reported and the next one still runs.
+    # Running the same command again resumes unfinished experiments and skips finished ones.
+    failed = []
+    for config in args.config:
+        try:
+            train(load_config(config, args.paths), restart=args.restart)
+        except (Exception, SystemExit) as error:
+            logger.error("Experiment %s failed: %s", config, error, exc_info=not isinstance(error, SystemExit))
+            failed.append(config)
+    if failed:
+        raise SystemExit(f"Failed: {', '.join(failed)}")
 
 
 if __name__ == "__main__":

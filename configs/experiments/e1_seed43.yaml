@@ -1,0 +1,6 @@
+# E-seeds (important): the final configuration (E1) with another training seed.
+# The split seed (split.seed) is unchanged, so all seeds share the same split.
+extends: e1_baseline.yaml
+
+experiment: e1_baseline_seed43
+seed: 43

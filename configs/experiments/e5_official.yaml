@@ -1,0 +1,13 @@
+# E5 (complementary): E1 on the official NIH split (test = test_list.txt; train/val from
+# train_val_list.txt, by patient). Other test set: reported in its own table, never side by
+# side with E1-E4. Generate the split once with:
+#   python -m chestxray.data.split --config configs/experiments/e5_official.yaml
+extends: e1_baseline.yaml
+
+experiment: e5_official
+
+paths:
+  splits_dir: data/splits/official
+
+split:
+  strategy: official
