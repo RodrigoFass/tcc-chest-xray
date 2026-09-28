@@ -1,0 +1,7 @@
+# E2 (essential): E1 + pos_weight (negatives / positives per class, from the training labels).
+extends: e1_baseline.yaml
+
+experiment: e2_posweight
+
+train:
+  pos_weight: true

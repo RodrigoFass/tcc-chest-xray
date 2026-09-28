@@ -57,6 +57,20 @@ def get_device(preference: str = "auto") -> torch.device:
     return device
 
 
+def keep_awake() -> None:
+    """Ask Windows not to go to sleep while this process runs (e.g. a long training run).
+
+    Uses ``SetThreadExecutionState``, the call video players make: it changes no system
+    setting, lets the screen turn off, and lapses by itself when the process ends. Does
+    nothing on other systems.
+    """
+    if sys.platform == "win32":
+        import ctypes
+
+        es_continuous, es_system_required = 0x80000000, 0x00000001
+        ctypes.windll.kernel32.SetThreadExecutionState(es_continuous | es_system_required)
+
+
 def setup_logging(log_file: str | Path | None = None, level: int = logging.INFO) -> logging.Logger:
     """Send log records to stdout and, optionally, to a file.
 

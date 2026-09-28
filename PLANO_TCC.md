@@ -642,6 +642,13 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | Os itens "se sobrar tempo" (E4, E5, pointing game, Fase 7) passam a se chamar "complementares" e entram no escopo; continuam por último na ordem de execução | Decisão do Rodrigo |
 | 28/09/2026 | `split_info.json` em cada pasta de split, e o `split.py` recusa sobrescrever um split feito com outras configurações; o split oficial (E5) vai para `data/splits/official` | Revisão da Fase 1: rodar o split oficial com a configuração padrão teria apagado a divisão principal |
 | 28/09/2026 | 3 imagens sem anatomia visível (00007160_002, rotulada Atelectasis; 00010007_121 e 00012249_001, No Finding) ficam no dataset | Defeito da própria base, não do pré-processamento; 3 em 112.120 (2 no treino, 1 na validação, 0 no teste) não mudam os resultados, e manter o conjunto completo preserva a comparação com a literatura. Citar na monografia como exemplo de ruído |
+| 28/09/2026 | Rodrigo delegou a Fase 2 ("pode fazer o que achar melhor"): implementar, testar e já treinar E1 e E2 na RTX 2060 durante a noite; a Fase 3 espera a revisão dele | Aproveitar a noite de GPU; o plano manda parar entre as fases |
+| 28/09/2026 | Precisão mista automática: fp16 com GradScaler em GPUs antes de Ampere (RTX 2060), bf16 a partir de Ampere (RTX 4060) | O bf16 não é nativo na RTX 2060 e seria lento |
+| 28/09/2026 | Validação durante o treino também em precisão mista; as métricas finais da Fase 3 são calculadas em fp32 | Validação ~2× mais rápida; a escolha do `best.pt` pela AUC praticamente não muda |
+| 28/09/2026 | `log.csv` reescrito a cada época a partir do histórico salvo no `last.pt` | Retomada sem linha duplicada nem faltando; um teste confirma que treino interrompido e retomado dá o mesmo resultado do treino direto (CPU) |
+| 28/09/2026 | No Windows, o treino chama `SetThreadExecutionState` para o PC não suspender | Não altera configuração do sistema; vale só enquanto o processo roda |
+| 28/09/2026 | YAMLs do E3, E4, E5 e das seeds extras criados na Fase 3, depois da escolha entre E1 e E2 pela validação | Todos partem do vencedor, que ainda não existe |
+| 28/09/2026 | `--restart` no `train.py` (apaga a execução anterior do experimento), para uso em debug; `results/runs/debug/` fora do git | O treino de debug precisa poder rodar de novo; nos experimentos reais a regra de nunca sobrescrever continua valendo |
 
 ## 11. Referências
 

@@ -1,0 +1,7 @@
+# E1 (essential): DenseNet-121 pretrained on ImageNet, BCE without pos_weight.
+extends: ../base.yaml
+
+experiment: e1_baseline
+
+train:
+  pos_weight: false

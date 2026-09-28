@@ -30,3 +30,6 @@ dist/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Debug training runs (python -m chestxray.train --config configs/debug.yaml)
+results/runs/debug/

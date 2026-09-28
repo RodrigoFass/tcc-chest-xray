@@ -17,8 +17,8 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | Fase | Conteúdo | Situação |
 |---|---|---|
 | 0 | Esqueleto do projeto | pronta |
-| 1 | Dados (download, pré-processamento, divisão, EDA) | pronta (aguardando revisão) |
-| 2 | Modelo e treino | — |
+| 1 | Dados (download, pré-processamento, divisão, EDA) | pronta |
+| 2 | Modelo e treino | código pronto; E1 e E2 em treino |
 | 3 | Avaliação e experimentos | — |
 | 4 | Grad-CAM | — |
 | 5 | Demonstração (Gradio) | — |
@@ -131,6 +131,31 @@ Plano B, se faltar disco: baixe os 12 pacotes oficiais do NIH (link abaixo) e ro
 `preprocess --no-tar --input <pasta do pacote>` para cada um, apagando o pacote depois. As imagens se
 acumulam em `data_dir`; no fim, copie os CSVs de metadados para `data_dir` e rode o `preprocess` uma
 última vez sem `--no-tar`, para gerar o tar.
+
+## Treino
+
+```bash
+python -m chestxray.train --config configs/experiments/e1_baseline.yaml
+```
+
+- Cada experimento grava em `results/runs/<experimento>/` a configuração resolvida, o
+  `environment.json` (versões, GPU e commit de cada sessão), o `log.csv` (uma linha por época), o
+  `train.log` e, no fim, o `summary.json`. Os pesos ficam em `checkpoints/<experimento>/`
+  (`last.pt` a cada época e `best.pt` na melhor AUC média de validação) e nunca são versionados.
+- Se o treino for interrompido (queda de energia, Ctrl+C, fim da sessão do Colab), rode o mesmo
+  comando: ele continua da última época salva. Um experimento terminado não roda de novo, e a pasta
+  de um experimento nunca é reaproveitada com outra configuração.
+- No Windows, o treino pede ao sistema para não suspender enquanto roda (a tela ainda pode apagar);
+  nenhuma configuração do Windows é alterada.
+- Na GPU, a precisão mista é automática: fp16 em placas anteriores à série RTX 30 (como a RTX 2060)
+  e bf16 da RTX 30/40 em diante. O batch 32 usa ~2,3 GB na RTX 2060; se o log avisar que a memória
+  está quase cheia, reduza o `batch_size`.
+- Teste rápido em CPU (200 imagens, 1 época, ~1 min); o `--restart` apaga a execução de debug
+  anterior:
+
+```bash
+python -m chestxray.train --config configs/debug.yaml --restart
+```
 
 ## Estrutura
 
