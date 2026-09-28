@@ -1,0 +1,30 @@
+{
+  "experiment": "e1_baseline",
+  "epochs": 13,
+  "stopped_early": true,
+  "best_epoch": 8,
+  "best_val_auc_mean": 0.8379586404338049,
+  "best_val_auc": {
+    "Atelectasis": 0.8201351494297455,
+    "Cardiomegaly": 0.9009116028341727,
+    "Effusion": 0.8854576179174205,
+    "Infiltration": 0.7139399761567385,
+    "Mass": 0.8505449516545531,
+    "Nodule": 0.7617793949488603,
+    "Pneumonia": 0.7450707144774172,
+    "Pneumothorax": 0.8684986052857794,
+    "Consolidation": 0.8063935313182684,
+    "Edema": 0.9056132455352627,
+    "Emphysema": 0.9265092645280604,
+    "Fibrosis": 0.8219559639083043,
+    "Pleural_Thickening": 0.8141022266673685,
+    "Hernia": 0.9105087214113128
+  },
+  "train_time_min": 85.5,
+  "first_epoch_min": 8.8,
+  "device": "NVIDIA GeForce RTX 2060",
+  "amp": "float16",
+  "batch_size": 32,
+  "train_images": 78486,
+  "val_images": 16812
+}
