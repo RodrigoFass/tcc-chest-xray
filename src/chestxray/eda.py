@@ -190,7 +190,7 @@ def plot_examples(picks: dict, images_dir: Path) -> plt.Figure:
                 with Image.open(images_dir / images[row]) as img:
                     ax.imshow(np.asarray(img), cmap="gray", vmin=0, vmax=255)
                 ax.set_title(f"{pt(name)}\n{images[row]}" if row == 0 else images[row], fontsize=9)
-    fig.suptitle("Exemplos de imagens com um único rótulo (256×256, sorteio com seed fixa)")
+    fig.suptitle("Exemplos de imagens com um único rótulo (256×256, sorteio com semente fixa)")
     fig.tight_layout()
     return fig
 

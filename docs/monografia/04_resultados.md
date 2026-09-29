@@ -9,7 +9,7 @@ por paciente entre parênteses. O modelo final é o E1, escolhido na validação
 
 ## 4.1 Treino
 
-A Figura 2 mostra as curvas de treino dos experimentos da divisão principal. No E1, a AUC média de validação subiu rapidamente
+A Figura 5 mostra as curvas de treino dos experimentos da divisão principal. No E1, a AUC média de validação subiu rapidamente
 nas primeiras épocas (0,802 na primeira, 0,834 na quinta) e atingiu o máximo, 0,838, na oitava época,
 logo depois da primeira redução da taxa de aprendizado (de $10^{-4}$ para $10^{-5}$). Nas cinco épocas
 seguintes, a AUC de validação ficou estável ou caiu levemente, e a parada antecipada encerrou o treino
@@ -34,7 +34,7 @@ validação ainda subia na 15ª época (0,809), deu um salto com a primeira redu
 época e 200,3 minutos de treino. A perda de treino do E4 terminou em 0,137, acima da do E1 (0,121): a
 rede treinada do zero não chegou a se ajustar aos dados de treino no mesmo grau.
 
-**Figura 2 – Curvas de treino do E1 ao E4**
+**Figura 5 – Curvas de treino do E1 ao E4**
 
 (`results/figures/curvas_treino_e1_baseline_e2_posweight_e3_noaug_e4_scratch.png`; as curvas das três
 sementes estão em `curvas_treino_e1_baseline_e1_baseline_seed43_e1_baseline_seed44.png` e as do E5 em
@@ -49,7 +49,7 @@ Entre as três doenças estudadas, a efusão pleural teve a maior AUC, **0,886 (
 atelectasia, **0,816 (0,802–0,829)**, e da pneumonia, **0,751 (0,714–0,787)**. As maiores AUCs foram de
 hérnia (0,939), cardiomegalia (0,920) e enfisema (0,915), doenças com sinais anatômicos marcantes; a
 hérnia, porém, tem só 28 casos no teste, e seu intervalo vai de 0,862 a 0,993. As menores foram de
-infiltração (0,720) e pneumonia (0,751), as duas classes de aspecto mais inespecífico. A Figura 3 mostra
+infiltração (0,720) e pneumonia (0,751), as duas classes de aspecto mais inespecífico. A Figura 6 mostra
 as curvas ROC das três doenças estudadas.
 
 **Tabela 3 – AUC e AUPRC do modelo final (E1) no conjunto de teste**
@@ -74,14 +74,14 @@ as curvas ROC das três doenças estudadas.
 
 Fonte: elaborado pelo autor (`results/tables/e1_baseline/metricas_test`). * Doenças estudadas.
 
-**Figura 3 – Curvas ROC das três doenças estudadas no teste (E1)**
+**Figura 6 – Curvas ROC das três doenças estudadas no teste (E1)**
 
 (`results/figures/e1_baseline/roc_foco_test.png`; as 14 classes estão em `roc_14_test.png`, para o
 apêndice)
 
 Fonte: elaborado pelo autor.
 
-A AUPRC conta outra parte da história (Figura 4). Para a efusão pleural, 0,543, cerca de quatro vezes a
+A AUPRC conta outra parte da história (Figura 7). Para a efusão pleural, 0,543, cerca de quatro vezes a
 prevalência (12,6%); para a atelectasia, 0,361, 3,6 vezes a prevalência (9,9%); e para a pneumonia,
 apenas **0,044**, 3,9 vezes a prevalência de 1,15%. Ou seja, a AUPRC fica acima do acaso nas três
 doenças, mas essas razões não se comparam entre classes: com a mesma curva ROC, quanto mais rara a
@@ -93,7 +93,7 @@ da efusão (12,6%), daria cerca de 0,33. A raridade explica a maior parte da AUP
 Na prática, poucos dos exames de maior escore têm de fato pneumonia. Esse é o limite prático mais
 importante do modelo para a pneumonia e é discutido no Capítulo 5.
 
-**Figura 4 – Curvas precisão-revocação das três doenças estudadas no teste (E1)**
+**Figura 7 – Curvas precisão-revocação das três doenças estudadas no teste (E1)**
 
 (`results/figures/e1_baseline/pr_foco_test.png`; a linha pontilhada de cada cor é a prevalência)
 
@@ -137,7 +137,7 @@ Wang et al. são os da versão 4 do artigo no arXiv (Seção 2.11)
 ## 4.4 Desempenho no limiar de decisão
 
 A Tabela 5 mostra o desempenho das três doenças no limiar escolhido na validação pelo índice de Youden
-(as 14 classes estão em `results/tables/e1_baseline/limiares_teste`), e a Figura 5, as matrizes de
+(as 14 classes estão em `results/tables/e1_baseline/limiares_teste`), e a Figura 8, as matrizes de
 confusão. Na efusão pleural, o modelo detectou 82,5% dos casos (1.751 de 2.123) com especificidade de
 78,7%; na atelectasia, 74,2% com especificidade de 73,4%; na pneumonia, 68,6% (133 de 194) com
 especificidade de 67,8%.
@@ -152,7 +152,7 @@ especificidade de 67,8%.
 
 Fonte: elaborado pelo autor (`results/tables/e1_baseline/limiares_teste`).
 
-**Figura 5 – Matrizes de confusão das três doenças estudadas no teste (E1)**
+**Figura 8 – Matrizes de confusão das três doenças estudadas no teste (E1)**
 
 (`results/figures/e1_baseline/matriz_confusao_foco_test.png`)
 
@@ -170,7 +170,7 @@ da prevalência de cada doença (ver a Seção 4.5).
 
 ## 4.5 Calibração
 
-A Figura 6 mostra os diagramas de confiabilidade das três doenças no teste, antes e depois do *Platt
+A Figura 9 mostra os diagramas de confiabilidade das três doenças no teste, antes e depois do *Platt
 scaling* ajustado na validação, e a Tabela 6, o escore de Brier. O E1 já saiu do treino bem calibrado:
 os pontos dos escores brutos ficam próximos da diagonal, e o Brier praticamente não muda com a
 recalibração (de 0,0776 para 0,0771 na efusão, de 0,0763 para 0,0757 na atelectasia e de 0,0113 para
@@ -191,7 +191,7 @@ individuais chegam a 24%.
 Fonte: elaborado pelo autor (`results/tables/e1_baseline/calibracao_teste` e
 `results/tables/e2_posweight/calibracao_teste`).
 
-**Figura 6 – Diagramas de confiabilidade no teste (E1)**
+**Figura 9 – Diagramas de confiabilidade no teste (E1)**
 
 (`results/figures/e1_baseline/calibracao_foco_test.png`)
 
@@ -346,7 +346,7 @@ teste é outro, o E5 não é comparado lado a lado com os experimentos da divis�
 
 ## 4.7 Análise por subgrupos
 
-A Figura 7 e a Tabela 11 mostram a AUC das três doenças por sexo, faixa etária e incidência.
+A Figura 10 e a Tabela 11 mostram a AUC das três doenças por sexo, faixa etária e incidência.
 
 **Tabela 11 – AUC por subgrupo no teste (E1)**
 
@@ -364,7 +364,7 @@ A Figura 7 e a Tabela 11 mostram a AUC das três doenças por sexo, faixa etári
 Fonte: elaborado pelo autor (`results/tables/e1_baseline/subgrupos_teste`; o número de casos de cada
 subgrupo está na tabela de origem).
 
-**Figura 7 – AUC por subgrupo no teste (E1)**
+**Figura 10 – AUC por subgrupo no teste (E1)**
 
 (`results/figures/e1_baseline/subgrupos_foco_test.png`)
 
@@ -383,14 +383,14 @@ pela incidência.
 
 ## 4.8 Mapas de calor
 
-**Figura 8 – Grad-CAM: acertos e erros na efusão pleural**
+**Figura 11 – Grad-CAM: acertos e erros na efusão pleural**
 
 (`results/figures/e1_baseline/gradcam/galeria_effusion.png`, na camada `denseblock4`; as galerias de
 pneumonia e atelectasia vão para o apêndice)
 
 Fonte: elaborado pelo autor.
 
-A Figura 8 mostra a galeria da efusão pleural, escolhida pela regra fixa da Seção 3.9. Nos três
+A Figura 11 mostra a galeria da efusão pleural, escolhida pela regra fixa da Seção 3.9. Nos três
 verdadeiros positivos, o mapa se concentra no hemitórax com opacidade e nas bases, onde o líquido se
 acumula. Nos falsos positivos, os mapas também caem sobre regiões com alteração visível: num deles há
 uma linha horizontal no hemitórax direito, com aspecto de nível hidroaéreo, e outro é um exame AP
@@ -406,7 +406,7 @@ mas o mapa fica sobre os pulmões, e não sobre a marcação ou os dispositivos.
 (escore 0,001) tem opacidades extensas nos dois pulmões: ou é um erro claro do modelo, ou é um caso em
 que o rótulo de pneumonia dependeu de informação que não está na imagem.
 
-**Figura 9 – Comparação das camadas-alvo**
+**Figura 12 – Comparação das camadas-alvo**
 
 (`results/figures/e1_baseline/gradcam/camadas_foco.png`)
 
@@ -428,15 +428,17 @@ caixa). Intervalos de Wilson.
 A camada `denseblock4` acertou 15 das 62 imagens das três doenças e a `relu`, 13; em todas as classes
 com caixa, 48 contra 42 de 153. A diferença não é significativa (teste de McNemar exato nas mesmas
 imagens, p = 0,73 nas três doenças e p = 0,15 em todas), e os mapas das duas camadas são quase iguais
-(Figura 9). Pela regra da Seção 3.9, a `denseblock4` foi adotada na galeria, nas figuras com as caixas e
+(Figura 12). Pela regra da Seção 3.9, a `denseblock4` foi adotada na galeria, nas figuras com as caixas e
 na interface. Na atelectasia e na efusão, as duas camadas ficaram acima do centro da imagem, com o
 limite inferior do intervalo acima da taxa do centro. Na pneumonia, a `denseblock4` acertou 3 de 20, o
 que não se distingue do centro (5%), e a `relu` não acertou nenhuma. Na cardiomegalia, o centro da
 imagem acerta todas as 25 imagens, porque o coração fica no centro, o que mostra por que a referência
 trivial é necessária. Mesmo nos melhores casos, o pico do mapa cai dentro da caixa em menos da metade
-das imagens: os mapas indicam a região geral do achado, mas não o localizam com precisão.
+das imagens: os mapas indicam a região geral do achado, mas não o localizam com precisão. A Figura 13
+mostra as 20 imagens de efusão pleural com caixa, cada uma com o mapa de calor, a caixa do radiologista
+e o ponto de máximo do mapa.
 
-**Figura 10 – Mapas de calor e caixas dos radiologistas (efusão pleural)**
+**Figura 13 – Mapas de calor e caixas dos radiologistas (efusão pleural)**
 
 (`results/figures/e1_baseline/gradcam/caixas_effusion.png`)
 
@@ -446,7 +448,8 @@ Fonte: elaborado pelo autor.
 
 O modelo final foi aplicado, sem novo treino, às 202 imagens frontais (200 pacientes) da validação do
 CheXpert, com os rótulos dos radiologistas (Seção 3.10). A Tabela 13 compara a AUC de cada classe com a
-do teste do NIH.
+do teste do NIH, e a Figura 14 mostra as curvas ROC das duas doenças estudadas que têm rótulos nesse
+conjunto.
 
 **Tabela 13 – AUC no conjunto de validação do CheXpert, comparada ao teste do NIH**
 
@@ -464,7 +467,7 @@ Fonte: elaborado pelo autor (`results/tables/e1_baseline/validacao_externa_chexp
 estudadas. † Menos de 30 casos: reportado, mas sem conclusão. A pneumonia não tem rótulos de
 radiologistas disponíveis nesse conjunto (Seção 3.10).
 
-**Figura 11 – Curvas ROC no CheXpert (validação)**
+**Figura 14 – Curvas ROC no CheXpert (validação)**
 
 (`results/figures/e1_baseline/roc_foco_chexpert.png`)
 
@@ -489,13 +492,13 @@ cardiomegalia, 0,837; consolidação, 0,924; edema, 0,825. As conclusões não m
 
 ## 4.10 Sistema de demonstração
 
-A Figura 12 mostra a página publicada analisando uma das imagens de exemplo, um verdadeiro positivo de
+A Figura 15 mostra a página publicada analisando uma das imagens de exemplo, um verdadeiro positivo de
 efusão pleural do conjunto de teste. A frase de resumo lista as doenças acima do limiar; o mapa de calor
 é o da efusão, com probabilidade estimada de 90,9% (limiar de 11,3%); e a tabela traz as 14 doenças, com
 as três estudadas em destaque. A mensagem acima do resultado informa que a análise foi feita no próprio
 navegador, em 0,6 s.
 
-**Figura 12 – Interface de demonstração publicada no Hugging Face Spaces**
+**Figura 15 – Interface de demonstração publicada no Hugging Face Spaces**
 
 (`results/figures/interface_demo.png`)
 
