@@ -21,7 +21,9 @@ Writes, for the experiment:
 Target layers (plan 3.11): ``relu`` is the ReLU after ``norm5``, the last feature map before the
 global pooling. With pooling followed by a single linear layer, Grad-CAM on that map equals the
 CAM used by CheXNet (Zhou et al., 2016) up to a positive factor. ``denseblock4`` is the same
-map before the final batch norm and ReLU; it is the alternative the plan asks to compare.
+map before the final batch norm and ReLU; it is the alternative the plan asks to compare, and
+the pointing game made it the default (``DEFAULT_LAYER``), used by the gallery, the box figures
+and the demo app.
 """
 
 from __future__ import annotations
@@ -58,7 +60,10 @@ TARGET_LAYERS = {
     "relu": lambda model: model.relu,
     "denseblock4": lambda model: model.features.denseblock4,
 }
-DEFAULT_LAYER = "relu"
+# Chosen by the pointing game on the E1 test boxes (plan, section 10): denseblock4 hit 15 of 62
+# images of the focus classes against 13 for relu; the difference is not significant and the
+# maps look alike, so relu (the CAM of CheXNet) stays in every comparison
+DEFAULT_LAYER = "denseblock4"
 
 # BBox_List_2017.csv: coordinates refer to the 1024x1024 images of the dataset, and the file
 # calls Infiltration "Infiltrate" (plan, Phase 4)
@@ -389,7 +394,8 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config", required=True, help="experiment config used for training")
     parser.add_argument("--paths", default="configs/paths/local.yaml")
-    parser.add_argument("--layers", nargs="+", default=list(TARGET_LAYERS), choices=list(TARGET_LAYERS),
+    parser.add_argument("--layers", nargs="+", choices=list(TARGET_LAYERS),
+                        default=[DEFAULT_LAYER] + [layer for layer in TARGET_LAYERS if layer != DEFAULT_LAYER],
                         help="target layers; the first one is used for the gallery and box figures")
     parser.add_argument("--per-group", type=int, default=3, help="images per group (TP, FP, FN) in the gallery")
     parser.add_argument("--no-boxes", action="store_true", help="skip the radiologist boxes and pointing game")

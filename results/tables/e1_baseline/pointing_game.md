@@ -1,0 +1,18 @@
+| Doença | Camada | Imagens | Acertos | Taxa (IC95%) | Centro da imagem |
+|---|---|---|---|---|---|
+| Atelectasia | denseblock4 | 22 | 6 | 27,3% (13,2–48,2%) | 4,5% |
+| Atelectasia | relu | 22 | 5 | 22,7% (10,1–43,4%) | 4,5% |
+| Cardiomegalia | denseblock4 | 25 | 25 | 100,0% (86,7–100,0%) | 100,0% |
+| Cardiomegalia | relu | 25 | 22 | 88,0% (70,0–95,8%) | 100,0% |
+| Efusão pleural | denseblock4 | 20 | 6 | 30,0% (14,5–51,9%) | 0,0% |
+| Efusão pleural | relu | 20 | 8 | 40,0% (21,9–61,3%) | 0,0% |
+| Infiltração | denseblock4 | 17 | 3 | 17,6% (6,2–41,0%) | 11,8% |
+| Infiltração | relu | 17 | 3 | 17,6% (6,2–41,0%) | 11,8% |
+| Massa | denseblock4 | 17 | 2 | 11,8% (3,3–34,3%) | 17,6% |
+| Massa | relu | 17 | 2 | 11,8% (3,3–34,3%) | 17,6% |
+| Nódulo | denseblock4 | 13 | 0 | 0,0% (0,0–22,8%) | 0,0% |
+| Nódulo | relu | 13 | 0 | 0,0% (0,0–22,8%) | 0,0% |
+| Pneumonia | denseblock4 | 20 | 3 | 15,0% (5,2–36,0%) | 5,0% |
+| Pneumonia | relu | 20 | 0 | 0,0% (0,0–16,1%) | 5,0% |
+| Pneumotórax | denseblock4 | 19 | 3 | 15,8% (5,5–37,6%) | 5,3% |
+| Pneumotórax | relu | 19 | 2 | 10,5% (2,9–31,4%) | 5,3% |
