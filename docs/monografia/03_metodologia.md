@@ -341,7 +341,7 @@ casos positivos são reportadas, mas não sustentam conclusões.
 
 ## 3.11 Sistema de demonstração
 
-O sistema final é uma página web publicada no Hugging Face Spaces [PREENCHER: link do Space], em que o
+O sistema final é uma página web publicada no Hugging Face Spaces (<https://huggingface.co/spaces/rotriguin/tcc-raio-x>), em que o
 modelo roda no navegador de quem acessa, com a biblioteca ONNX Runtime Web: a radiografia não é enviada a
 nenhum servidor. A escolha se deve a uma mudança do serviço: o Hugging Face passou a cobrar pelos Spaces
 que executam Python, como os feitos com a biblioteca Gradio, e manteve gratuitos os Spaces estáticos,

@@ -20,8 +20,8 @@ Os mapas de calor Grad-CAM apontaram para regiões plausíveis, mas o ponto de m
 da marcação do radiologista em só 24% das imagens das três doenças. No conjunto de validação do CheXpert, de outro hospital
 e com rótulos de radiologistas, a AUC média das seis classes em comum foi de 0,823, contra 0,865 no
 teste do NIH, com a atelectasia (0,810) e a efusão pleural (0,849) na mesma faixa. O modelo
-foi disponibilizado numa interface web de demonstração, que mostra o valor de cada doença, o limiar de
-decisão e um mapa de calor Grad-CAM. [CONFERIR: manter esta frase só depois de publicar a interface.]
+foi disponibilizado numa página web de demonstração, que roda no navegador de quem acessa e mostra a
+probabilidade estimada de cada doença, o limiar de decisão e um mapa de calor Grad-CAM.
 
 **Palavras-chave:** aprendizado profundo; radiografia de tórax; redes neurais convolucionais; DenseNet;
 Grad-CAM.
@@ -51,7 +51,7 @@ pointed to plausible regions, but the heatmap peak fell inside the radiologist's
 images of the three diseases. On the CheXpert validation set, from another hospital and
 labeled by radiologists, the mean AUC over the six shared classes was 0.823, against 0.865 on the NIH test
 set, with atelectasis (0.810) and pleural effusion (0.849) in the same range. The model was made available in a
-web demo that shows each disease's score, the decision threshold and a Grad-CAM heatmap. [TO CHECK: keep
-this sentence only after the demo is published.]
+web demo that runs in the visitor's browser and shows each disease's estimated probability, the decision
+threshold and a Grad-CAM heatmap.
 
 **Keywords:** deep learning; chest radiography; convolutional neural networks; DenseNet; Grad-CAM.

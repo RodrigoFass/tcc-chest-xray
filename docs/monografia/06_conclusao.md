@@ -41,7 +41,8 @@ g) no CheXpert, de outro hospital e com rótulos de radiologistas, a AUC média 
    pleural (0,849) ficaram na mesma faixa, a cardiomegalia caiu e a consolidação subiu, e a pneumonia não
    pôde ser avaliada, por falta de rótulos de radiologistas nesse conjunto;
 
-h) a interface foi publicada [PREENCHER: link] e reproduz os escores da avaliação.
+h) a interface foi publicada como uma página web que roda no navegador (<https://huggingface.co/spaces/rotriguin/tcc-raio-x>) e reproduz os
+   escores e os mapas de calor da avaliação.
 
 A hipótese do trabalho, apresentada no Capítulo 1, de que uma DenseNet-121 com transferência de
 aprendizado atinge no ChestX-ray14 desempenho competitivo com a literatura, foi sustentada pelos

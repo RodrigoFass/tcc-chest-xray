@@ -21,8 +21,8 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | 2 | Modelo e treino | pronta; E1 e E2 treinados |
 | 3 | Avaliação e experimentos | pronta; E1 a E5 e as seeds 43 e 44 treinados e avaliados (E1 escolhido) |
 | 4 | Grad-CAM | pronta; galerias, caixas e pointing game do E1, camada `denseblock4` |
-| 5 | Demonstração | página estática com o modelo no navegador (ONNX), testada; falta publicar no Hugging Face |
-| 6 | Material para a monografia | capítulos em `docs/monografia/`, completos exceto o link da interface |
+| 5 | Demonstração | pronta; página estática com o modelo no navegador: <https://huggingface.co/spaces/rotriguin/tcc-raio-x> |
+| 6 | Material para a monografia | capítulos em `docs/monografia/`; falta a captura de tela da interface |
 | 7 | Validação externa (CheXpert) | pronta; 202 imagens frontais, 6 classes, rótulos de radiologistas |
 
 ## Instalação local

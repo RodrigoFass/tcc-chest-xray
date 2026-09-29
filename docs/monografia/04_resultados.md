@@ -502,5 +502,6 @@ As verificações da Seção 3.11 passaram com folga:
 
 O modelo, com 29 MB, é baixado uma vez quando a página abre. Depois disso, cada análise, com o mapa de
 calor, levou entre 0,3 e 0,6 s no navegador do computador de desenvolvimento (Intel Core i5-10400F), e
-a versão Gradio levou entre 0,3 e 0,4 s em CPU. [PREENCHER: link do Space e tempo de resposta num
-celular.]
+a versão Gradio levou entre 0,3 e 0,4 s em CPU. A página está publicada em <https://huggingface.co/spaces/rotriguin/tcc-raio-x>, e o autoteste,
+rodado no endereço público, deu os mesmos resultados que no computador de desenvolvimento.
+[PREENCHER, opcional: tempo de resposta num celular.]
