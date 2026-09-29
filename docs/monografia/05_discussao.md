@@ -6,7 +6,7 @@ A hipótese do trabalho (Capítulo 1) era que uma DenseNet-121 pré-treinada no 
 ChestX-ray14 atinge desempenho competitivo com a literatura. O resultado sustenta essa hipótese: a AUC média do
 modelo final, 0,841 (IC95% 0,833–0,848), é igual à do CheXNet (0,8414), e o valor do CheXNet está dentro
 do intervalo de confiança deste trabalho em 11 das 14 classes, incluindo a atelectasia e a pneumonia. Em
-relação à primeira referência publicada para o conjunto (WANG et al., 2017), o modelo é melhor em todas
+relação à primeira referência publicada para o conjunto (WANG et al., 2017b), o modelo é melhor em todas
 as classes, com diferenças de 0,05 a 0,17 na AUC.
 
 A comparação, porém, precisa ser feita com cuidado. Os dois trabalhos usaram conjuntos de teste
@@ -34,11 +34,12 @@ AUC nos trabalhos citados; diferenças pequenas de protocolo mudam seu resultado
 ## 5.2 Pneumonia: ordenação moderada, pouca utilidade isolada
 
 A pneumonia teve a menor AUC entre as três doenças estudadas (0,751), como nos trabalhos citados
-(WANG et al., 2017; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
+(WANG et al., 2017b; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
 imagem de uma pneumonia pode ser idêntica à de uma atelectasia, de um edema ou de uma hemorragia, e o
 laudo que originou o rótulo muitas vezes dependeu de informações que não estão na imagem. Segundo, os
-rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros, e Oakden-Rayner
-(2020) identificou justamente a pneumonia entre as classes de rótulo menos confiável; se parte dos
+rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros. Na revisão visual de
+Oakden-Rayner (2020), só 60% das imagens rotuladas como pneumonia mostravam o achado, um dos valores
+mais baixos entre as classes. Se parte dos
 rótulos está errada, nenhum modelo consegue uma AUC alta **medida contra esses rótulos**, mesmo que
 acerte a doença. Terceiro, a pneumonia tem poucos exemplos positivos: só 985 imagens de treino têm o
 rótulo, contra 8.158 de atelectasia e 9.175 de efusão. Para um padrão já ambíguo e com rótulos ruidosos,
@@ -198,7 +199,7 @@ b) **Comparação aproximada com a literatura.** A divisão dos dados e os hiper
 
 c) **Um único hospital no treino.** O modelo foi treinado com imagens de uma única instituição, e modelos
    de radiografia de tórax costumam perder desempenho em outras (ZECH et al., 2018). A validação no
-   CheXpert avalia isso parcialmente, num conjunto pequeno.
+   CheXpert avalia isso parcialmente, num conjunto pequeno e sem a pneumonia.
 
 d) **Possíveis atalhos.** A incidência AP, dispositivos visíveis na imagem e marcações de texto podem
    estar correlacionados com as doenças. A análise por incidência e os mapas de calor investigam isso,
@@ -238,5 +239,7 @@ registrá-las porque são frequentemente omitidas em trabalhos da área:
   aleatória;
 - as imagens da galeria de mapas de calor foram escolhidas por uma regra fixa, e a localização foi
   medida contra marcações de radiologistas e comparada com uma referência trivial;
+- o desenho da validação externa (fonte dos rótulos, classes e configuração principal) foi registrado
+  antes de o modelo ser aplicado ao CheXpert;
 - o código tem testes automáticos, e cada experimento registra a configuração, as versões das principais
   bibliotecas e o *commit* usado.

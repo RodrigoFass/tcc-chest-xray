@@ -1,27 +1,23 @@
 # 1 INTRODUÇÃO
 
-A radiografia de tórax é o exame de imagem mais realizado no mundo [CONFERIR: citar fonte. Candidata,
-a verificar antes de usar: RAOOF, S. et al. Interpretation of plain chest roentgenogram. **Chest**,
-v. 141, n. 2, p. 545-558, 2012]. Ela é barata, rápida, amplamente
-disponível e expõe o paciente a uma dose baixa de radiação, o que a torna o primeiro exame na
-investigação de queixas respiratórias, no acompanhamento de pacientes internados e na triagem de
-doenças como pneumonia, derrame pleural e tuberculose. A interpretação dessas imagens, porém, está
-longe de ser simples: estruturas anatômicas se sobrepõem numa projeção bidimensional, achados
-diferentes produzem aspectos parecidos, e a leitura depende da experiência de quem laudou. A
-variabilidade entre radiologistas na interpretação de radiografias de tórax é bem documentada
-[CONFERIR: citar fonte. Candidata, a verificar antes de usar: HOPSTAKEN, R. M. et al. Inter-observer
-variation in the interpretation of chest radiographs for pneumonia in community-acquired lower
-respiratory tract infections. **Clinical Radiology**, v. 59, n. 8, p. 743-752, 2004], e em
-muitas regiões simplesmente não há radiologistas suficientes para laudar todos os exames em tempo
-hábil [CONFERIR: se quiser um número sobre a distribuição de radiologistas no Brasil, citar uma fonte
-como a Demografia Médica no Brasil (CFM/USP)].
+A radiografia de tórax continua sendo o exame mais solicitado na investigação de doenças pulmonares
+(RAOOF et al., 2012). Ela é barata, rápida, amplamente disponível e expõe o paciente a uma dose baixa
+de radiação, o que a torna o primeiro exame na investigação de queixas respiratórias, no acompanhamento
+de pacientes internados e na triagem de doenças como pneumonia, derrame pleural e tuberculose. A
+interpretação dessas imagens, porém, está longe de ser simples: estruturas anatômicas se sobrepõem numa
+projeção bidimensional, achados diferentes produzem aspectos parecidos, e a leitura depende da
+experiência de quem laudou. A concordância entre radiologistas é limitada. Num estudo com radiografias
+de pacientes com infecção respiratória, a concordância na identificação de pneumonia, descontado o
+acaso, foi apenas moderada (kappa de 0,53) e bem pior nos exames com a doença do que nos sem ela
+(HOPSTAKEN et al., 2004). Além disso, a falta de serviços de radiologia em muitas regiões do mundo
+contribui para a desigualdade no acesso à saúde (MOLLURA; MAZAL; EVERTON, 2013).
 
 Nesse contexto, sistemas computacionais de apoio ao diagnóstico podem ajudar a priorizar exames com
 maior chance de alteração, oferecer uma segunda opinião e reduzir o tempo até o laudo. Na última
 década, o aprendizado profundo (*deep learning*), em especial as redes neurais convolucionais
 (*Convolutional Neural Networks*, CNN), transformou a análise automática de imagens médicas (LITJENS
 et al., 2017). Dois fatores tornaram isso possível para a radiografia de tórax: a publicação de
-grandes conjuntos de dados rotulados, como o NIH ChestX-ray14, com 112.120 imagens (WANG et al., 2017),
+grandes conjuntos de dados rotulados, como o NIH ChestX-ray14, com 112.120 imagens (WANG et al., 2017a),
 e o CheXpert, com mais de 224 mil (IRVIN et al., 2019); e a técnica de transferência de aprendizado,
 que permite partir de uma rede já treinada em milhões de imagens naturais (o ImageNet) e ajustá-la ao
 domínio médico. O trabalho mais conhecido dessa linha, o CheXNet (RAJPURKAR et al., 2017), usou uma
@@ -42,7 +38,7 @@ por paciente, intervalos de confiança por bootstrap por paciente para a AUC e a
 estatística entre variações do modelo, análise por subgrupos de pacientes, calibração das saídas, mapas
 de calor avaliados contra marcações de radiologistas e validação em um conjunto de dados de outra
 instituição. A hipótese do trabalho é que uma DenseNet-121 pré-treinada no ImageNet e ajustada no
-ChestX-ray14 atinge AUC competitiva com a literatura (WANG et al., 2017; RAJPURKAR et al., 2017),
+ChestX-ray14 atinge AUC competitiva com a literatura (WANG et al., 2017b; RAJPURKAR et al., 2017),
 entendida como resultados na mesma faixa, já que a comparação entre divisões diferentes dos dados é
 aproximada.
 
@@ -63,7 +59,7 @@ b) avaliar o desempenho do modelo com a área sob a curva ROC (AUC) e a área so
    precisão-revocação (AUPRC), com intervalos de confiança de 95%, além de sensibilidade,
    especificidade e valor preditivo num limiar definido na validação;
 
-c) comparar os resultados com os reportados na literatura, em especial por Wang et al. (2017) e pelo
+c) comparar os resultados com os reportados na literatura, em especial por Wang et al. (2017b) e pelo
    CheXNet (RAJPURKAR et al., 2017), discutindo as diferenças de protocolo que tornam a comparação
    aproximada;
 
@@ -82,7 +78,8 @@ h) disponibilizar o modelo numa interface web de demonstração.
 ## 1.3 Justificativa
 
 A motivação principal é o impacto social. O diagnóstico por imagem do tórax exige especialização, está
-sujeito à variabilidade entre profissionais e esbarra na falta de radiologistas em muitas regiões. Um
+sujeito à variabilidade entre profissionais (HOPSTAKEN et al., 2004) e esbarra na falta de serviços de
+radiologia em muitas regiões (MOLLURA; MAZAL; EVERTON, 2013). Um
 sistema automático de apoio, que sinalize exames com maior chance de alteração e mostre onde está a
 alteração suspeita, pode agilizar laudos e ampliar o acesso a um diagnóstico de qualidade.
 
@@ -91,8 +88,7 @@ essencial do método científico, e no aprendizado profundo aplicado à medicina
 necessária: detalhes como a divisão dos dados, o critério de escolha do modelo e a forma de reportar a
 incerteza mudam os números de maneira relevante (BALTRUSCHAT et al., 2019). Um trabalho que reproduz o
 CheXNet com um protocolo documentado, código aberto e avaliação estatística explícita contribui para
-separar o que é resultado robusto do que é artefato de protocolo, e essa linha de pesquisa ainda é
-pouco explorada no Brasil [CONFERIR: se possível, apoiar com uma referência brasileira].
+separar o que é resultado robusto do que é artefato de protocolo.
 
 ## 1.4 Escopo e limitações
 

@@ -1,7 +1,7 @@
 # RESUMO
 
-A radiografia de tórax é o exame de imagem mais realizado no mundo, mas sua interpretação exige
-especialização e está sujeita à variabilidade entre profissionais. Este trabalho desenvolveu um sistema
+A radiografia de tórax é o exame mais solicitado na investigação de doenças pulmonares, mas sua
+interpretação exige especialização e está sujeita à variabilidade entre profissionais. Este trabalho desenvolveu um sistema
 de apoio à identificação de doenças pulmonares em radiografias de tórax, com foco em pneumonia,
 atelectasia e efusão pleural. Uma rede neural convolucional DenseNet-121, pré-treinada no ImageNet, foi
 ajustada nas 14 doenças do conjunto público NIH ChestX-ray14 (112.120 imagens de 30.805 pacientes), com
@@ -31,7 +31,7 @@ para trabalhos acadêmicos.]
 
 # ABSTRACT
 
-Chest radiography is the most frequently performed imaging exam in the world, but its interpretation
+Chest radiography is the most commonly ordered test for pulmonary disorders, but its interpretation
 requires expertise and varies between readers. This work developed a system to support the
 identification of lung diseases on chest X-rays, focusing on pneumonia, atelectasis and pleural effusion.
 A DenseNet-121 convolutional neural network, pretrained on ImageNet, was fine-tuned on the 14 diseases of

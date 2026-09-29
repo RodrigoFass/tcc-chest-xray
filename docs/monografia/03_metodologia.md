@@ -1,9 +1,11 @@
 # 3 MATERIAIS E MÉTODOS
 
 Este capítulo descreve como o trabalho foi feito, com detalhe suficiente para ser reproduzido. Todo o
-código, as configurações de cada experimento, as divisões dos dados e as predições estão num
-repositório público [CONFERIR: link do GitHub, ou "disponível mediante solicitação"], e cada número
-apresentado no Capítulo 4 pode ser recalculado a partir dele.
+código, as configurações de cada experimento, as divisões dos dados e as predições no NIH estão num
+repositório público (<https://github.com/RodrigoFass/tcc-chest-xray>), e cada número apresentado no
+Capítulo 4 pode ser recalculado a partir dele. A exceção são as predições por imagem no CheXpert, que
+trazem os rótulos desse conjunto e por isso não são redistribuídas (Seção 3.13); delas, o repositório
+guarda as métricas e tabelas agregadas.
 
 ## 3.1 Visão geral
 
@@ -35,7 +37,7 @@ Fonte: elaborado pelo autor. [Substituir por um diagrama desenhado na versão fi
 ## 3.2 Conjunto de dados
 
 Este trabalho utiliza o conjunto de dados público NIH ChestX-ray14, disponibilizado pelo NIH Clinical
-Center (National Institutes of Health, Estados Unidos) e descrito por Wang et al. (2017). O conjunto
+Center (National Institutes of Health, Estados Unidos) e descrito por Wang et al. (2017a). O conjunto
 reúne 112.120 radiografias de tórax em incidência frontal (PA ou AP), de 30.805 pacientes, em arquivos
 PNG de 1024 × 1024 pixels. Cada imagem traz até 14 rótulos de doenças torácicas, ou a indicação de
 ausência de achados ("No Finding"), extraídos automaticamente dos laudos radiológicos por técnicas de
@@ -81,7 +83,7 @@ etária (Seção 3.8.4).
 | Sem achados | 60.361 | 53,8% | 34,9% |
 | Todas as imagens | 112.120 | — | 40,0% |
 
-Fonte: elaborado pelo autor a partir de Wang et al. (2017) (`results/tables/eda_contagens_por_classe.csv`).
+Fonte: elaborado pelo autor a partir de Wang et al. (2017a) (`results/tables/eda_contagens_por_classe.csv`).
 Em negrito, as três doenças estudadas.
 
 As figuras da análise exploratória (`results/figures/eda_*`) mostram a prevalência das classes, a
@@ -165,7 +167,7 @@ Uma alteração técnica foi feita na implementação padrão: a ReLU que o torc
 normalização em lote final, que segue o último bloco denso, é executada "no lugar" (*in place*),
 sobrescrevendo o tensor de entrada, o que interfere nos mecanismos usados para calcular o Grad-CAM. No
 modelo deste trabalho, essa ReLU é uma camada separada e sem sobrescrita, o que não muda nenhum
-resultado numérico e a torna a camada-alvo natural do Grad-CAM (Seção 3.9). O modelo final tem,
+resultado numérico e permite usá-la como camada-alvo do Grad-CAM, uma das duas comparadas na Seção 3.9. O modelo final tem,
 portanto, a sequência: parte convolucional da DenseNet-121 (convolução inicial, blocos densos e camadas
 de transição), normalização em lote final, ReLU, *pooling* médio global e camada linear.
 
@@ -235,7 +237,7 @@ teste e salvas em arquivos CSV; toda a avaliação é calculada a partir delas.
 ### 3.8.1 Métricas e intervalos de confiança
 
 Para cada classe, calculam-se a AUC e a AUPRC (precisão média), sempre com a prevalência ao lado, e a
-média da AUC nas 14 classes, que é a métrica resumo usada pela literatura. Todos os valores têm
+média da AUC nas 14 classes, que é a métrica resumo usada pela literatura. Esses valores têm
 intervalo de confiança de 95% por **bootstrap por paciente**, com 1.000 reamostragens e semente fixa
 (Seção 2.8). As diferenças entre experimentos são avaliadas por **bootstrap pareado**, com as mesmas
 reamostras para os dois modelos; uma diferença é considerada significativa quando o intervalo de 95% não
@@ -272,7 +274,7 @@ o desempenho **dentro** de cada incidência seria bem menor que o geral.
 
 ### 3.8.5 Comparação com a literatura
 
-A AUC de cada classe é comparada com as reportadas por Wang et al. (2017) e pelo CheXNet (RAJPURKAR et
+A AUC de cada classe é comparada com as reportadas por Wang et al. (2017b) e pelo CheXNet (RAJPURKAR et
 al., 2017), tomadas da Tabela 2 do artigo do CheXNet (versão 3 no arXiv), que reporta as duas. A
 comparação é aproximada, porque os trabalhos usam divisões diferentes dos dados, e o desempenho no
 ChestX-ray14 varia bastante com a divisão (BALTRUSCHAT et al., 2019).
@@ -323,10 +325,12 @@ A Stanford não distribui mais o arquivo original com os rótulos dessa validaç
 no CheXpert Plus (CHAMBON et al., 2024), e os rótulos dos radiologistas estão no CheXlocalize (SAPORTA
 et al., 2022). Os rótulos próprios do CheXpert Plus são extraídos automaticamente dos laudos e por isso
 não servem como referência. O CheXlocalize traz, para cada imagem da validação, contornos desenhados
-pelos radiologistas sobre as observações com rótulo positivo. Os rótulos foram reconstruídos a partir
-dessas anotações: uma observação é positiva numa imagem se estiver anotada nela, e negativa caso
-contrário. As contagens obtidas assim coincidem com as publicadas para a validação do CheXpert (por
-exemplo, 80 imagens com atelectasia e 67 com efusão pleural entre as 234).
+pelos radiologistas sobre as observações com rótulo positivo. Segundo a documentação do CheXlocalize,
+o arquivo de anotações da validação inclui exatamente as imagens com ao menos um rótulo positivo e, em
+cada uma, só as observações positivas: 187 imagens e 643 anotações, os mesmos números do arquivo
+baixado. Os rótulos foram reconstruídos a partir dessas anotações: uma observação é positiva numa imagem
+se estiver anotada nela, e negativa caso contrário. Entre as 234 imagens da validação, isso dá, por
+exemplo, 80 imagens com atelectasia e 67 com efusão pleural.
 
 Usam-se apenas as imagens frontais, 202 imagens de 200 pacientes, e as seis classes que existem nos dois
 conjuntos e são anotadas no CheXlocalize: atelectasia, cardiomegalia, efusão pleural ("Pleural
@@ -389,11 +393,15 @@ usadas no treino e na avaliação (torchvision, NumPy, pandas, scikit-learn, Pil
 Matplotlib, seaborn e PyYAML), o modelo da GPU e o *commit* do código ficam registrados junto com cada
 experimento (arquivo `environment.json`); as demais dependências têm versão fixada em `requirements.txt`.
 
-O código é organizado como um pacote Python, com configurações em YAML, e tem testes automáticos (mais
-de 130) que verificam, entre outras coisas, que nenhum paciente aparece em dois conjuntos, que as
-métricas coincidem com as da biblioteca scikit-learn, que um treino interrompido e retomado dá o mesmo
-resultado na configuração do teste (CPU, com as imagens carregadas no processo principal) e que a interface reproduz os escores avaliados. Os testes rodam a cada alteração, num serviço
-de integração contínua.
+O código é organizado como um pacote Python, com configurações em YAML, e tem 150 testes automáticos.
+Eles verificam, entre outras coisas:
+- que nenhum paciente aparece em dois conjuntos;
+- que as métricas coincidem com as da biblioteca scikit-learn;
+- que um treino interrompido e retomado dá o mesmo resultado, na configuração do teste (CPU, com as
+  imagens carregadas no processo principal);
+- que as duas versões da interface reproduzem os escores e os mapas de calor avaliados.
+
+Os testes rodam a cada alteração, num serviço de integração contínua.
 
 ## 3.13 Aspectos éticos
 
@@ -403,6 +411,7 @@ de nascimento, datas de exame ou qualquer outro identificador pessoal. Como o tr
 exclusivamente essa base pública e anonimizada, sem contato com pacientes e sem acesso a dados que
 permitam identificá-los, ele não foi submetido a Comitê de Ética em Pesquisa [CONFERIR com o orientador
 se cabe citar a Resolução CNS nº 510/2016, art. 1º, parágrafo único]. Conforme solicitado pelo NIH, o
-trabalho cita Wang et al. (2017) e reconhece o NIH Clinical Center como fornecedor dos dados. O uso do
-CheXpert segue o acordo de uso de pesquisa da Universidade de Stanford [CONFERIR os termos no momento do
-download].
+trabalho cita Wang et al. (2017a) e reconhece o NIH Clinical Center como fornecedor dos dados. O uso do
+CheXpert segue o acordo de uso para pesquisa da Stanford AIMI (*Stanford Research Agreement*), aceito na
+plataforma Redivis para os dois conjuntos usados, o CheXpert Plus e o CheXlocalize. Por isso, o
+repositório do trabalho não redistribui imagens nem rótulos do CheXpert, só as métricas agregadas.

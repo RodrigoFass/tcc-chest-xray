@@ -16,12 +16,12 @@ b) no teste, a AUC média nas 14 classes foi de 0,841 (IC95% 0,833–0,848); nas
    0,044, respectivamente;
 
 c) os resultados estão na mesma faixa dos do CheXNet (AUC média de 0,8414) e acima dos de Wang et al.
-   (2017) em todas as classes, com a ressalva de que a comparação é aproximada, por causa das diferenças
+   (2017b) em todas as classes, com a ressalva de que a comparação é aproximada, por causa das diferenças
    de protocolo; na divisão oficial do NIH (E5), a AUC média foi de 0,811 (0,804–0,816), num conjunto de
    teste mais difícil, que concentra pacientes com muitos exames de acompanhamento;
 
 d) a ponderação de classes não melhorou a AUC e piorou a calibração; sem aumento de dados, a AUC média
-   caiu 0,010 e o sobreajuste começou na terceira época; sem transferência de aprendizado, caiu 0,020,
+   caiu 0,010 e o sobreajuste começou logo depois da terceira época; sem transferência de aprendizado, caiu 0,020,
    com mais que o dobro do tempo de treino; e a repetição da configuração final com três sementes deu
    desvio-padrão de 0,003 na AUC média e de 0,008 na pneumonia, o que torna frágeis as diferenças
    pequenas entre experimentos, em especial na pneumonia;
@@ -60,7 +60,9 @@ público de uma ferramenta que possa, um dia, ser útil na prática.
 
 - **Rótulos melhores:** reavaliar o conjunto de teste com rótulos revistos por radiologistas, ou treinar
   com conjuntos de rótulos mais confiáveis, para medir o desempenho real e não a concordância com o
-  rotulador automático.
+  rotulador automático. Para a pneumonia, que ficou sem avaliação externa, um caminho direto são as
+  anotações de radiologistas feitas para o desafio de pneumonia da RSNA sobre imagens do próprio
+  ChestX-ray14 (SHIH et al., 2019).
 - **Mais dados e mais hospitais:** treinar com o CheXpert e outros conjuntos públicos (como o MIMIC-CXR),
   com as estratégias de tratamento de rótulos incertos propostas por Irvin et al. (2019), e validar em
   dados de hospitais brasileiros.
