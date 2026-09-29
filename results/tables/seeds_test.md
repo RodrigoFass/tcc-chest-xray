@@ -1,0 +1,6 @@
+| Execução | Seed | AUC média | Pneumonia: AUC | Pneumonia: AUPRC | Atelectasia: AUC | Atelectasia: AUPRC | Efusão pleural: AUC | Efusão pleural: AUPRC |
+|---|---|---|---|---|---|---|---|---|
+| e1_baseline | 42 | 0,841 | 0,751 | 0,044 | 0,816 | 0,361 | 0,886 | 0,543 |
+| e1_baseline_seed43 | 43 | 0,842 | 0,766 | 0,045 | 0,819 | 0,372 | 0,885 | 0,539 |
+| e1_baseline_seed44 | 44 | 0,837 | 0,757 | 0,040 | 0,813 | 0,360 | 0,881 | 0,534 |
+| Média ± desvio padrão |  | 0,840 ± 0,003 | 0,758 ± 0,008 | 0,043 ± 0,003 | 0,816 ± 0,003 | 0,364 ± 0,007 | 0,884 ± 0,002 | 0,539 ± 0,005 |
