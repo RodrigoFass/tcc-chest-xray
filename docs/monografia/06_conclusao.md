@@ -36,7 +36,10 @@ f) os mapas de calor Grad-CAM apontam para regiões plausíveis nos acertos, mas
    dentro da caixa do radiologista em só 15 de 62 imagens das três doenças (24%), acima do centro da
    imagem na atelectasia e na efusão, mas não na pneumonia;
 
-g) [PREENCHER: resultado no CheXpert];
+g) no CheXpert, de outro hospital e com rótulos de radiologistas, a AUC média das seis classes em comum
+   foi de 0,823 (IC95% 0,777–0,876), contra 0,865 no teste do NIH; a atelectasia (0,810) e a efusão
+   pleural (0,849) ficaram na mesma faixa, a cardiomegalia caiu e a consolidação subiu, e a pneumonia não
+   pôde ser avaliada, por falta de rótulos de radiologistas nesse conjunto;
 
 h) a interface foi publicada [PREENCHER: link] e reproduz os escores da avaliação.
 

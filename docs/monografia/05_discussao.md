@@ -160,14 +160,30 @@ importou: as duas candidatas geraram mapas quase iguais e taxas de acerto sem di
 
 ## 5.6 Generalização para outro hospital
 
-[PREENCHER depois do CheXpert. Pontos a discutir:
-- a variação da AUC do NIH para o CheXpert, por classe, com os intervalos;
-- que a diferença mistura dois efeitos: a mudança de hospital e de equipamento (que tende a reduzir a
-  AUC; ZECH et al., 2018) e a mudança da qualidade dos rótulos (voto da maioria de três radiologistas no
-  CheXpert, laudos processados automaticamente no NIH, o que pode aumentar a AUC medida);
-- que os limiares e a calibração ajustados no NIH não valem automaticamente no CheXpert, onde a
-  prevalência é outra;
-- as classes com poucos casos, sobre as quais não se conclui nada.]
+No CheXpert, de outro hospital, o modelo manteve a atelectasia e ficou próximo na efusão pleural e no
+edema. Na média das seis classes, a AUC foi 0,041 menor que no teste do NIH, uma queda dentro da
+incerteza de um conjunto de 202 imagens. Não apareceu, portanto, uma perda grande e generalizada de
+desempenho ao mudar de hospital, como a relatada por Zech et al. (2018) para a pneumonia. Essa comparação,
+porém, mistura dois efeitos de sinais opostos.
+
+O primeiro efeito é a **mudança de hospital e de equipamento**, que tende a reduzir a AUC. O segundo é a
+**mudança da qualidade dos rótulos**: no CheXpert, voto da maioria de três radiologistas; no NIH,
+rótulos processados automaticamente a partir dos laudos. Rótulos melhores podem aumentar a AUC medida,
+porque o modelo deixa de ser "punido" por acertar casos rotulados errado.
+
+A consolidação é compatível com o segundo efeito. No NIH, ela é uma das classes de aspecto mais
+inespecífico, com sobreposição à infiltração e à pneumonia, e teve AUC de só 0,783. No CheXpert,
+com rótulos de radiologistas, a AUC foi de 0,911. A melhora sugere que parte do desempenho baixo medido
+no NIH vinha dos rótulos, e não do modelo. A cardiomegalia foi no sentido oposto: caiu de 0,920 para
+0,836. Uma explicação possível, não testada aqui, é a diferença no critério de "coração aumentado"
+entre os laudos do NIH e os radiologistas do CheXpert.
+
+Dois cuidados limitam essas conclusões. Primeiro, os limiares e a calibração ajustados no NIH não valem
+automaticamente no CheXpert, onde a prevalência é bem maior (32% de efusão nas imagens frontais, contra
+12,6% no teste do NIH): a "probabilidade estimada" da interface vale para a população do NIH, como ela
+mesma avisa. Segundo, o pneumotórax, com 7 casos, e a pneumonia, sem rótulos de radiologistas neste
+conjunto, ficam sem avaliação externa. Para a pneumonia, isso quer dizer que o desempenho fora do NIH
+continua desconhecido.
 
 ## 5.7 Limitações
 

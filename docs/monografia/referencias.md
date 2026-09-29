@@ -13,6 +13,10 @@ approaches for multi-label chest X-ray classification. **Scientific Reports**, [
 BRIER, G. W. Verification of forecasts expressed in terms of probability. **Monthly Weather Review**,
 [s. l.], v. 78, n. 1, p. 1-3, 1950. [CONFERIR]
 
+CHAMBON, P. *et al*. CheXpert Plus: augmenting a large chest x-ray dataset with text radiology
+reports, patient demographics and additional image formats. **arXiv**, [s. l.], 2024. Disponível em:
+https://arxiv.org/abs/2405.19538. Acesso em: [data]. [CONFERIR]
+
 DENG, J.; DONG, W.; SOCHER, R.; LI, L.-J.; LI, K.; FEI-FEI, L. ImageNet: a large-scale hierarchical
 image database. *In*: IEEE CONFERENCE ON COMPUTER VISION AND PATTERN RECOGNITION (CVPR), 2009, Miami.
 **Proceedings** [...]. Piscataway: IEEE, 2009. p. 248-255. [CONFERIR]
@@ -65,6 +69,9 @@ Computer Vision**, [s. l.], v. 115, n. 3, p. 211-252, 2015. [CONFERIR]
 SAITO, T.; REHMSMEIER, M. The precision-recall plot is more informative than the ROC plot when
 evaluating binary classifiers on imbalanced datasets. **PLOS ONE**, [s. l.], v. 10, n. 3, e0118432,
 2015. [CONFERIR]
+
+SAPORTA, A. *et al*. Benchmarking saliency methods for chest X-ray interpretation. **Nature Machine
+Intelligence**, [s. l.], v. 4, p. 867-878, 2022. [CONFERIR]
 
 SELVARAJU, R. R. *et al*. Grad-CAM: visual explanations from deep networks via gradient-based
 localization. *In*: IEEE INTERNATIONAL CONFERENCE ON COMPUTER VISION (ICCV), 2017, Veneza.

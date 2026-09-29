@@ -437,31 +437,70 @@ Fonte: elaborado pelo autor.
 
 ## 4.9 Validação externa no CheXpert
 
-[PREENCHER depois de rodar `python -m chestxray.external ...`.]
+O modelo final foi aplicado, sem novo treino, às 202 imagens frontais (200 pacientes) da validação do
+CheXpert, com os rótulos dos radiologistas (Seção 3.10). A Tabela 13 compara a AUC de cada classe com a
+do teste do NIH.
 
 **Tabela 13 – AUC no conjunto de validação do CheXpert, comparada ao teste do NIH**
 
-[PREENCHER com `results/tables/e1_baseline/validacao_externa_chexpert.md`: casos, AUC no CheXpert com
-IC95%, AUC no teste do NIH e diferença, para as 7 classes em comum; marcar com † as classes com menos de
-30 casos.]
+| Doença | Casos (CheXpert) | AUC CheXpert (IC95%) | AUC NIH teste | Diferença |
+|---|---|---|---|---|
+| Atelectasia * | 75 | 0,810 (0,748–0,868) | 0,816 | −0,006 |
+| Cardiomegalia | 66 | 0,836 (0,775–0,890) | 0,920 | −0,084 |
+| Efusão pleural * | 64 | 0,849 (0,789–0,899) | 0,886 | −0,037 |
+| Pneumotórax | 7 | 0,692 (0,455–0,963) † | 0,888 | −0,196 |
+| Consolidação | 32 | 0,911 (0,867–0,949) | 0,783 | +0,129 |
+| Edema | 42 | 0,841 (0,774–0,904) | 0,896 | −0,055 |
+| Média (6 classes) | | 0,823 (0,777–0,876) | 0,865 | −0,041 |
+
+Fonte: elaborado pelo autor (`results/tables/e1_baseline/validacao_externa_chexpert`). * Doenças
+estudadas. † Menos de 30 casos: reportado, mas sem conclusão. A pneumonia não tem rótulos de
+radiologistas disponíveis nesse conjunto (Seção 3.10).
+
+**Figura 11 – Curvas ROC no CheXpert (validação)**
+
+(`results/figures/e1_baseline/roc_foco_chexpert.png`)
 
 Fonte: elaborado pelo autor.
 
-[PREENCHER: número de imagens frontais e de pacientes; se a AUC caiu, em quais classes, e se a queda é
-maior que a incerteza; lembrar que os rótulos do CheXpert de validação são de radiologistas, enquanto os
-do NIH vêm de laudos processados automaticamente, e que isso pode aumentar ou reduzir a AUC. Registrar
-também o resultado com `--fit pad`, se diferente.]
+Nas duas doenças estudadas com rótulos no CheXpert, o desempenho se manteve na mesma faixa. A
+atelectasia ficou praticamente igual à do teste do NIH (0,810 contra 0,816). A efusão pleural caiu
+0,037, mas a AUC do NIH (0,886) ainda está dentro do IC95% do CheXpert (0,789 a 0,899). O mesmo vale
+para o edema (−0,055; IC até 0,904) e para a média das seis classes (0,823 contra 0,865; IC até 0,876).
+
+Duas classes se afastaram do NIH além da incerteza:
+- **Cardiomegalia:** caiu de 0,920 para 0,836, com o valor do NIH acima do limite superior do intervalo
+  (0,890).
+- **Consolidação:** subiu de 0,783 para 0,911, com o valor do NIH abaixo do limite inferior (0,867).
+
+O pneumotórax, com 7 casos, não permite conclusão. A comparação é aproximada: o intervalo leva em conta
+só a incerteza do CheXpert, e a AUC do NIH também tem a sua.
+
+Como verificação, a análise foi repetida com preenchimento das bordas em preto em vez do
+redimensionamento. Os valores ficaram próximos: média de 0,819; atelectasia, 0,804; efusão, 0,875;
+cardiomegalia, 0,837; consolidação, 0,924; edema, 0,825. As conclusões não mudam.
 
 ## 4.10 Sistema de demonstração
 
-**Figura 11 – Interface de demonstração**
+**Figura 12 – Interface de demonstração**
 
 [PREENCHER: captura de tela da interface no Hugging Face Spaces com um exemplo em que a efusão fica acima
 do limiar, mostrando a frase de resumo, a tabela e o mapa de calor.]
 
 Fonte: elaborado pelo autor.
 
-A exportação do modelo para a interface foi conferida contra as predições da avaliação: nas três imagens
-de teste verificadas, a diferença máxima entre os escores da interface e os do arquivo de predições foi
-de 3,6 × 10⁻⁷ (o critério era 10⁻⁴). Cada análise, com o mapa de calor, levou entre 0,3 e 0,4 s em CPU no
-computador de desenvolvimento. [PREENCHER: tempo de resposta medido no Space e link.]
+As verificações da Seção 3.11 passaram com folga:
+
+- **Modelo ONNX contra a avaliação:** nas cinco imagens de teste conferidas, os escores do modelo ONNX
+  diferiram dos do arquivo de predições em no máximo 5,4 × 10⁻⁷, e os mapas de calor diferiram dos do
+  Grad-CAM em Python em no máximo 8,6 × 10⁻⁶.
+- **Autoteste no navegador (quatro imagens de exemplo):** a imagem vista pela rede foi idêntica pixel a
+  pixel, os escores diferiram em no máximo 1,8 × 10⁻⁷ e os mapas de calor em no máximo 6,9 × 10⁻⁶. Os
+  critérios eram 10⁻⁴ e 10⁻³.
+- **Mesmo resultado nas duas versões:** para a mesma imagem, a página e a versão Gradio mostram a mesma
+  frase de resumo e a mesma tabela.
+
+O modelo, com 29 MB, é baixado uma vez quando a página abre. Depois disso, cada análise, com o mapa de
+calor, levou entre 0,3 e 0,6 s no navegador do computador de desenvolvimento (Intel Core i5-10400F), e
+a versão Gradio levou entre 0,3 e 0,4 s em CPU. [PREENCHER: link do Space e tempo de resposta num
+celular.]

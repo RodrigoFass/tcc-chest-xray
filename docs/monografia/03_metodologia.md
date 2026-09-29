@@ -317,10 +317,23 @@ Para avaliar a generalização para outra instituição, o modelo final, **sem n
 aplicado ao conjunto de validação do CheXpert (IRVIN et al., 2019), do Stanford Hospital, cujos rótulos
 foram definidos pelo voto da maioria de três radiologistas que anotaram cada estudo de forma
 independente; as anotações foram binarizadas antes da votação, e por isso os rótulos finais não têm a
-categoria "incerto". Usam-se apenas as imagens
-frontais e as sete classes presentes nos dois conjuntos: atelectasia, cardiomegalia, efusão pleural
-("Pleural Effusion" no CheXpert), pneumonia, pneumotórax, consolidação e edema. As imagens do CheXpert
-não são quadradas; na configuração principal, elas são redimensionadas para quadrado, como qualquer
+categoria "incerto".
+
+A Stanford não distribui mais o arquivo original com os rótulos dessa validação. Hoje, as imagens estão
+no CheXpert Plus (CHAMBON et al., 2024), e os rótulos dos radiologistas estão no CheXlocalize (SAPORTA
+et al., 2022). Os rótulos próprios do CheXpert Plus são extraídos automaticamente dos laudos e por isso
+não servem como referência. O CheXlocalize traz, para cada imagem da validação, contornos desenhados
+pelos radiologistas sobre as observações com rótulo positivo. Os rótulos foram reconstruídos a partir
+dessas anotações: uma observação é positiva numa imagem se estiver anotada nela, e negativa caso
+contrário. As contagens obtidas assim coincidem com as publicadas para a validação do CheXpert (por
+exemplo, 80 imagens com atelectasia e 67 com efusão pleural entre as 234).
+
+Usam-se apenas as imagens frontais, 202 imagens de 200 pacientes, e as seis classes que existem nos dois
+conjuntos e são anotadas no CheXlocalize: atelectasia, cardiomegalia, efusão pleural ("Pleural
+Effusion" no CheXpert), pneumotórax, consolidação e edema. A pneumonia fica de fora, porque o
+CheXlocalize não a anota. As imagens do CheXpert Plus são PNG de 8 bits convertidas pela própria
+Stanford e podem diferir ligeiramente dos JPG da distribuição original. Esse desenho foi registrado no
+log de decisões antes de o modelo ser aplicado ao CheXpert. As imagens do CheXpert não são quadradas; na configuração principal, elas são redimensionadas para quadrado, como qualquer
 imagem enviada à interface, e, como verificação, também com preenchimento das bordas em preto,
 preservando as proporções. A AUC de cada classe, com IC95% por bootstrap por paciente, é comparada com
 a do teste do NIH. O conjunto é pequeno e tem poucos casos de algumas doenças; classes com menos de 30
@@ -328,8 +341,12 @@ casos positivos são reportadas, mas não sustentam conclusões.
 
 ## 3.11 Sistema de demonstração
 
-O sistema final é uma interface web feita com a biblioteca Gradio, publicada no Hugging Face Spaces
-[PREENCHER: link do Space], que roda em CPU. O usuário envia uma radiografia (PNG ou JPG) e recebe:
+O sistema final é uma página web publicada no Hugging Face Spaces [PREENCHER: link do Space], em que o
+modelo roda no navegador de quem acessa, com a biblioteca ONNX Runtime Web: a radiografia não é enviada a
+nenhum servidor. A escolha se deve a uma mudança do serviço: o Hugging Face passou a cobrar pelos Spaces
+que executam Python, como os feitos com a biblioteca Gradio, e manteve gratuitos os Spaces estáticos,
+que só servem arquivos. Uma versão com Gradio, que faz a mesma análise em Python, fica como versão local
+e de reserva para a apresentação. O usuário envia uma radiografia (PNG ou JPG) e recebe:
 
 a) uma frase de resumo, com as doenças cujo valor ficou acima do limiar ("Achados acima do limiar:
    Efusão pleural, Atelectasia") ou, se nenhuma ficou, "Nenhum achado acima do limiar entre as 14 doenças
@@ -345,11 +362,21 @@ d) um aviso fixo: "Protótipo acadêmico. Não usar para diagnóstico.", com a o
 O valor exibido é o escore recalibrado por *Platt scaling*, e o limiar é mostrado na mesma escala. Ele
 é chamado de "probabilidade estimada", porque as curvas de calibração do teste ficaram próximas da
 diagonal (Seção 4.5), com a observação de que a calibração vale para a população do NIH. Se a
-calibração não tivesse se sustentado no teste, o valor seria chamado de "escore do modelo". O modelo exportado para a interface
-reproduz os escores da avaliação com diferença máxima de 3,6 × 10⁻⁷ nas três imagens de teste
-conferidas (o critério era 10⁻⁴), e cada análise, incluindo o mapa de calor, levou entre 0,3 e 0,4 s em
-CPU no computador de desenvolvimento (Intel Core i5-10400F) [PREENCHER: e cerca de X s no Hugging Face
-Spaces].
+calibração não tivesse se sustentado no teste, o valor seria chamado de "escore do modelo".
+
+Para rodar no navegador, o modelo foi exportado para o formato ONNX com uma segunda saída: o mapa Grad-CAM
+de cada classe na camada `denseblock4`, calculado em forma fechada. Entre essa camada e o *logit* da
+classe $c$ há apenas a normalização em lote final (no modo de avaliação, uma função afim por canal,
+$B_k = s_k A_k + t_k$), a ReLU, o *pooling* médio e a camada linear. Por isso, o gradiente do *logit*
+é $\partial z_c / \partial A^k_{ij} = w^c_k \, s_k \, [B^k_{ij} > 0] / Z$, e o peso do Grad-CAM, a
+média desse gradiente, é $\alpha^c_k = w^c_k \, s_k \, n_k / Z^2$, em que $n_k$ é o número de
+posições com $B^k_{ij} > 0$. O pré-processamento (conversão para tons de cinza e os dois
+redimensionamentos da biblioteca Pillow) e o pós-processamento do mapa de calor foram reescritos em
+JavaScript seguindo os mesmos passos do Python. Testes automáticos comparam cada etapa com a original,
+e a própria página tem um autoteste que refaz, no navegador, a análise das imagens de exemplo e a
+compara com a do Python. Os critérios de aceitação foram diferença menor que 10⁻⁴ nos escores e 10⁻³
+nos mapas de calor, com a imagem vista pela rede idêntica pixel a pixel. Os resultados dessas
+verificações estão na Seção 4.10.
 
 ## 3.12 Ambiente e reprodutibilidade
 
