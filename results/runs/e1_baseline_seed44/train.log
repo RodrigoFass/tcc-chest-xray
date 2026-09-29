@@ -1,0 +1,167 @@
+2026-09-28 21:28:30 INFO __main__: Experiment 'e1_baseline_seed44': 78486 train / 16812 val images, device cuda, AMP torch.float16, batch 32
+2026-09-28 21:29:24 INFO __main__: epoch 1:  10% | train loss 0.2193 | 144 img/s
+2026-09-28 21:29:59 INFO __main__: epoch 1:  20% | train loss 0.1915 | 176 img/s
+2026-09-28 21:30:34 INFO __main__: epoch 1:  30% | train loss 0.1812 | 189 img/s
+2026-09-28 21:31:09 INFO __main__: epoch 1:  40% | train loss 0.1761 | 197 img/s
+2026-09-28 21:31:44 INFO __main__: epoch 1:  50% | train loss 0.1723 | 202 img/s
+2026-09-28 21:32:19 INFO __main__: epoch 1:  60% | train loss 0.1694 | 205 img/s
+2026-09-28 21:32:54 INFO __main__: epoch 1:  70% | train loss 0.1674 | 208 img/s
+2026-09-28 21:33:29 INFO __main__: epoch 1:  80% | train loss 0.1659 | 210 img/s
+2026-09-28 21:34:04 INFO __main__: epoch 1:  90% | train loss 0.1648 | 211 img/s
+2026-09-28 21:34:39 INFO __main__: epoch 1: 100% | train loss 0.1635 | 212 img/s
+2026-09-28 21:35:27 INFO __main__: epoch 1/30 | lr 1e-04 | train loss 0.1635 | val loss 0.1500 | val AUC 0.8069 (Atelectasis 0.788, Effusion 0.875, Pneumonia 0.727) | best | 6.9 min
+2026-09-28 21:36:02 INFO __main__: epoch 2:  10% | train loss 0.1523 | 224 img/s
+2026-09-28 21:36:36 INFO __main__: epoch 2:  20% | train loss 0.1509 | 225 img/s
+2026-09-28 21:37:11 INFO __main__: epoch 2:  30% | train loss 0.1511 | 224 img/s
+2026-09-28 21:37:46 INFO __main__: epoch 2:  40% | train loss 0.1506 | 224 img/s
+2026-09-28 21:38:21 INFO __main__: epoch 2:  50% | train loss 0.1508 | 224 img/s
+2026-09-28 21:38:56 INFO __main__: epoch 2:  60% | train loss 0.1507 | 225 img/s
+2026-09-28 21:39:31 INFO __main__: epoch 2:  70% | train loss 0.1505 | 225 img/s
+2026-09-28 21:40:06 INFO __main__: epoch 2:  80% | train loss 0.1501 | 225 img/s
+2026-09-28 21:40:41 INFO __main__: epoch 2:  90% | train loss 0.1499 | 225 img/s
+2026-09-28 21:41:16 INFO __main__: epoch 2: 100% | train loss 0.1501 | 224 img/s
+2026-09-28 21:41:45 INFO __main__: epoch 2/30 | lr 1e-04 | train loss 0.1500 | val loss 0.1471 | val AUC 0.8202 (Atelectasis 0.808, Effusion 0.880, Pneumonia 0.743) | best | 6.3 min
+2026-09-28 21:42:20 INFO __main__: epoch 3:  10% | train loss 0.1462 | 223 img/s
+2026-09-28 21:42:54 INFO __main__: epoch 3:  20% | train loss 0.1458 | 225 img/s
+2026-09-28 21:43:29 INFO __main__: epoch 3:  30% | train loss 0.1456 | 225 img/s
+2026-09-28 21:44:04 INFO __main__: epoch 3:  40% | train loss 0.1458 | 225 img/s
+2026-09-28 21:44:38 INFO __main__: epoch 3:  50% | train loss 0.1461 | 226 img/s
+2026-09-28 21:45:13 INFO __main__: epoch 3:  60% | train loss 0.1465 | 226 img/s
+2026-09-28 21:45:47 INFO __main__: epoch 3:  70% | train loss 0.1465 | 226 img/s
+2026-09-28 21:46:22 INFO __main__: epoch 3:  80% | train loss 0.1464 | 226 img/s
+2026-09-28 21:46:57 INFO __main__: epoch 3:  90% | train loss 0.1465 | 226 img/s
+2026-09-28 21:47:32 INFO __main__: epoch 3: 100% | train loss 0.1467 | 226 img/s
+2026-09-28 21:48:00 INFO __main__: epoch 3/30 | lr 1e-04 | train loss 0.1467 | val loss 0.1464 | val AUC 0.8274 (Atelectasis 0.806, Effusion 0.880, Pneumonia 0.747) | best | 6.3 min
+2026-09-28 21:48:35 INFO __main__: epoch 4:  10% | train loss 0.1446 | 225 img/s
+2026-09-28 21:49:10 INFO __main__: epoch 4:  20% | train loss 0.1434 | 225 img/s
+2026-09-28 21:49:44 INFO __main__: epoch 4:  30% | train loss 0.1438 | 226 img/s
+2026-09-28 21:50:19 INFO __main__: epoch 4:  40% | train loss 0.1439 | 226 img/s
+2026-09-28 21:50:54 INFO __main__: epoch 4:  50% | train loss 0.1437 | 226 img/s
+2026-09-28 21:51:28 INFO __main__: epoch 4:  60% | train loss 0.1437 | 226 img/s
+2026-09-28 21:52:03 INFO __main__: epoch 4:  70% | train loss 0.1436 | 226 img/s
+2026-09-28 21:52:38 INFO __main__: epoch 4:  80% | train loss 0.1437 | 226 img/s
+2026-09-28 21:53:13 INFO __main__: epoch 4:  90% | train loss 0.1440 | 226 img/s
+2026-09-28 21:53:47 INFO __main__: epoch 4: 100% | train loss 0.1438 | 226 img/s
+2026-09-28 21:54:16 INFO __main__: epoch 4/30 | lr 1e-04 | train loss 0.1438 | val loss 0.1448 | val AUC 0.8337 (Atelectasis 0.813, Effusion 0.884, Pneumonia 0.753) | best | 6.3 min
+2026-09-28 21:54:51 INFO __main__: epoch 5:  10% | train loss 0.1430 | 225 img/s
+2026-09-28 21:55:25 INFO __main__: epoch 5:  20% | train loss 0.1412 | 226 img/s
+2026-09-28 21:56:00 INFO __main__: epoch 5:  30% | train loss 0.1406 | 226 img/s
+2026-09-28 21:56:35 INFO __main__: epoch 5:  40% | train loss 0.1409 | 226 img/s
+2026-09-28 21:57:09 INFO __main__: epoch 5:  50% | train loss 0.1411 | 226 img/s
+2026-09-28 21:57:44 INFO __main__: epoch 5:  60% | train loss 0.1411 | 226 img/s
+2026-09-28 21:58:19 INFO __main__: epoch 5:  70% | train loss 0.1412 | 226 img/s
+2026-09-28 21:58:53 INFO __main__: epoch 5:  80% | train loss 0.1413 | 226 img/s
+2026-09-28 21:59:28 INFO __main__: epoch 5:  90% | train loss 0.1411 | 226 img/s
+2026-09-28 22:00:03 INFO __main__: epoch 5: 100% | train loss 0.1414 | 226 img/s
+2026-09-28 22:00:31 INFO __main__: epoch 5/30 | lr 1e-04 | train loss 0.1414 | val loss 0.1447 | val AUC 0.8351 (Atelectasis 0.812, Effusion 0.884, Pneumonia 0.758) | best | 6.3 min
+2026-09-28 22:01:06 INFO __main__: epoch 6:  10% | train loss 0.1369 | 225 img/s
+2026-09-28 22:01:41 INFO __main__: epoch 6:  20% | train loss 0.1373 | 226 img/s
+2026-09-28 22:02:15 INFO __main__: epoch 6:  30% | train loss 0.1376 | 226 img/s
+2026-09-28 22:02:50 INFO __main__: epoch 6:  40% | train loss 0.1378 | 226 img/s
+2026-09-28 22:03:25 INFO __main__: epoch 6:  50% | train loss 0.1384 | 226 img/s
+2026-09-28 22:04:00 INFO __main__: epoch 6:  60% | train loss 0.1384 | 226 img/s
+2026-09-28 22:04:34 INFO __main__: epoch 6:  70% | train loss 0.1382 | 226 img/s
+2026-09-28 22:05:09 INFO __main__: epoch 6:  80% | train loss 0.1383 | 226 img/s
+2026-09-28 22:05:45 INFO __main__: epoch 6:  90% | train loss 0.1386 | 225 img/s
+2026-09-28 22:06:20 INFO __main__: epoch 6: 100% | train loss 0.1390 | 225 img/s
+2026-09-28 22:06:48 INFO __main__: epoch 6/30 | lr 1e-04 | train loss 0.1390 | val loss 0.1447 | val AUC 0.8354 (Atelectasis 0.810, Effusion 0.886, Pneumonia 0.761) | best | 6.3 min
+2026-09-28 22:07:23 INFO __main__: epoch 7:  10% | train loss 0.1332 | 224 img/s
+2026-09-28 22:07:58 INFO __main__: epoch 7:  20% | train loss 0.1337 | 224 img/s
+2026-09-28 22:08:33 INFO __main__: epoch 7:  30% | train loss 0.1344 | 224 img/s
+2026-09-28 22:09:08 INFO __main__: epoch 7:  40% | train loss 0.1344 | 225 img/s
+2026-09-28 22:09:43 INFO __main__: epoch 7:  50% | train loss 0.1347 | 225 img/s
+2026-09-28 22:10:18 INFO __main__: epoch 7:  60% | train loss 0.1351 | 225 img/s
+2026-09-28 22:10:53 INFO __main__: epoch 7:  70% | train loss 0.1357 | 225 img/s
+2026-09-28 22:11:28 INFO __main__: epoch 7:  80% | train loss 0.1360 | 224 img/s
+2026-09-28 22:12:04 INFO __main__: epoch 7:  90% | train loss 0.1363 | 224 img/s
+2026-09-28 22:12:39 INFO __main__: epoch 7: 100% | train loss 0.1365 | 224 img/s
+2026-09-28 22:13:08 INFO __main__: epoch 7/30 | lr 1e-04 | train loss 0.1365 | val loss 0.1457 | val AUC 0.8369 (Atelectasis 0.814, Effusion 0.884, Pneumonia 0.756) | best | 6.3 min
+2026-09-28 22:13:44 INFO __main__: epoch 8:  10% | train loss 0.1320 | 219 img/s
+2026-09-28 22:14:19 INFO __main__: epoch 8:  20% | train loss 0.1328 | 220 img/s
+2026-09-28 22:14:55 INFO __main__: epoch 8:  30% | train loss 0.1332 | 220 img/s
+2026-09-28 22:15:31 INFO __main__: epoch 8:  40% | train loss 0.1331 | 220 img/s
+2026-09-28 22:16:06 INFO __main__: epoch 8:  50% | train loss 0.1337 | 220 img/s
+2026-09-28 22:16:42 INFO __main__: epoch 8:  60% | train loss 0.1341 | 220 img/s
+2026-09-28 22:17:18 INFO __main__: epoch 8:  70% | train loss 0.1338 | 220 img/s
+2026-09-28 22:17:54 INFO __main__: epoch 8:  80% | train loss 0.1340 | 220 img/s
+2026-09-28 22:18:29 INFO __main__: epoch 8:  90% | train loss 0.1340 | 220 img/s
+2026-09-28 22:19:05 INFO __main__: epoch 8: 100% | train loss 0.1339 | 220 img/s
+2026-09-28 22:19:34 INFO __main__: epoch 8/30 | lr 1e-04 | train loss 0.1340 | val loss 0.1459 | val AUC 0.8333 (Atelectasis 0.816, Effusion 0.886, Pneumonia 0.753) | 1 without improvement | 6.4 min
+2026-09-28 22:20:10 INFO __main__: epoch 9:  10% | train loss 0.1301 | 219 img/s
+2026-09-28 22:20:45 INFO __main__: epoch 9:  20% | train loss 0.1301 | 219 img/s
+2026-09-28 22:21:21 INFO __main__: epoch 9:  30% | train loss 0.1304 | 220 img/s
+2026-09-28 22:21:57 INFO __main__: epoch 9:  40% | train loss 0.1301 | 220 img/s
+2026-09-28 22:22:32 INFO __main__: epoch 9:  50% | train loss 0.1305 | 220 img/s
+2026-09-28 22:23:08 INFO __main__: epoch 9:  60% | train loss 0.1308 | 220 img/s
+2026-09-28 22:23:43 INFO __main__: epoch 9:  70% | train loss 0.1307 | 220 img/s
+2026-09-28 22:24:19 INFO __main__: epoch 9:  80% | train loss 0.1311 | 220 img/s
+2026-09-28 22:24:55 INFO __main__: epoch 9:  90% | train loss 0.1313 | 220 img/s
+2026-09-28 22:25:30 INFO __main__: epoch 9: 100% | train loss 0.1314 | 220 img/s
+2026-09-28 22:25:59 INFO __main__: epoch 9/30 | lr 1e-04 | train loss 0.1314 | val loss 0.1469 | val AUC 0.8293 (Atelectasis 0.806, Effusion 0.881, Pneumonia 0.749) | 2 without improvement | 6.4 min
+2026-09-28 22:26:35 INFO __main__: epoch 10:  10% | train loss 0.1262 | 219 img/s
+2026-09-28 22:27:10 INFO __main__: epoch 10:  20% | train loss 0.1249 | 220 img/s
+2026-09-28 22:27:46 INFO __main__: epoch 10:  30% | train loss 0.1238 | 220 img/s
+2026-09-28 22:28:22 INFO __main__: epoch 10:  40% | train loss 0.1229 | 220 img/s
+2026-09-28 22:28:57 INFO __main__: epoch 10:  50% | train loss 0.1233 | 220 img/s
+2026-09-28 22:29:33 INFO __main__: epoch 10:  60% | train loss 0.1224 | 220 img/s
+2026-09-28 22:30:08 INFO __main__: epoch 10:  70% | train loss 0.1226 | 220 img/s
+2026-09-28 22:30:44 INFO __main__: epoch 10:  80% | train loss 0.1221 | 220 img/s
+2026-09-28 22:31:20 INFO __main__: epoch 10:  90% | train loss 0.1220 | 220 img/s
+2026-09-28 22:31:55 INFO __main__: epoch 10: 100% | train loss 0.1219 | 220 img/s
+2026-09-28 22:32:25 INFO __main__: epoch 10/30 | lr 1e-05 | train loss 0.1220 | val loss 0.1466 | val AUC 0.8372 (Atelectasis 0.816, Effusion 0.883, Pneumonia 0.751) | best | 6.4 min
+2026-09-28 22:33:01 INFO __main__: epoch 11:  10% | train loss 0.1195 | 218 img/s
+2026-09-28 22:33:37 INFO __main__: epoch 11:  20% | train loss 0.1187 | 218 img/s
+2026-09-28 22:34:13 INFO __main__: epoch 11:  30% | train loss 0.1190 | 218 img/s
+2026-09-28 22:34:49 INFO __main__: epoch 11:  40% | train loss 0.1194 | 218 img/s
+2026-09-28 22:35:25 INFO __main__: epoch 11:  50% | train loss 0.1187 | 218 img/s
+2026-09-28 22:36:00 INFO __main__: epoch 11:  60% | train loss 0.1189 | 218 img/s
+2026-09-28 22:36:36 INFO __main__: epoch 11:  70% | train loss 0.1188 | 218 img/s
+2026-09-28 22:37:12 INFO __main__: epoch 11:  80% | train loss 0.1186 | 218 img/s
+2026-09-28 22:37:48 INFO __main__: epoch 11:  90% | train loss 0.1183 | 218 img/s
+2026-09-28 22:38:24 INFO __main__: epoch 11: 100% | train loss 0.1186 | 218 img/s
+2026-09-28 22:38:54 INFO __main__: epoch 11/30 | lr 1e-05 | train loss 0.1186 | val loss 0.1479 | val AUC 0.8342 (Atelectasis 0.813, Effusion 0.882, Pneumonia 0.745) | 1 without improvement | 6.5 min
+2026-09-28 22:39:30 INFO __main__: epoch 12:  10% | train loss 0.1190 | 217 img/s
+2026-09-28 22:40:06 INFO __main__: epoch 12:  20% | train loss 0.1172 | 218 img/s
+2026-09-28 22:40:42 INFO __main__: epoch 12:  30% | train loss 0.1168 | 218 img/s
+2026-09-28 22:41:18 INFO __main__: epoch 12:  40% | train loss 0.1163 | 218 img/s
+2026-09-28 22:41:53 INFO __main__: epoch 12:  50% | train loss 0.1164 | 218 img/s
+2026-09-28 22:42:29 INFO __main__: epoch 12:  60% | train loss 0.1165 | 218 img/s
+2026-09-28 22:43:06 INFO __main__: epoch 12:  70% | train loss 0.1169 | 218 img/s
+2026-09-28 22:43:42 INFO __main__: epoch 12:  80% | train loss 0.1169 | 218 img/s
+2026-09-28 22:44:18 INFO __main__: epoch 12:  90% | train loss 0.1166 | 218 img/s
+2026-09-28 22:44:54 INFO __main__: epoch 12: 100% | train loss 0.1163 | 218 img/s
+2026-09-28 22:45:23 INFO __main__: epoch 12/30 | lr 1e-05 | train loss 0.1163 | val loss 0.1498 | val AUC 0.8302 (Atelectasis 0.810, Effusion 0.880, Pneumonia 0.740) | 2 without improvement | 6.5 min
+2026-09-28 22:45:59 INFO __main__: epoch 13:  10% | train loss 0.1125 | 216 img/s
+2026-09-28 22:46:35 INFO __main__: epoch 13:  20% | train loss 0.1141 | 217 img/s
+2026-09-28 22:47:11 INFO __main__: epoch 13:  30% | train loss 0.1139 | 218 img/s
+2026-09-28 22:47:47 INFO __main__: epoch 13:  40% | train loss 0.1132 | 218 img/s
+2026-09-28 22:48:23 INFO __main__: epoch 13:  50% | train loss 0.1135 | 217 img/s
+2026-09-28 22:48:59 INFO __main__: epoch 13:  60% | train loss 0.1138 | 217 img/s
+2026-09-28 22:49:35 INFO __main__: epoch 13:  70% | train loss 0.1140 | 217 img/s
+2026-09-28 22:50:11 INFO __main__: epoch 13:  80% | train loss 0.1139 | 217 img/s
+2026-09-28 22:50:47 INFO __main__: epoch 13:  90% | train loss 0.1142 | 218 img/s
+2026-09-28 22:51:23 INFO __main__: epoch 13: 100% | train loss 0.1141 | 218 img/s
+2026-09-28 22:51:52 INFO __main__: epoch 13/30 | lr 1e-06 | train loss 0.1141 | val loss 0.1494 | val AUC 0.8305 (Atelectasis 0.810, Effusion 0.880, Pneumonia 0.738) | 3 without improvement | 6.5 min
+2026-09-28 22:52:28 INFO __main__: epoch 14:  10% | train loss 0.1112 | 218 img/s
+2026-09-28 22:53:04 INFO __main__: epoch 14:  20% | train loss 0.1131 | 218 img/s
+2026-09-28 22:53:40 INFO __main__: epoch 14:  30% | train loss 0.1130 | 218 img/s
+2026-09-28 22:54:16 INFO __main__: epoch 14:  40% | train loss 0.1130 | 218 img/s
+2026-09-28 22:54:52 INFO __main__: epoch 14:  50% | train loss 0.1136 | 218 img/s
+2026-09-28 22:55:28 INFO __main__: epoch 14:  60% | train loss 0.1134 | 218 img/s
+2026-09-28 22:56:04 INFO __main__: epoch 14:  70% | train loss 0.1136 | 218 img/s
+2026-09-28 22:56:40 INFO __main__: epoch 14:  80% | train loss 0.1134 | 218 img/s
+2026-09-28 22:57:16 INFO __main__: epoch 14:  90% | train loss 0.1136 | 218 img/s
+2026-09-28 22:57:52 INFO __main__: epoch 14: 100% | train loss 0.1137 | 218 img/s
+2026-09-28 22:58:21 INFO __main__: epoch 14/30 | lr 1e-06 | train loss 0.1138 | val loss 0.1499 | val AUC 0.8308 (Atelectasis 0.810, Effusion 0.880, Pneumonia 0.738) | 4 without improvement | 6.5 min
+2026-09-28 22:58:58 INFO __main__: epoch 15:  10% | train loss 0.1154 | 212 img/s
+2026-09-28 22:59:34 INFO __main__: epoch 15:  20% | train loss 0.1141 | 215 img/s
+2026-09-28 23:00:10 INFO __main__: epoch 15:  30% | train loss 0.1131 | 216 img/s
+2026-09-28 23:00:46 INFO __main__: epoch 15:  40% | train loss 0.1131 | 216 img/s
+2026-09-28 23:01:22 INFO __main__: epoch 15:  50% | train loss 0.1132 | 216 img/s
+2026-09-28 23:01:58 INFO __main__: epoch 15:  60% | train loss 0.1132 | 217 img/s
+2026-09-28 23:02:34 INFO __main__: epoch 15:  70% | train loss 0.1135 | 217 img/s
+2026-09-28 23:03:10 INFO __main__: epoch 15:  80% | train loss 0.1133 | 217 img/s
+2026-09-28 23:03:46 INFO __main__: epoch 15:  90% | train loss 0.1134 | 217 img/s
+2026-09-28 23:04:22 INFO __main__: epoch 15: 100% | train loss 0.1135 | 217 img/s
+2026-09-28 23:04:51 INFO __main__: epoch 15/30 | lr 1e-07 | train loss 0.1135 | val loss 0.1499 | val AUC 0.8308 (Atelectasis 0.810, Effusion 0.880, Pneumonia 0.739) | 5 without improvement | 6.5 min
+2026-09-28 23:04:51 INFO __main__: Finished 'e1_baseline_seed44': best mean val AUC 0.8372 at epoch 10 of 15 (early stopping)

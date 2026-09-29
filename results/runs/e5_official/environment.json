@@ -1,0 +1,29 @@
+[
+  {
+    "started_at": "2026-09-29T02:25:28",
+    "start_epoch": 1,
+    "device": "cuda",
+    "amp": "float16",
+    "python": "3.10.11",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch": "2.14.0+cu126",
+    "cuda": "12.6",
+    "cudnn": 91002,
+    "cuda_available": true,
+    "gpus": [
+      "NVIDIA GeForce RTX 2060"
+    ],
+    "git_commit": "3abbb9dda4a989e8b5d4a59264f59b3842a4e5fe-dirty",
+    "packages": {
+      "torchvision": "0.29.0+cu126",
+      "numpy": "2.2.6",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.7.2",
+      "pillow": "12.3.0",
+      "grad-cam": "1.5.7",
+      "matplotlib": "3.10.9",
+      "seaborn": "0.13.2",
+      "pyyaml": "6.0.3"
+    }
+  }
+]
