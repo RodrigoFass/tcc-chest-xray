@@ -194,7 +194,7 @@ precisão mista e com as imagens carregadas no processo principal, confirmou que
 reproduz o treino sem interrupção. No treino real, as imagens são carregadas por vários processos
 paralelos, e nessa condição a retomada altera a ordem das imagens e os sorteios do aumento de dados: o
 resultado seria estatisticamente comparável, mas não idêntico. Pelo registro de sessões de cada
-experimento, nenhum dos treinos deste trabalho precisou ser retomado [CONFERIR depois do E5].
+experimento, nenhum dos sete treinos deste trabalho precisou ser retomado.
 
 ## 3.7 Experimentos
 
@@ -280,15 +280,17 @@ ChestX-ray14 varia bastante com a divisão (BALTRUSCHAT et al., 2019).
 ## 3.9 Interpretabilidade
 
 Os mapas de calor são gerados com o Grad-CAM (SELVARAJU et al., 2017), pela biblioteca
-`pytorch-grad-cam`. A camada-alvo padrão é a ReLU após a normalização em lote final (Seção 3.5). Como
-ela é seguida apenas do *pooling* global e da camada linear, o Grad-CAM nela coincide com o CAM usado
-pelo CheXNet depois de aplicada a ReLU, a menos de um fator positivo que desaparece na normalização
-(Seção 2.10). Essa equivalência foi verificada numericamente num teste automático, que compara o mapa do
-Grad-CAM com $\mathrm{ReLU}\big(\sum_k w^c_k A^k\big)$, calculado diretamente dos pesos, com ambos
-normalizados para o intervalo [0, 1]. Como alternativa, avalia-se também a saída do último bloco denso,
-antes da normalização em lote final e da ReLU (Seção 3.5), e a escolha entre as duas camadas é feita
-pelo *pointing game* e pela inspeção visual. Os escores exibidos junto aos mapas vêm da mesma função de
-inferência usada na avaliação.
+`pytorch-grad-cam`, em duas camadas-alvo candidatas. A primeira é a ReLU após a normalização em lote
+final (Seção 3.5). Como ela é seguida apenas do *pooling* global e da camada linear, o Grad-CAM nela
+coincide com o CAM usado pelo CheXNet depois de aplicada a ReLU, a menos de um fator positivo que
+desaparece na normalização (Seção 2.10). Essa equivalência foi verificada numericamente num teste
+automático, que compara o mapa do Grad-CAM com $\mathrm{ReLU}\big(\sum_k w^c_k A^k\big)$, calculado
+diretamente dos pesos, com ambos normalizados para o intervalo [0, 1]. A segunda é a saída do último
+bloco denso, antes da normalização em lote final e da ReLU (Seção 3.5). A camada usada na galeria, nas
+figuras com as caixas e na interface é a de maior taxa de acerto no *pointing game* (item c, somando as
+três doenças estudadas), com a comparação visual das duas camadas como apoio. Como essa escolha usa as
+caixas do conjunto de teste, as duas camadas são reportadas. Os escores exibidos junto aos mapas vêm da
+mesma função de inferência usada na avaliação.
 
 Três análises são feitas no conjunto de teste:
 
@@ -341,8 +343,9 @@ d) um aviso fixo: "Protótipo acadêmico. Não usar para diagnóstico.", com a o
    dessas (foto de tela, criança pequena, incidência lateral, outro exame) geram resultados sem sentido.
 
 O valor exibido é o escore recalibrado por *Platt scaling*, e o limiar é mostrado na mesma escala. Ele
-é chamado de [PREENCHER: "probabilidade estimada" ou "escore do modelo", conforme a decisão da Seção 4.5],
-com a observação de que a calibração vale para a população do NIH. O modelo exportado para a interface
+é chamado de "probabilidade estimada", porque as curvas de calibração do teste ficaram próximas da
+diagonal (Seção 4.5), com a observação de que a calibração vale para a população do NIH. Se a
+calibração não tivesse se sustentado no teste, o valor seria chamado de "escore do modelo". O modelo exportado para a interface
 reproduz os escores da avaliação com diferença máxima de 3,6 × 10⁻⁷ nas três imagens de teste
 conferidas (o critério era 10⁻⁴), e cada análise, incluindo o mapa de calor, levou entre 0,3 e 0,4 s em
 CPU no computador de desenvolvimento (Intel Core i5-10400F) [PREENCHER: e cerca de X s no Hugging Face

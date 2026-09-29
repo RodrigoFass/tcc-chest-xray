@@ -58,7 +58,7 @@ maior, ao custo de ainda mais alarmes falsos. Esse é o tipo de
 limitação que a AUC, sozinha, esconde, e é o motivo de este trabalho reportar a AUPRC ao lado da
 prevalência.
 
-## 5.3 A ponderação de classes não ajudou
+## 5.3 Ponderação de classes, aumento de dados e transferência de aprendizado
 
 A intuição de que dar mais peso aos casos positivos melhora as classes raras não se confirmou. O E2 foi
 significativamente pior que o E1 na atelectasia e na efusão, sem ganho significativo na pneumonia, e
@@ -71,9 +71,26 @@ ordenação, e o E1 continuou melhor na atelectasia e na efusão. O resultado é
 consistente com a escolha do CheXNet, que também treinou as 14 classes sem ponderação.
 
 Um resultado prático dessa análise é que o E1 já sai do treino quase calibrado, e a recalibração só
-ajusta a faixa de escores mais altos. Isso permite que a interface mostre um valor interpretável como
-probabilidade [PREENCHER: se a decisão da Seção 4.5 for essa], com a ressalva de que essa probabilidade
-vale para a população e a prevalência do NIH.
+ajusta a faixa de escores mais altos. Isso permitiu que a interface mostre o valor como "probabilidade
+estimada", com a ressalva de que essa probabilidade vale para a população e a prevalência do NIH.
+
+Os outros dois experimentos confirmaram o que se esperava. Sem aumento de dados (E3), o modelo
+sobreajustou logo depois da terceira época e perdeu 0,010 de AUC média; sem transferência de aprendizado
+(E4), perdeu 0,020, mesmo usando todo o orçamento de 30 épocas e mais que o dobro do tempo de treino. As
+duas técnicas contribuem para o resultado, e a transferência é a que mais pesa. O E4 mostra, porém, que o
+ChestX-ray14 é grande o bastante para uma rede treinada do zero chegar a 0,821, bem acima da primeira
+referência publicada (0,738). Parte da vantagem da transferência está em acelerar a convergência, e um
+treino mais longo, com outro cronograma de taxa de aprendizado, poderia reduzir a diferença (Seção 5.7,
+item g).
+
+A repetição com três sementes dá a escala dessas diferenças. Só a troca da semente mudou a AUC média em
+até 0,005 e a da pneumonia em até 0,015, uma variação que os intervalos por bootstrap não capturam,
+porque consideram a amostra de teste, mas não o treino (Seção 4.6.3). Diante disso, as conclusões mais
+seguras são as das diferenças grandes e consistentes: a perda do E4 na média, na atelectasia e na efusão
+e a do E2 na atelectasia. As diferenças na pneumonia, positivas nos três experimentos, estão dentro da
+variação entre sementes e não permitem dizer que alguma configuração favoreça essa classe. Uma
+comparação mais rigorosa treinaria cada configuração com várias sementes, o que não coube no orçamento
+deste trabalho.
 
 ## 5.4 O modelo pode estar usando a incidência como atalho?
 
@@ -98,9 +115,20 @@ prático.
 Na pneumonia, o padrão é diferente: a AUC dentro dos exames PA (0,722) e dentro dos AP (0,746) ficaram
 ambas abaixo da geral (0,751). Quando isso acontece, parte da discriminação medida no conjunto todo vem
 da própria diferença de prevalência entre os grupos, o que é compatível com algum uso da incidência como
-atalho. Os intervalos, porém, são largos (87 e 107 casos), e o dado não permite conclusão. Os mapas de
-calor [PREENCHER: se os falsos positivos de pneumonia forem, em sua maioria, exames AP com dispositivos,
-isso reforça a hipótese] e a validação externa (Seção 5.6) ajudam a avaliar essa questão.
+atalho. Os intervalos, porém, são largos (87 e 107 casos), e o dado não permite conclusão.
+
+Um indício mais forte aparece nos erros, e não só na pneumonia. No limiar da validação, o modelo marcou
+como pneumonia 46% dos exames AP sem pneumonia, contra 23% dos PA. Mesmo entre os exames sem nenhuma das
+14 doenças, marcou 31% dos AP e 16% dos PA; o mesmo acontece na efusão (24% contra 9% nesses exames) e
+na atelectasia (30% contra 15%). Ou seja, com o mesmo limiar, um exame AP recebe escores mais altos que
+um PA mesmo sem doença rotulada, e a discriminação **dentro** de cada incidência, medida pela AUC, não
+mostra isso. O dado é compatível com o uso da incidência como atalho, mas também com rótulos incompletos
+nos exames AP, de pacientes mais graves, em que achados podem não ter sido registrados como diagnóstico
+no laudo. Os mapas de calor não resolvem a questão: nos falsos positivos de pneumonia da galeria, dois
+dos três exames são AP portáteis, mas o mapa fica sobre os pulmões, e não sobre a marcação de texto ou
+os dispositivos (Seção 4.8), o que não exclui o atalho, porque a incidência muda o aspecto de todo o
+tórax. A validação externa (Seção 5.6) ajuda a avaliar essa questão, e, na prática, um uso real
+precisaria de limiares diferentes para cada incidência ou de um modelo treinado para não depender dela.
 
 Nas análises por sexo e idade, a diferença mais clara foi na atelectasia, com AUC menor nas mulheres e
 nos pacientes com mais de 60 anos. Este trabalho não investigou a causa; possibilidades incluem
@@ -110,17 +138,25 @@ antes de qualquer uso clínico.
 
 ## 5.5 O que os mapas de calor mostram
 
-[PREENCHER depois do Grad-CAM. Pontos a discutir:
-- se os mapas se concentram nas regiões anatomicamente esperadas (bases e seios costofrênicos na efusão;
-  opacidades segmentares ou lineares na atelectasia; o pulmão, e não o mediastino ou as bordas, na
-  pneumonia);
-- o *pointing game* comparado ao centro da imagem: se a taxa de acerto for parecida com a do centro,
-  os mapas não localizam melhor que o acaso, mesmo que pareçam convincentes;
-- padrões nos falsos positivos (cabos, eletrodos, drenos, marcações de texto na imagem) que indiquem
-  atalhos, na linha de Zech et al. (2018) e Oakden-Rayner (2020);
-- a limitação do Grad-CAM: o mapa tem resolução de 7 × 7 posições ampliada para 224 × 224, e por isso
-  indica regiões amplas, não lesões pequenas; e um mapa correto não prova que o modelo raciocinou como
-  um radiologista.]
+Os mapas de calor apontam, em geral, para regiões plausíveis: nos verdadeiros positivos de efusão, o
+hemitórax opacificado e as bases; nos de pneumonia, as opacidades pulmonares (Seção 4.8). O *pointing
+game*, porém, mostra os limites dessa impressão visual. O pico do mapa caiu dentro da caixa do
+radiologista em cerca de um quarto das imagens das três doenças estudadas (15 de 62). Isso é melhor que
+o centro da imagem na atelectasia e na efusão, mas não na pneumonia, em que o acerto (3 de 20) não se
+distingue da referência trivial. Na cardiomegalia, o centro da imagem acerta todas as imagens, o que
+mostra como uma localização "correta" pode vir só da posição típica do achado.
+
+Dois fatores limitam a leitura dos mapas. Primeiro, o mapa tem resolução de 7 × 7 posições, ampliada
+para 224 × 224, e por isso indica regiões amplas, não lesões pequenas; o *pointing game* exige que um
+único ponto caia numa caixa às vezes pequena, o que é mais exigente do que a impressão visual. Segundo,
+um mapa no lugar certo não prova que o modelo raciocinou como um radiologista: ele mostra onde estão as
+características que mais pesaram, não por que pesaram. Nos falsos positivos da galeria, os mapas ficaram
+sobre os pulmões, e não sobre marcações de texto, eletrodos ou cateteres, sem sinal claro de atalhos
+desse tipo (ZECH et al., 2018; OAKDEN-RAYNER, 2020). A galeria, no entanto, tem só três exemplos por
+grupo, e a análise por incidência (Seção 5.4) sugere uma influência difusa da incidência nos escores,
+que um mapa de calor não mostraria. Nos falsos negativos, com escores próximos de zero, o mapa não tem
+significado, e isso deveria ser dito a quem usa a interface. Por fim, a escolha da camada-alvo pouco
+importou: as duas candidatas geraram mapas quase iguais e taxas de acerto sem diferença significativa.
 
 ## 5.6 Generalização para outro hospital
 
@@ -183,9 +219,8 @@ registrá-las porque são frequentemente omitidas em trabalhos da área:
   apresentados como estimativas pontuais);
 - a AUPRC e a prevalência acompanham a AUC, para não esconder o problema das classes raras;
 - a configuração final foi repetida com três sementes, para separar efeito da configuração de variação
-  aleatória [CONFERIR: manter depois do treino das sementes 43 e 44];
+  aleatória;
 - as imagens da galeria de mapas de calor foram escolhidas por uma regra fixa, e a localização foi
-  medida contra marcações de radiologistas e comparada com uma referência trivial [CONFERIR: manter
-  depois de rodar o Grad-CAM oficial];
+  medida contra marcações de radiologistas e comparada com uma referência trivial;
 - o código tem testes automáticos, e cada experimento registra a configuração, as versões das principais
   bibliotecas e o *commit* usado.

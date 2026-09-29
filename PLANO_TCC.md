@@ -662,6 +662,11 @@ Se o início + 7 semanas + o tempo de revisão do orientador passar de D, cortar
 | 28/09/2026 | App mostra o escore recalibrado (Platt) e o limiar na mesma escala; o nome ("escore do modelo" ou "probabilidade estimada") é escolhido na exportação (`--label`) | Segue a Fase 5; a decisão depende das curvas de calibração do teste |
 | 28/09/2026 | CheXpert: 7 classes em comum (Atelectasis, Cardiomegaly, Effusion ← Pleural Effusion, Pneumonia, Pneumothorax, Consolidation, Edema); imagens não quadradas redimensionadas para quadrado (`--fit resize`, padrão) ou com bordas pretas (`--fit pad`) | Igual ao que o app faz com qualquer imagem; `pad` fica como verificação de sensibilidade |
 | 28/09/2026 | `evaluate --seeds` resume as 3 seeds (média ± desvio padrão amostral) | Plano 3.9 |
+| 29/09/2026 | Fila da Fase 3 concluída na RTX 2060 (E3, seeds 43 e 44, E4, E5), cada treino numa única sessão, sem retomada; avaliados em fp32 na validação e no teste | Resultados em `results/tables/` e no Capítulo 4 da monografia |
+| 29/09/2026 | Rodrigo dispensou a parada para revisão entre a Fase 3 e as seguintes e pediu o merge do PR #3 | Decisão do Rodrigo |
+| 29/09/2026 | **Grad-CAM: camada padrão passa a ser `denseblock4`** (galeria, caixas e app); a `relu` (igual ao CAM do CheXNet) continua na comparação | Pointing game no teste, nas 3 doenças do TCC: `denseblock4` 15 de 62 imagens contra 13 da `relu` (em todas as classes com caixa, 48 contra 42 de 153). A diferença não é significativa (McNemar exato, p = 0,73 nas 3 doenças e p = 0,15 em todas), e os mapas são visualmente quase iguais; como a escolha usou o teste, as duas camadas são reportadas |
+| 29/09/2026 | App chama o valor de **"probabilidade estimada"** (`--label probability`), com a nota de que vale para a população do NIH | Curvas de calibração do E1 no teste, depois do Platt, perto da diagonal nas 3 doenças; Brier praticamente igual antes e depois do Platt (Seção 4.5 da monografia) |
+| 29/09/2026 | Licença MIT para o código (`LICENSE`); os dados seguem os termos do NIH e de Stanford | Licença curta e permissiva, a mesma já declarada no cabeçalho do Space |
 
 ## 11. Referências
 

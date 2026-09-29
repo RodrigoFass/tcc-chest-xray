@@ -19,10 +19,10 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | 0 | Esqueleto do projeto | pronta |
 | 1 | Dados (download, pré-processamento, divisão, EDA) | pronta |
 | 2 | Modelo e treino | pronta; E1 e E2 treinados |
-| 3 | Avaliação e experimentos | E1 e E2 avaliados (E1 escolhido); E3–E5 e seeds prontos para treinar |
-| 4 | Grad-CAM | código e testes prontos; falta rodar com o `best.pt` do E1 |
-| 5 | Demonstração (Gradio) | código e testes prontos; falta exportar o modelo e publicar no Hugging Face |
-| 6 | Material para a monografia | notebook de resultados e rascunho dos capítulos em `docs/monografia/` |
+| 3 | Avaliação e experimentos | pronta; E1 a E5 e as seeds 43 e 44 treinados e avaliados (E1 escolhido) |
+| 4 | Grad-CAM | pronta; galerias, caixas e pointing game do E1, camada `denseblock4` |
+| 5 | Demonstração (Gradio) | modelo exportado ("probabilidade estimada"); falta publicar no Hugging Face |
+| 6 | Material para a monografia | capítulos em `docs/monografia/`, completos exceto CheXpert e link da interface |
 | 7 | Validação externa (CheXpert) | código e testes prontos; falta baixar o CheXpert |
 
 ## Instalação local
@@ -216,8 +216,10 @@ Precisa do `best.pt`, das imagens e da avaliação de teste (usa o `preds_test.c
   falsos negativos no limiar de Youden da validação. **Critério de escolha, fixo:** os 3 verdadeiros
   positivos e os 3 falsos positivos de **maior** escore e os 3 falsos negativos de **menor** escore, no
   máximo uma imagem por paciente, desempate pelo nome do arquivo. A lista fica em `gradcam_selecao.csv`.
-- **Camadas** (`camadas_foco`): as duas camadas-alvo candidatas lado a lado. A padrão é a ReLU final
-  (`relu`); nessa arquitetura o Grad-CAM nela é igual ao CAM do CheXNet, o que um teste confere.
+- **Camadas** (`camadas_foco`): as duas camadas-alvo candidatas lado a lado. Na ReLU final (`relu`),
+  o Grad-CAM é igual ao CAM do CheXNet, o que um teste confere; a saída do último bloco denso
+  (`denseblock4`) é a padrão, escolhida pelo *pointing game* (seção 10 do plano). As figuras de
+  galeria e de caixas usam a primeira camada de `--layers`, que por padrão é a `denseblock4`.
 - **Caixas do radiologista** (`caixas_<classe>`): todas as imagens de teste com caixa no
   `BBox_List_2017.csv`, com o heatmap, a caixa e o pico do mapa (verde se cair dentro da caixa).
 - **Pointing game** (`pointing_game`): porcentagem de imagens em que o pico do mapa cai dentro da caixa,
@@ -232,9 +234,14 @@ Precisa do `best.pt`, das imagens e da avaliação de teste (usa o `preds_test.c
    python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model
    ```
 
-   O valor aparece como "escore do modelo". Use `--label probability` ("probabilidade estimada")
-   **só** se as curvas de calibração do teste, depois do Platt, ficarem perto da diagonal nas 3 classes
-   do TCC, e registre a decisão na seção 10 do plano.
+   Sem opção, o valor aparece como "escore do modelo". Com `--label probability`, aparece como
+   "probabilidade estimada", o que só vale se as curvas de calibração do teste, depois do Platt,
+   ficarem perto da diagonal nas 3 classes do TCC. Isso foi verificado para o E1 (seção 10 do plano),
+   e o pacote da defesa é exportado assim:
+
+   ```bash
+   python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model --label probability
+   ```
 
 2. Rodar localmente (backup para a defesa; `--share` gera um link público temporário):
 
@@ -258,7 +265,7 @@ Precisa do `best.pt`, das imagens e da avaliação de teste (usa o `preds_test.c
 
 ## Validação externa no CheXpert
 
-Usa só o conjunto de **validação** do CheXpert (rótulos por consenso de radiologistas, sem incerteza),
+Usa só o conjunto de **validação** do CheXpert (rótulos pelo voto da maioria de três radiologistas, sem incerteza),
 com o modelo treinado no NIH, sem treinar nada. Só imagens frontais e as 7 classes que existem nos dois
 datasets. O download exige cadastro na Stanford.
 
@@ -295,3 +302,8 @@ Este trabalho usa o NIH ChestX-ray14, disponibilizado pelo **NIH Clinical Center
 > Chest X-ray Database and Benchmarks on Weakly-Supervised Classification and Localization of
 > Common Thorax Diseases. In: IEEE Conference on Computer Vision and Pattern Recognition (CVPR),
 > 2017, p. 2097-2106.
+
+## Licença
+
+O código está sob a licença MIT ([LICENSE](LICENSE)). A licença vale só para o código: os dados do
+NIH ChestX-ray14 e do CheXpert seguem os termos de uso das instituições que os distribuem.

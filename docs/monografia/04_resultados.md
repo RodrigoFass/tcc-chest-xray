@@ -9,7 +9,7 @@ por paciente entre parênteses. O modelo final é o E1, escolhido na validação
 
 ## 4.1 Treino
 
-A Figura 2 mostra as curvas de treino do E1 e do E2. No E1, a AUC média de validação subiu rapidamente
+A Figura 2 mostra as curvas de treino dos experimentos da divisão principal. No E1, a AUC média de validação subiu rapidamente
 nas primeiras épocas (0,802 na primeira, 0,834 na quinta) e atingiu o máximo, 0,838, na oitava época,
 logo depois da primeira redução da taxa de aprendizado (de $10^{-4}$ para $10^{-5}$). Nas cinco épocas
 seguintes, a AUC de validação ficou estável ou caiu levemente, e a parada antecipada encerrou o treino
@@ -25,15 +25,22 @@ registro do treino) na 14ª época e parou na 19ª, depois de 121,7 minutos. A p
 oitava época (de 0,941 para 1,087 na 19ª), enquanto a AUC ainda melhorava até a 14ª, o que ilustra por que a perda não é um bom critério de parada quando a
 função de perda é ponderada: ela passa a refletir a escala dos escores, e não só a ordenação dos exames.
 
-**Figura 2 – Curvas de treino do E1 e do E2**
+Sem aumento de dados (E3), o sobreajuste chegou cedo: a AUC de validação atingiu o máximo (0,830) já
+na terceira época e, a partir daí, a perda de treino despencou (de 0,138 para 0,063 na oitava época)
+enquanto a perda de validação subia (de 0,146 para 0,175). A parada antecipada encerrou o treino na
+oitava época, depois de 51,6 minutos. O E4, que parte de pesos aleatórios, convergiu devagar: a AUC de
+validação ainda subia na 15ª época (0,809), deu um salto com a primeira redução da taxa de aprendizado
+(0,817 na 18ª) e depois ficou estável até a 30ª, o limite do orçamento, com máximo de 0,817 na 25ª
+época e 200,3 minutos de treino. A perda de treino do E4 terminou em 0,137, acima da do E1 (0,121): a
+rede treinada do zero não chegou a se ajustar aos dados de treino no mesmo grau.
 
-(`results/figures/curvas_treino_e1_baseline_e2_posweight.png`)
+**Figura 2 – Curvas de treino do E1 ao E4**
+
+(`results/figures/curvas_treino_e1_baseline_e2_posweight_e3_noaug_e4_scratch.png`; as curvas das três
+sementes estão em `curvas_treino_e1_baseline_e1_baseline_seed43_e1_baseline_seed44.png` e as do E5 em
+`curvas_treino_e5_official.png`, para o apêndice)
 
 Fonte: elaborado pelo autor.
-
-[PREENCHER: se a figura for refeita com os demais experimentos (`python -m chestxray.evaluate --curves
-results/runs/e1_baseline results/runs/e3_noaug results/runs/e4_scratch`), comentar a convergência do E4,
-que parte de pesos aleatórios.]
 
 ## 4.2 Desempenho do modelo final
 
@@ -197,10 +204,9 @@ não muda com o Platt, que é uma transformação crescente (Seção 2.9). A peq
 o E1 na atelectasia (0,0757 contra 0,0774) e na efusão (0,0771 contra 0,0792) é coerente com a AUC maior
 dele nessas doenças; na pneumonia, a diferença é desprezível (0,0112 contra 0,0113).
 
-Com as curvas recalibradas próximas da diagonal nas três doenças, a interface de demonstração
-[PREENCHER: decisão do autor. Recomendação a partir desta figura: chamar o valor de "probabilidade
-estimada", com a nota de que ela vale para a população do NIH, e registrar a decisão na seção 10 do
-plano.]
+Com as curvas recalibradas próximas da diagonal nas três doenças, a interface de demonstração chama o
+valor exibido de "probabilidade estimada", com a nota de que ela vale para a população do NIH (Seção
+3.11).
 
 ## 4.6 Comparação entre experimentos
 
@@ -213,8 +219,8 @@ relação ao E1.
 |---|---|---|---|---|---|---|
 | E1 (base) | 0,841 (0,833–0,848) | 0,751 (0,714–0,787) | 0,816 (0,802–0,829) | 0,886 (0,874–0,896) | 8 / 13 | 85,5 |
 | E2 (`pos_weight`) | 0,835 (0,828–0,842) | 0,761 (0,728–0,791) | 0,802 (0,787–0,816) | 0,882 (0,870–0,893) | 14 / 19 | 121,7 |
-| E3 (sem aumento de dados) | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| E4 (sem ImageNet) | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| E3 (sem aumento de dados) | 0,830 (0,822–0,837) | 0,773 (0,739–0,804) | 0,807 (0,792–0,821) | 0,882 (0,871–0,892) | 3 / 8 | 51,6 |
+| E4 (sem ImageNet) | 0,821 (0,812–0,829) | 0,758 (0,722–0,790) | 0,792 (0,776–0,806) | 0,877 (0,865–0,888) | 25 / 30 | 200,3 |
 
 Fonte: elaborado pelo autor (`results/tables/experimentos_test`; a tabela completa, com a AUPRC, tem
 mais colunas e pode ir para o apêndice).
@@ -227,8 +233,14 @@ mais colunas e pode ir para o apêndice).
 | E2 − E1 | Atelectasia | −0,014 (−0,021 a −0,008) | sim |
 | E2 − E1 | Efusão pleural | −0,004 (−0,008 a −0,0003) | sim |
 | E2 − E1 | Pneumonia | +0,009 (−0,011 a 0,029) | não |
-| E3 − E1 | [PREENCHER] | | |
-| E4 − E1 | [PREENCHER] | | |
+| E3 − E1 | Média (14 classes) | −0,010 (−0,015 a −0,006) | sim |
+| E3 − E1 | Atelectasia | −0,009 (−0,016 a −0,003) | sim |
+| E3 − E1 | Efusão pleural | −0,004 (−0,008 a −0,0002) | sim |
+| E3 − E1 | Pneumonia | +0,022 (−0,003 a 0,047) | não |
+| E4 − E1 | Média (14 classes) | −0,020 (−0,026 a −0,015) | sim |
+| E4 − E1 | Atelectasia | −0,024 (−0,032 a −0,016) | sim |
+| E4 − E1 | Efusão pleural | −0,009 (−0,013 a −0,005) | sim |
+| E4 − E1 | Pneumonia | +0,006 (−0,018 a 0,031) | não |
 
 Fonte: elaborado pelo autor (`results/tables/diferencas_pareadas_test`). Uma diferença é significativa
 quando o IC95% não contém o zero; limites próximos de zero são mostrados com quatro casas decimais.
@@ -249,36 +261,81 @@ problema.
 
 ### 4.6.2 Aumento de dados (E3)
 
-[PREENCHER a partir de `experimentos_test` e `diferencas_pareadas_test`: AUC média do E3 e diferença
-E3 − E1 com IC95%; se significativa, em que direção; épocas até a parada (sem aumento de dados, o
-sobreajuste costuma chegar mais cedo, o que deve aparecer nas curvas de treino).]
+Sem aumento de dados, o modelo foi pior. A AUC média caiu 0,010 (IC95% −0,015 a −0,006), e a queda foi
+significativa na atelectasia (−0,009) e na efusão (−0,004). O resultado já aparecia na validação, com
+diferença média de −0,008 (−0,015 a −0,003). Na pneumonia, a diferença no teste foi positiva, +0,022,
+mas não significativa (−0,003 a 0,047), e vai na direção oposta à das outras classes. Com 194 casos e
+com a variação entre sementes medida na Seção 4.6.3, não há base para concluir que o aumento de dados
+prejudique essa classe. Como mostrou a Seção 4.1, sem aumento de dados o sobreajuste começou logo
+depois da terceira época, e o treino terminou em pouco mais da metade do tempo do E1.
 
 ### 4.6.3 Variação entre sementes
 
 **Tabela 9 – Configuração final repetida com três sementes (teste)**
 
-[PREENCHER com `results/tables/seeds_test.md`: AUC média e das três doenças para as sementes 42, 43 e
-44, e a linha de média ± desvio-padrão.]
+| Semente | AUC média | Pneumonia: AUC | Atelectasia: AUC | Efusão pleural: AUC |
+|---|---|---|---|---|
+| 42 (E1) | 0,841 | 0,751 | 0,816 | 0,886 |
+| 43 | 0,842 | 0,766 | 0,819 | 0,885 |
+| 44 | 0,837 | 0,757 | 0,813 | 0,881 |
+| Média ± desvio-padrão | 0,840 ± 0,003 | 0,758 ± 0,008 | 0,816 ± 0,003 | 0,884 ± 0,002 |
 
-Fonte: elaborado pelo autor.
+Fonte: elaborado pelo autor (`results/tables/seeds_test`, que traz também a AUPRC).
 
-[PREENCHER: comparar o desvio-padrão entre sementes com as diferenças da Tabela 8. Uma diferença entre
-experimentos menor que a variação entre sementes não deve ser interpretada como efeito da configuração.]
+Trocar só a semente, com a mesma divisão dos dados e a mesma configuração, mudou a AUC média em até
+0,005 e a da pneumonia em até 0,015 (de 0,751 a 0,766). A semente 42, usada nas comparações, ficou no
+meio das três. Essa variação vem do treino (inicialização da camada final, ordem das imagens e sorteios
+do aumento de dados), e os intervalos da Tabela 8 não a incluem: o bootstrap pareado considera a amostra
+de teste, mas cada experimento foi treinado uma única vez. Como a diferença entre duas execuções isoladas
+tem desvio-padrão cerca de $\sqrt{2}$ vezes o de uma execução, a variação esperada só pela semente
+numa diferença da Tabela 8 é de cerca de 0,004 na média, 0,004 na atelectasia, 0,003 na efusão e 0,011
+na pneumonia.
+
+Com essa escala, as diferenças da Tabela 8 se dividem em três grupos. São várias vezes maiores que a
+variação entre sementes as quedas do E4 na média (−0,020), na atelectasia (−0,024) e na efusão
+(−0,009) e a do E2 na atelectasia (−0,014). Ficam em torno de duas vezes essa variação as quedas do E3
+na média (−0,010) e na atelectasia (−0,009): são prováveis, mas menos seguras do que o intervalo sugere.
+Ficam na mesma ordem da variação entre sementes a queda do E2 na média (−0,006), as da efusão no E2 e
+no E3 (−0,004) e todas as diferenças na pneumonia (+0,009, +0,022 e +0,006), que não devem ser
+interpretadas como efeito da configuração. Com três sementes, o próprio desvio-padrão é uma estimativa
+imprecisa, e esses limites são aproximados.
 
 ### 4.6.4 Transferência de aprendizado (E4)
 
-[PREENCHER: AUC média do E4 e diferença E4 − E1 com IC95%; número de épocas até a parada. Lembrar que o
-E4 teve o mesmo orçamento de épocas (Seção 3.7).]
+Sem a transferência de aprendizado, com o mesmo orçamento de até 30 épocas (Seção 3.7), o modelo foi o
+pior da divisão principal: AUC média de 0,821, 0,020 abaixo do E1 (IC95% −0,026 a −0,015), com quedas
+significativas na atelectasia (−0,024) e na efusão (−0,009); na pneumonia, a diferença foi de +0,006,
+não significativa (−0,018 a 0,031). O E4 usou todo o orçamento (melhor época na 25ª, fim na 30ª) e levou
+200,3 minutos, mais que o dobro do E1. Ainda assim, 0,821 fica bem acima da referência de Wang et al.
+(0,738, Tabela 4): o ChestX-ray14 é grande o bastante para uma rede treinada do zero aprender boa parte
+da tarefa, e a transferência de aprendizado acelerou a convergência (melhor época na 8ª, contra a 25ª) e
+melhorou o resultado final.
 
 ### 4.6.5 Divisão oficial do NIH (E5)
 
 **Tabela 10 – E1 treinado e testado na divisão oficial do NIH (E5)**
 
-[PREENCHER com `results/tables/e5_official/metricas_test.md` e `comparacao_literatura.md`: AUC e AUPRC
-das três doenças, com a prevalência ao lado (no teste oficial, 2,2% de pneumonia, 12,8% de atelectasia e
-18,2% de efusão), e a AUC média. Não colocar lado a lado com E1–E4: o conjunto de teste é outro.]
+| Doença | Casos | Prevalência | AUC (IC95%) | AUPRC (IC95%) |
+|---|---|---|---|---|
+| Atelectasia | 3.279 | 12,8% | 0,770 (0,756–0,782) | 0,336 (0,313–0,359) |
+| Efusão pleural | 4.658 | 18,2% | 0,829 (0,819–0,838) | 0,519 (0,493–0,545) |
+| Pneumonia | 555 | 2,2% | 0,716 (0,694–0,739) | 0,052 (0,044–0,064) |
+| Média (14 classes) | | | 0,811 (0,804–0,816) | |
 
-Fonte: elaborado pelo autor.
+Fonte: elaborado pelo autor (`results/tables/e5_official/metricas_test`; as 14 classes e a comparação
+com a literatura estão em `comparacao_literatura`, na mesma pasta).
+
+No teste oficial (25.596 imagens de 2.797 pacientes), a AUC média do E5 foi de 0,811 (0,804–0,816),
+contra 0,840 na validação do próprio E5, tirada por paciente do conjunto oficial de treino. A queda
+aparece nas três doenças: 0,829 na efusão, 0,770 na atelectasia e 0,716 na pneumonia, contra 0,898,
+0,833 e 0,770 na validação. Na divisão principal, a mesma configuração teve AUC de teste praticamente
+igual à de validação (0,841 contra 0,838), o que indica que a diferença está no conjunto de teste
+oficial, e não no treino. Esse conjunto é diferente do resto da base: tem 9,2 imagens por paciente,
+contra 3,6 no conjunto todo, ou seja, concentra pacientes com muitos exames de acompanhamento,
+provavelmente internados, e tem prevalências mais altas (Seção 3.4). Trabalhos que usam a divisão
+oficial também relatam AUCs médias abaixo das obtidas em divisões aleatórias [CONFERIR: citar os valores
+de GUENDEL et al., 2018, e de BALTRUSCHAT et al., 2019, nos artigos]. Como o conjunto de teste é outro,
+o E5 não é comparado lado a lado com os experimentos da divisão principal.
 
 ## 4.7 Análise por subgrupos
 
@@ -319,20 +376,28 @@ pela incidência.
 
 ## 4.8 Mapas de calor
 
-[PREENCHER depois de rodar `python -m chestxray.gradcam --config configs/experiments/e1_baseline.yaml`.
-Sugestão de estrutura:]
-
 **Figura 8 – Grad-CAM: acertos e erros na efusão pleural**
 
-(`results/figures/e1_baseline/gradcam/galeria_effusion.png`; as galerias de pneumonia e atelectasia vão
-para o texto ou para o apêndice)
+(`results/figures/e1_baseline/gradcam/galeria_effusion.png`, na camada `denseblock4`; as galerias de
+pneumonia e atelectasia vão para o apêndice)
 
 Fonte: elaborado pelo autor.
 
-[PREENCHER: descrever o que os mapas mostram em cada grupo. Perguntas a responder: nos verdadeiros
-positivos de efusão, o mapa se concentra nos seios costofrênicos e nas bases? Nos falsos positivos, há
-algo em comum (dispositivos, cabos, exames AP, outra doença na mesma região)? Nos falsos negativos, o
-achado é sutil ou o rótulo parece errado?]
+A Figura 8 mostra a galeria da efusão pleural, escolhida pela regra fixa da Seção 3.9. Nos três
+verdadeiros positivos, o mapa se concentra no hemitórax com opacidade e nas bases, onde o líquido se
+acumula. Nos falsos positivos, os mapas também caem sobre regiões com alteração visível: num deles há
+uma linha horizontal no hemitórax direito, com aspecto de nível hidroaéreo, e outro é um exame AP
+portátil, com cateteres e opacidade na base direita. Imagens como essas sugerem que parte dos falsos
+positivos pode ser erro de rótulo, e não do modelo, mas confirmar isso exigiria a leitura de um
+radiologista. Nos falsos negativos, os escores são próximos de zero (0,001 a 0,003) e os pulmões não
+mostram alteração evidente na imagem reduzida; com um escore tão baixo, o mapa não tem significado, e o
+calor que aparece nos cantos da imagem só reflete a normalização do mapa para o intervalo [0, 1].
+
+A galeria da pneumonia tem o mesmo padrão nos verdadeiros positivos, com o mapa sobre as opacidades
+pulmonares. Dois dos três falsos positivos são exames AP portáteis, com a marcação "PORTABLE" na imagem,
+mas o mapa fica sobre os pulmões, e não sobre a marcação ou os dispositivos. Um dos falsos negativos
+(escore 0,001) tem opacidades extensas nos dois pulmões: ou é um erro claro do modelo, ou é um caso em
+que o rótulo de pneumonia dependeu de informação que não está na imagem.
 
 **Figura 9 – Comparação das camadas-alvo**
 
@@ -342,14 +407,27 @@ Fonte: elaborado pelo autor.
 
 **Tabela 12 – *Pointing game* nas imagens de teste com caixa delimitadora**
 
-[PREENCHER com `results/tables/e1_baseline/pointing_game.md`: por doença e camada, número de imagens,
-acertos, taxa com IC95% de Wilson e a taxa do centro da imagem. Destacar as três doenças estudadas
-(atelectasia, efusão e pneumonia, com cerca de 20 imagens cada).]
+| Doença | Imagens | `denseblock4`: acertos, taxa (IC95%) | `relu`: acertos, taxa (IC95%) | Centro da imagem |
+|---|---|---|---|---|
+| Atelectasia | 22 | 6; 27,3% (13,2–48,2%) | 5; 22,7% (10,1–43,4%) | 4,5% |
+| Efusão pleural | 20 | 6; 30,0% (14,5–51,9%) | 8; 40,0% (21,9–61,3%) | 0,0% |
+| Pneumonia | 20 | 3; 15,0% (5,2–36,0%) | 0; 0,0% (0,0–16,1%) | 5,0% |
+| Três doenças | 62 | 15; 24,2% (15,2–36,2%) | 13; 21,0% (12,7–32,6%) | 3,2% |
+| Todas as classes com caixa | 153 | 48; 31,4% (24,6–39,1%) | 42; 27,5% (21,0–35,0%) | |
 
-Fonte: elaborado pelo autor.
+Fonte: elaborado pelo autor (`results/tables/e1_baseline/pointing_game`, com as oito classes que têm
+caixa). Intervalos de Wilson.
 
-[PREENCHER: qual camada foi escolhida e por quê; se a taxa de acerto de cada doença ficou acima da taxa
-do centro da imagem (se o IC de Wilson não cobre a taxa do centro, a diferença é clara).]
+A camada `denseblock4` acertou 15 das 62 imagens das três doenças e a `relu`, 13; em todas as classes
+com caixa, 48 contra 42 de 153. A diferença não é significativa (teste de McNemar exato nas mesmas
+imagens, p = 0,73 nas três doenças e p = 0,15 em todas), e os mapas das duas camadas são quase iguais
+(Figura 9). Pela regra da Seção 3.9, a `denseblock4` foi adotada na galeria, nas figuras com as caixas e
+na interface. Na atelectasia e na efusão, as duas camadas ficaram acima do centro da imagem, com o
+limite inferior do intervalo acima da taxa do centro. Na pneumonia, a `denseblock4` acertou 3 de 20, o
+que não se distingue do centro (5%), e a `relu` não acertou nenhuma. Na cardiomegalia, o centro da
+imagem acerta todas as 25 imagens, porque o coração fica no centro, o que mostra por que a referência
+trivial é necessária. Mesmo nos melhores casos, o pico do mapa cai dentro da caixa em menos da metade
+das imagens: os mapas indicam a região geral do achado, mas não o localizam com precisão.
 
 **Figura 10 – Mapas de calor e caixas dos radiologistas (efusão pleural)**
 
