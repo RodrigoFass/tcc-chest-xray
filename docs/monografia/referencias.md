@@ -1,6 +1,7 @@
 # REFERÊNCIAS
 
-Formato ABNT NBR 6023. As seis primeiras referências do TCC 1 já foram conferidas naquele documento.
+Formato ABNT NBR 6023. As seis referências que vieram do TCC 1 (Huang, Irvin, Litjens, Rajpurkar,
+Selvaraju e Wang, sem a marca [CONFERIR]) já foram conferidas naquele documento.
 **As demais foram escritas de memória e precisam ser conferidas** (autores, volume, número, páginas e,
 se o modelo da UVV pedir, DOI) antes da entrega. Busque cada título no Google Scholar e copie a
 referência da página da revista ou do congresso.
@@ -58,6 +59,9 @@ RAJPURKAR, P. *et al*. CheXNet: radiologist-level pneumonia detection on chest X
 learning. **arXiv**, [s. l.], 2017. Disponível em: https://arxiv.org/abs/1711.05225. Acesso em: 20
 maio 2026.
 
+RUSSAKOVSKY, O. *et al*. ImageNet large scale visual recognition challenge. **International Journal of
+Computer Vision**, [s. l.], v. 115, n. 3, p. 211-252, 2015. [CONFERIR]
+
 SAITO, T.; REHMSMEIER, M. The precision-recall plot is more informative than the ROC plot when
 evaluating binary classifiers on imbalanced datasets. **PLOS ONE**, [s. l.], v. 10, n. 3, e0118432,
 2015. [CONFERIR]
@@ -70,6 +74,12 @@ WANG, X.; PENG, Y.; LU, L.; LU, Z.; BAGHERI, M.; SUMMERS, R. M. ChestX-ray8: hos
 X-ray database and benchmarks on weakly-supervised classification and localization of common thorax
 diseases. *In*: IEEE CONFERENCE ON COMPUTER VISION AND PATTERN RECOGNITION (CVPR), 2017, Honolulu.
 **Proceedings** [...]. Piscataway: IEEE, 2017. p. 2097-2106.
+
+WANG, X.; PENG, Y.; LU, L.; LU, Z.; BAGHERI, M.; SUMMERS, R. M. ChestX-ray8: hospital-scale chest
+X-ray database and benchmarks on weakly-supervised classification and localization of common thorax
+diseases. **arXiv**, [s. l.], 2017. Versão revisada, com os resultados para as 14 classes. Disponível
+em: https://arxiv.org/abs/1705.02315. Acesso em: [data]. [CONFERIR: versão e distinguir como 2017a e
+2017b]
 
 WILSON, E. B. Probable inference, the law of succession, and statistical inference. **Journal of the
 American Statistical Association**, [s. l.], v. 22, n. 158, p. 209-212, 1927. [CONFERIR]

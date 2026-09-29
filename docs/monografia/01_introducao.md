@@ -38,9 +38,13 @@ isso, métodos de interpretabilidade, como o Grad-CAM (SELVARAJU et al., 2017), 
 esperada desse tipo de sistema.
 
 Este trabalho reproduz e estende a abordagem do CheXNet com atenção a esses pontos: divisão dos dados
-por paciente, intervalos de confiança para todas as métricas, comparação estatística entre variações
-do modelo, análise por subgrupos de pacientes, calibração das saídas, mapas de calor avaliados contra
-marcações de radiologistas e validação em um conjunto de dados de outra instituição.
+por paciente, intervalos de confiança por bootstrap por paciente para a AUC e a AUPRC, comparação
+estatística entre variações do modelo, análise por subgrupos de pacientes, calibração das saídas, mapas
+de calor avaliados contra marcações de radiologistas e validação em um conjunto de dados de outra
+instituição. A hipótese do trabalho é que uma DenseNet-121 pré-treinada no ImageNet e ajustada no
+ChestX-ray14 atinge AUC competitiva com a literatura (WANG et al., 2017; RAJPURKAR et al., 2017),
+entendida como resultados na mesma faixa, já que a comparação entre divisões diferentes dos dados é
+aproximada.
 
 ## 1.1 Objetivo geral
 
@@ -94,7 +98,9 @@ pouco explorada no Brasil [CONFERIR: se possível, apoiar com uma referência br
 
 O sistema é uma prova de conceito acadêmica. Ele **não é um dispositivo médico**, não foi validado
 clinicamente e não deve ser usado para decidir sobre pacientes. O modelo avalia apenas as 14 doenças
-rotuladas no ChestX-ray14, em radiografias frontais de adultos; não detecta outras condições (como
+rotuladas no ChestX-ray14, em radiografias frontais, pensado para adultos (a base inclui poucos exames
+de menores de 18 anos, 4,7% das imagens, e o desempenho nesse grupo não foi avaliado separadamente); não
+detecta outras condições (como
 tuberculose ou fraturas) e não usa informações clínicas do paciente. Os rótulos de treino vêm de laudos
 processados automaticamente e contêm erros, o que limita o desempenho que qualquer modelo treinado
 nessa base pode atingir e medir.

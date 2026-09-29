@@ -52,6 +52,12 @@ def make_run(runs_dir: Path, name: str, strength: float) -> Path:
     return run_dir
 
 
+def test_fmt_ci_keeps_the_sign_of_limits_near_zero():
+    assert ev.fmt_ci(0.8204, [0.8101, 0.8299]) == "0,820 (0,810–0,830)"
+    assert ev.fmt_ci(-0.003953, [-0.007608, -0.000348]) == "-0,004 (-0,008–-0,0003)"
+    assert ev.fmt_ci(-0.005704, [-0.010416, 0.000157]) == "-0,006 (-0,010–0,0002)"
+
+
 def test_evaluate_run_writes_metrics_tables_and_figures(tmp_path):
     run_dir = make_run(tmp_path / "results" / "runs", "exp_a", strength=1.5)
     results = tmp_path / "results"

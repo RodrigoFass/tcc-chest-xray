@@ -16,10 +16,12 @@ seguintes, a AUC de validação ficou estável ou caiu levemente, e a parada ant
 na 13ª época, depois de 85,5 minutos. A perda de treino continuou caindo até o fim (de 0,165 para
 0,121), enquanto a perda de validação ficou praticamente constante a partir da terceira época (entre
 0,144 e 0,146): o modelo passou a ajustar detalhes do treino que não se generalizam, e a parada antecipada
-cumpriu o papel de evitar esse sobreajuste.
+cumpriu o papel de evitar esse sobreajuste. Os valores de AUC desta seção vêm do registro do treino,
+calculados em precisão mista a cada época; na reavaliação em precisão completa usada para a escolha do
+modelo (Seção 3.7), as AUCs médias de validação na melhor época são 0,838 (E1) e 0,832 (E2).
 
-O E2, com ponderação de classes, teve curva de validação mais irregular, atingiu o máximo (0,833) na 14ª
-época e parou na 19ª, depois de 121,7 minutos. A perda de validação do E2 passou a subir depois da
+O E2, com ponderação de classes, teve curva de validação mais irregular, atingiu o máximo (0,833 no
+registro do treino) na 14ª época e parou na 19ª, depois de 121,7 minutos. A perda de validação do E2 passou a subir depois da
 oitava época (de 0,941 para 1,087 na 19ª), enquanto a AUC ainda melhorava até a 14ª, o que ilustra por que a perda não é um bom critério de parada quando a
 função de perda é ponderada: ela passa a refletir a escala dos escores, e não só a ordenação dos exames.
 
@@ -74,10 +76,15 @@ Fonte: elaborado pelo autor.
 
 A AUPRC conta outra parte da história (Figura 4). Para a efusão pleural, 0,543, cerca de quatro vezes a
 prevalência (12,6%); para a atelectasia, 0,361, 3,6 vezes a prevalência (9,9%); e para a pneumonia,
-apenas **0,044**, 3,8 vezes a prevalência de 1,2%. Ou seja, em relação ao acaso o modelo melhora de
-forma parecida nas três doenças, mas, como a pneumonia é rara, mesmo um bom ordenamento dos exames se
-traduz em poucos acertos entre os exames de maior escore. Esse é o limite prático mais importante do
-modelo para a pneumonia e é discutido no Capítulo 5.
+apenas **0,044**, 3,9 vezes a prevalência de 1,15%. Ou seja, a AUPRC fica acima do acaso nas três
+doenças, mas essas razões não se comparam entre classes: com a mesma curva ROC, quanto mais rara a
+doença, maior tende a ser a razão entre AUPRC e prevalência. Na pneumonia somam-se dois efeitos: a
+doença é rara, e a ordenação é a mais fraca das três (AUC 0,751). Reponderando o teste para a mesma
+prevalência da pneumonia (1,15%), a ordenação da efusão daria AUPRC de cerca de 0,11 e a da
+atelectasia, cerca de 0,07, contra 0,044 da pneumonia; já a ordenação da pneumonia, com a prevalência
+da efusão (12,6%), daria cerca de 0,33. A raridade explica a maior parte da AUPRC baixa, mas não toda.
+Na prática, poucos dos exames de maior escore têm de fato pneumonia. Esse é o limite prático mais
+importante do modelo para a pneumonia e é discutido no Capítulo 5.
 
 **Figura 4 – Curvas precisão-revocação das três doenças estudadas no teste (E1)**
 
@@ -143,11 +150,14 @@ Fonte: elaborado pelo autor (`results/tables/e1_baseline/limiares_teste`).
 
 Fonte: elaborado pelo autor.
 
-O VPP mostra o efeito da prevalência. Na pneumonia, o modelo marcou 5.480 exames como positivos, dos
-quais só 133 (2,4%) tinham o rótulo de pneumonia; em compensação, entre os exames abaixo do limiar,
-99,5% não tinham pneumonia. Nesse limiar, o modelo serve mais para **descartar** do que para
-**confirmar** a doença, e um limiar mais alto trocaria sensibilidade por menos alarmes falsos. Os
-limiares são baixos (0,011 para pneumonia) porque o modelo, treinado sem ponderação, dá escores próximos
+O VPP e o VPN mostram o efeito da prevalência. Na pneumonia, o modelo marcou 5.480 exames como
+positivos, e só 133 deles (2,4%) tinham o rótulo de pneumonia. Entre os exames abaixo do limiar, 99,5%
+não tinham pneumonia, mas esse valor alto se deve sobretudo à prevalência: sem modelo algum, 98,8% dos
+exames já não têm a doença. Na prática, o resultado positivo leva a chance de pneumonia de 1,2% para
+2,4%, e o negativo a reduz para 0,5% (razões de verossimilhança de cerca de 2,1 e 0,46). Com 31% dos
+casos (61 de 194) abaixo do limiar, nesse ponto de operação o modelo sozinho não serve bem nem para
+confirmar nem para descartar a doença. Um limiar mais alto trocaria sensibilidade por menos alarmes
+falsos, e um mais baixo faria o contrário. Os limiares são baixos (0,011 para pneumonia) porque o modelo, treinado sem ponderação, dá escores próximos
 da prevalência de cada doença (ver a Seção 4.5).
 
 ## 4.5 Calibração
@@ -181,8 +191,11 @@ Fonte: elaborado pelo autor.
 
 O contraste com o E2 confirma o efeito esperado da ponderação de classes (Seção 2.6): com `pos_weight`,
 os escores brutos ficam muito acima da frequência real, e o Brier da pneumonia é mais de dez vezes o do
-E1 (0,1258 contra 0,0113). Depois do Platt, os dois modelos ficam com Brier praticamente igual, o que
-mostra que a recalibração corrige a escala, mas não melhora a ordenação.
+E1 (0,1258 contra 0,0113). Depois do Platt, os dois modelos ficam com Brier praticamente igual: o
+excesso do E2 vinha da escala dos escores, que a recalibração corrige. A ordenação, e portanto a AUC,
+não muda com o Platt, que é uma transformação crescente (Seção 2.9). A pequena vantagem que sobra para
+o E1 na atelectasia (0,0757 contra 0,0774) e na efusão (0,0771 contra 0,0792) é coerente com a AUC maior
+dele nessas doenças; na pneumonia, a diferença é desprezível (0,0112 contra 0,0113).
 
 Com as curvas recalibradas próximas da diagonal nas três doenças, a interface de demonstração
 [PREENCHER: decisão do autor. Recomendação a partir desta figura: chamar o valor de "probabilidade
@@ -210,22 +223,27 @@ mais colunas e pode ir para o apêndice).
 
 | Comparação | Classe | Diferença (IC95%) | Significativa? |
 |---|---|---|---|
-| E2 − E1 | Média (14 classes) | −0,006 (−0,010 a 0,000) | não |
+| E2 − E1 | Média (14 classes) | −0,006 (−0,010 a +0,0002) | não |
 | E2 − E1 | Atelectasia | −0,014 (−0,021 a −0,008) | sim |
-| E2 − E1 | Efusão pleural | −0,004 (−0,008 a −0,000) | sim |
+| E2 − E1 | Efusão pleural | −0,004 (−0,008 a −0,0003) | sim |
 | E2 − E1 | Pneumonia | +0,009 (−0,011 a 0,029) | não |
 | E3 − E1 | [PREENCHER] | | |
 | E4 − E1 | [PREENCHER] | | |
 
-Fonte: elaborado pelo autor (`results/tables/diferencas_pareadas_test`).
+Fonte: elaborado pelo autor (`results/tables/diferencas_pareadas_test`). Uma diferença é significativa
+quando o IC95% não contém o zero; limites próximos de zero são mostrados com quatro casas decimais.
 
 ### 4.6.1 Ponderação de classes (E2)
 
 A ponderação não melhorou o modelo. Na média das 14 classes, a diferença foi de −0,006 (IC95% −0,010 a
-0,000), no limite da significância; na atelectasia e na efusão, o E2 foi significativamente pior
-(−0,014 e −0,004); na pneumonia, a classe mais rara e aquela em que a ponderação mais poderia ajudar, a
-diferença foi positiva, +0,009, mas não significativa (−0,011 a 0,029). Esse resultado é o mesmo
-observado na validação, antes de qualquer contato com o teste, e confirma a escolha do E1. Somando o
++0,0002), no limite da significância: o intervalo inclui o zero por muito pouco. Na atelectasia e na
+efusão, o E2 foi significativamente pior (−0,014 e −0,004); na pneumonia, a mais rara das três doenças
+estudadas (1,2% do teste) e, entre elas, aquela em que a ponderação mais poderia ajudar, a diferença foi
+positiva, +0,009, mas não significativa (−0,011 a 0,029). O mesmo padrão já aparecia na validação,
+antes de qualquer contato com o teste: média sem diferença significativa, E2 significativamente pior em
+atelectasia e efusão e pneumonia sem diferença significativa (lá com o sinal oposto, E2 − E1 = −0,008;
+IC95% −0,031 a 0,016). A oscilação do sinal na pneumonia é compatível com ruído, e o resultado no teste é
+coerente com a escolha do E1. Somando o
 efeito na calibração (Seção 4.5) e o treino 42% mais longo, a ponderação não trouxe vantagem neste
 problema.
 

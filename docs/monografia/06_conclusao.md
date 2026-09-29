@@ -23,8 +23,10 @@ d) a ponderação de classes não melhorou a AUC e piorou a calibração; [PREEN
    dados (E3) e da transferência de aprendizado (E4), e a variação entre sementes];
 
 e) o modelo final é bem calibrado já sem ajuste, e o *Platt scaling* corrige a faixa de escores mais
-   altos; o desempenho é pior nos exames AP, típicos de pacientes mais graves, o que é a principal
-   diferença entre subgrupos encontrada;
+   altos; na efusão pleural e na atelectasia, o desempenho é pior nos exames AP, típicos de pacientes
+   mais graves (AUC de 0,844 contra 0,908 nos PA e de 0,789 contra 0,828), o que é a principal diferença
+   entre subgrupos encontrada; na pneumonia, as estimativas das duas incidências (PA 0,722; AP 0,746) têm
+   intervalos que se sobrepõem e ficaram ambas abaixo da AUC geral;
 
 f) [PREENCHER: resultado do Grad-CAM e do *pointing game*];
 
@@ -32,10 +34,13 @@ g) [PREENCHER: resultado no CheXpert];
 
 h) a interface foi publicada [PREENCHER: link] e reproduz os escores da avaliação.
 
-A hipótese do trabalho, de que uma DenseNet-121 com transferência de aprendizado atinge no ChestX-ray14
-desempenho competitivo com a literatura, foi confirmada. Mais importante que o número final, porém, é o
+A hipótese do trabalho, apresentada no Capítulo 1, de que uma DenseNet-121 com transferência de
+aprendizado atinge no ChestX-ray14 desempenho competitivo com a literatura, foi sustentada pelos
+resultados, no sentido definido ali: o modelo ficou na mesma faixa do CheXNet, numa comparação que é
+aproximada porque os conjuntos de teste são diferentes. Mais importante que o número final, porém, é o
 que a avaliação detalhada revelou: a AUC, sozinha, esconde que a pneumonia é detectada com valor
-preditivo positivo muito baixo; o desempenho cai no grupo de pacientes mais graves; e os valores do
+preditivo positivo muito baixo; na efusão e na atelectasia, o desempenho cai nos exames AP, que costumam
+ser de pacientes internados e mais graves; e os valores do
 modelo só podem ser lidos como probabilidades depois de verificada a calibração, e apenas para a
 população em que ela foi verificada. Esses são os pontos que separam um bom resultado em um conjunto
 público de uma ferramenta que possa, um dia, ser útil na prática.

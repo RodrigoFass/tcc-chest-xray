@@ -20,13 +20,14 @@ a interface de demonstração.
 NIH ChestX-ray14 (112.120 imagens)
   └─ pré-processamento: tons de cinza, 256 × 256
       └─ divisão por paciente: treino 70% | validação 15% | teste 15%
-          ├─ treino da DenseNet-121 (experimentos E1–E5)
-          │    └─ validação: parada antecipada, escolha do modelo, limiares, Platt
-          └─ teste (uma vez, com o modelo escolhido)
-               ├─ AUC, AUPRC, limiares, calibração, subgrupos (IC95% por bootstrap)
-               ├─ Grad-CAM, caixas dos radiologistas, pointing game
-               ├─ validação externa: CheXpert
-               └─ interface web de demonstração
+          ├─ treino da DenseNet-121 (E1–E4 e sementes; o E5 usa a divisão oficial)
+          │    └─ validação: parada antecipada, limiares, Platt e escolha da configuração (E1),
+          │       feita antes de qualquer predição de teste
+          └─ teste (só depois da escolha; cada modelo avaliado uma vez)
+               ├─ todos os experimentos: AUC, AUPRC, limiares, calibração, subgrupos
+               │  (IC95% por bootstrap) e diferenças pareadas
+               └─ modelo escolhido (E1): Grad-CAM, caixas dos radiologistas, pointing game,
+                  validação externa no CheXpert e interface web de demonstração
 ```
 
 Fonte: elaborado pelo autor. [Substituir por um diagrama desenhado na versão final.]
@@ -53,8 +54,11 @@ doenças estudadas é de 11,9% para efusão pleural (13.317 imagens), 10,3% para
 1,3% para pneumonia (1.431). A Tabela 1 mostra todas as classes. A idade mediana é de 49 anos (intervalo
 interquartil de 35 a 59 anos); 43,5% das imagens são de pacientes do sexo feminino, e 40,0% dos exames
 foram feitos na incidência AP. O número de imagens por paciente varia de 1 a 184 (mediana de 1; 56,8%
-dos pacientes têm uma única imagem). O arquivo de metadados contém 16 idades impossíveis (acima de 100
-anos), mantidas nos dados e excluídas apenas do gráfico de idade.
+dos pacientes têm uma única imagem). Há 5.241 imagens (4,7%), de 1.600 pacientes, de menores de 18 anos
+(idade mínima registrada de 1 ano), mantidas em todos os conjuntos. O arquivo de metadados contém 16
+idades impossíveis (acima de 100 anos, provavelmente erros de registro). Essas imagens foram mantidas nos
+dados e no treino, mas ficaram de fora do gráfico e das estatísticas de idade e da análise por faixa
+etária (Seção 3.8.4).
 
 **Tabela 1 – Imagens por classe no NIH ChestX-ray14 e fração de exames AP em cada classe**
 
@@ -157,12 +161,13 @@ uma camada linear de 1.024 entradas e 14 saídas, uma por doença, com vieses in
 produz *logits*; a função sigmoide é aplicada apenas na inferência, porque a função de perda usada no
 treino já a incorpora de forma numericamente estável.
 
-Uma alteração técnica foi feita na implementação padrão: a ReLU que o torchvision aplica depois do
-último bloco denso é executada "no lugar" (*in place*), sobrescrevendo o tensor de entrada, o que
-interfere nos mecanismos usados para calcular o Grad-CAM. No modelo deste trabalho, essa ReLU é uma
-camada separada e sem sobrescrita, o que não muda nenhum resultado numérico e a torna a camada-alvo
-natural do Grad-CAM (Seção 3.9). O modelo final tem, portanto, a sequência: blocos densos da DenseNet-121,
-ReLU, *pooling* médio global e camada linear.
+Uma alteração técnica foi feita na implementação padrão: a ReLU que o torchvision aplica depois da
+normalização em lote final, que segue o último bloco denso, é executada "no lugar" (*in place*),
+sobrescrevendo o tensor de entrada, o que interfere nos mecanismos usados para calcular o Grad-CAM. No
+modelo deste trabalho, essa ReLU é uma camada separada e sem sobrescrita, o que não muda nenhum
+resultado numérico e a torna a camada-alvo natural do Grad-CAM (Seção 3.9). O modelo final tem,
+portanto, a sequência: parte convolucional da DenseNet-121 (convolução inicial, blocos densos e camadas
+de transição), normalização em lote final, ReLU, *pooling* médio global e camada linear.
 
 ## 3.6 Treino
 
@@ -181,10 +186,15 @@ Para reprodutibilidade, a semente 42 foi fixada no Python, no NumPy e no PyTorch
 foi configurada para usar algoritmos determinísticos. Mesmo assim, treinos na GPU podem variar
 ligeiramente entre execuções; por isso, a configuração final foi repetida com outras duas sementes
 (43 e 44), mantendo a mesma divisão dos dados. O treino usa precisão mista (*float16*) na GPU, o que
-acelera o treino sem efeito prático na métrica; as métricas finais do Capítulo 4, porém, são calculadas
-a partir de predições em precisão completa (*float32*). A cada época, o estado completo do treino é
-salvo, de modo que um treino interrompido continua de onde parou e produz o mesmo resultado de um treino
-sem interrupção (o que foi verificado por um teste automático em CPU).
+acelera o treino sem efeito prático na métrica; as métricas finais do Capítulo 4, exceto as curvas de
+treino da Seção 4.1, são calculadas a partir de predições em precisão completa (*float32*). A cada
+época, o estado completo do treino (pesos, otimizador, *scheduler*, contadores e geradores aleatórios) é
+salvo, de modo que um treino interrompido pode continuar de onde parou. Um teste automático em CPU, sem
+precisão mista e com as imagens carregadas no processo principal, confirmou que o treino retomado
+reproduz o treino sem interrupção. No treino real, as imagens são carregadas por vários processos
+paralelos, e nessa condição a retomada altera a ordem das imagens e os sorteios do aumento de dados: o
+resultado seria estatisticamente comparável, mas não idêntico. Pelo registro de sessões de cada
+experimento, nenhum dos treinos deste trabalho precisou ser retomado [CONFERIR depois do E5].
 
 ## 3.7 Experimentos
 
@@ -243,14 +253,18 @@ A calibração das três doenças estudadas é avaliada no teste por diagramas d
 faixas de mesmo número de imagens, e pelo escore de Brier. Os escores são recalibrados por *Platt
 scaling* (Seção 2.9), com os parâmetros de cada classe ajustados **apenas na validação** e aplicados ao
 teste, onde se comparam a calibração e o Brier antes e depois. Não se usou a regressão isotônica, uma
-alternativa mais flexível, porque com poucas dezenas de casos positivos nas classes raras ela sobreajusta.
+alternativa mais flexível, por dois motivos: ela tende a sobreajustar quando há poucos casos positivos,
+como na hérnia, com apenas 27 na validação; e, por ser uma função em degraus, cria empates entre escores e
+pode alterar a AUC. O Platt tem só dois parâmetros e, como a inclinação ajustada foi positiva em todas as
+classes, preserva a ordem dos escores e, portanto, a AUC (Seção 2.9).
 O objetivo da recalibração é permitir que a interface mostre o valor como uma probabilidade estimada, se
 a calibração no teste justificar.
 
 ### 3.8.4 Análise por subgrupos
 
 Para as três doenças estudadas, a AUC é calculada, com IC95%, separadamente por sexo, por faixa etária
-(menos de 40, de 40 a 60 e mais de 60 anos) e por incidência (PA e AP). A análise verifica se o modelo
+(menos de 40, de 40 a 60 e mais de 60 anos; as idades acima de 100 anos ficam fora das faixas, e no
+teste é uma única imagem, com idade registrada de 155 anos) e por incidência (PA e AP). A análise verifica se o modelo
 funciona de forma parecida para grupos diferentes de pacientes e expõe um possível atalho: como exames
 AP costumam ser de pacientes acamados e mais graves, e como as três doenças são mais frequentes nesses
 exames (Tabela 1), o modelo pode ter aprendido a reconhecer a incidência em vez da doença. Nesse caso,
@@ -266,11 +280,13 @@ ChestX-ray14 varia bastante com a divisão (BALTRUSCHAT et al., 2019).
 ## 3.9 Interpretabilidade
 
 Os mapas de calor são gerados com o Grad-CAM (SELVARAJU et al., 2017), pela biblioteca
-`pytorch-grad-cam`. A camada-alvo padrão é a ReLU após o último bloco denso (Seção 3.5). Como ela é
-seguida apenas do *pooling* global e da camada linear, o Grad-CAM nela é igual ao CAM usado pelo CheXNet
-(Seção 2.10); essa igualdade foi verificada numericamente num teste automático, que compara o mapa do
-Grad-CAM com o mapa $\sum_k w^c_k A^k$ calculado diretamente dos pesos. Como alternativa, avalia-se também
-a saída do último bloco denso antes da normalização final, e a escolha entre as duas camadas é feita
+`pytorch-grad-cam`. A camada-alvo padrão é a ReLU após a normalização em lote final (Seção 3.5). Como
+ela é seguida apenas do *pooling* global e da camada linear, o Grad-CAM nela coincide com o CAM usado
+pelo CheXNet depois de aplicada a ReLU, a menos de um fator positivo que desaparece na normalização
+(Seção 2.10). Essa equivalência foi verificada numericamente num teste automático, que compara o mapa do
+Grad-CAM com $\mathrm{ReLU}\big(\sum_k w^c_k A^k\big)$, calculado diretamente dos pesos, com ambos
+normalizados para o intervalo [0, 1]. Como alternativa, avalia-se também a saída do último bloco denso,
+antes da normalização em lote final e da ReLU (Seção 3.5), e a escolha entre as duas camadas é feita
 pelo *pointing game* e pela inspeção visual. Os escores exibidos junto aos mapas vêm da mesma função de
 inferência usada na avaliação.
 
@@ -297,7 +313,9 @@ c) ***Pointing game*:** fração das imagens em que o ponto de máximo do mapa c
 
 Para avaliar a generalização para outra instituição, o modelo final, **sem nenhum novo treino**, é
 aplicado ao conjunto de validação do CheXpert (IRVIN et al., 2019), do Stanford Hospital, cujos rótulos
-foram definidos por consenso de radiologistas e não têm a categoria "incerto". Usam-se apenas as imagens
+foram definidos pelo voto da maioria de três radiologistas que anotaram cada estudo de forma
+independente; as anotações foram binarizadas antes da votação, e por isso os rótulos finais não têm a
+categoria "incerto". Usam-se apenas as imagens
 frontais e as sete classes presentes nos dois conjuntos: atelectasia, cardiomegalia, efusão pleural
 ("Pleural Effusion" no CheXpert), pneumonia, pneumotórax, consolidação e edema. As imagens do CheXpert
 não são quadradas; na configuração principal, elas são redimensionadas para quadrado, como qualquer
@@ -318,8 +336,9 @@ a) uma frase de resumo, com as doenças cujo valor ficou acima do limiar ("Achad
 b) uma tabela com o valor das 14 doenças, as três estudadas em destaque, cada uma com o limiar da
    validação e a indicação "acima" ou "abaixo do limiar";
 c) o mapa de calor Grad-CAM da doença escolhida;
-d) um aviso fixo: "Protótipo acadêmico. Não usar para diagnóstico.", com a observação de que imagens
-   muito diferentes das do NIH (foto de tela, criança, incidência lateral) geram resultados sem sentido.
+d) um aviso fixo: "Protótipo acadêmico. Não usar para diagnóstico.", com a observação de que o modelo
+   foi treinado principalmente com radiografias frontais de adultos e de que imagens muito diferentes
+   dessas (foto de tela, criança pequena, incidência lateral, outro exame) geram resultados sem sentido.
 
 O valor exibido é o escore recalibrado por *Platt scaling*, e o limiar é mostrado na mesma escala. Ele
 é chamado de [PREENCHER: "probabilidade estimada" ou "escore do modelo", conforme a decisão da Seção 4.5],
@@ -334,13 +353,16 @@ Spaces].
 O treino foi feito num computador pessoal com uma GPU NVIDIA GeForce RTX 2060, em Windows, com Python
 3.10.11, PyTorch 2.14.0 (CUDA 12.6) e torchvision 0.29.0. A primeira época do E1 levou 8,8 minutos
 (cerca de 168 imagens de treino por segundo, com o cuDNN determinístico), a segunda, 7,5 minutos, e,
-a partir da terceira, cerca de 6,3 minutos (225 imagens por segundo); o E1 completo, com 13 épocas, levou 85,5 minutos. As versões de todas as bibliotecas e o *commit* do código ficam
-registrados junto com cada experimento.
+a partir da terceira, cerca de 6,3 minutos (225 imagens por segundo); o E1 completo, com 13 épocas,
+levou 85,5 minutos. As versões do Python, do PyTorch, do CUDA e do cuDNN e das principais bibliotecas
+usadas no treino e na avaliação (torchvision, NumPy, pandas, scikit-learn, Pillow, pytorch-grad-cam,
+Matplotlib, seaborn e PyYAML), o modelo da GPU e o *commit* do código ficam registrados junto com cada
+experimento (arquivo `environment.json`); as demais dependências têm versão fixada em `requirements.txt`.
 
 O código é organizado como um pacote Python, com configurações em YAML, e tem testes automáticos (mais
 de 130) que verificam, entre outras coisas, que nenhum paciente aparece em dois conjuntos, que as
 métricas coincidem com as da biblioteca scikit-learn, que um treino interrompido e retomado dá o mesmo
-resultado e que a interface reproduz os escores avaliados. Os testes rodam a cada alteração, num serviço
+resultado na configuração do teste (CPU, com as imagens carregadas no processo principal) e que a interface reproduz os escores avaliados. Os testes rodam a cada alteração, num serviço
 de integração contínua.
 
 ## 3.13 Aspectos éticos

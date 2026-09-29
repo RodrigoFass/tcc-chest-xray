@@ -99,17 +99,22 @@ $\ell$, a saída é
 
 $$x_\ell = H_\ell([x_0, x_1, \ldots, x_{\ell-1}]),$$
 
-em que $[\cdot]$ é a concatenação e $H_\ell$ é a sequência normalização em lote, ReLU e convolução.
+em que $[\cdot]$ é a concatenação e $H_\ell$, na forma original, é a sequência normalização em lote,
+ReLU e convolução 3 × 3. Na DenseNet-121, que usa a variante DenseNet-BC, cada $H_\ell$ começa com um
+gargalo: normalização em lote, ReLU e uma convolução 1 × 1 que produz 128 mapas ($4k$); depois vêm
+normalização em lote, ReLU e a convolução 3 × 3, que produz os $k = 32$ mapas novos.
 
 Essa conectividade tem três efeitos. O gradiente chega mais diretamente às camadas iniciais, o que
 facilita o treino de redes profundas; as características de cada camada são reaproveitadas pelas
 seguintes, em vez de reaprendidas; e, por isso, cada camada pode ser estreita, produzindo poucos mapas
 novos (a taxa de crescimento, 32 na DenseNet-121), o que resulta em redes com relativamente poucos
 parâmetros. Entre os blocos densos, **camadas de transição** (convolução 1 × 1 e *pooling* médio)
-reduzem a resolução e o número de mapas.
+reduzem a resolução e reduzem o número de mapas pela metade.
 
 A **DenseNet-121** tem quatro blocos densos, com 6, 12, 24 e 16 camadas, e cerca de 8 milhões de
-parâmetros (HUANG et al., 2017). Numa entrada de 224 × 224 pixels, o último bloco produz 1.024 mapas de
+parâmetros (HUANG et al., 2017). Cada camada densa tem duas convoluções; somadas à convolução inicial, às
+três camadas de transição e à camada linear final, elas dão as 121 camadas do nome
+(1 + 2 × 58 + 3 + 1). Numa entrada de 224 × 224 pixels, o último bloco produz 1.024 mapas de
 7 × 7, que passam por uma normalização em lote, uma ReLU e o *pooling* global, resultando num vetor de
 1.024 números. Foi a arquitetura usada pelo CheXNet (RAJPURKAR et al., 2017) e é a escolhida neste
 trabalho.
@@ -119,7 +124,8 @@ trabalho.
 Treinar uma rede profunda do zero exige muitos dados rotulados. A **transferência de aprendizado**
 (PAN; YANG, 2010) reaproveita uma rede já treinada numa tarefa com muitos dados como ponto de partida
 para outra tarefa. Em visão computacional, o ponto de partida mais comum é o ImageNet (DENG et al.,
-2009), com mais de um milhão de fotografias em mil categorias. As camadas iniciais de uma rede treinada
+2009), mais precisamente o subconjunto de mil categorias usado na competição ILSVRC, com cerca de 1,3
+milhão de fotografias de treino (RUSSAKOVSKY et al., 2015). As camadas iniciais de uma rede treinada
 nele aprendem detectores genéricos de bordas, texturas e formas, úteis também em imagens médicas.
 
 No **ajuste fino** (*fine-tuning*), a última camada da rede pré-treinada é substituída por uma nova,
@@ -246,13 +252,16 @@ hospital com outra prevalência, ela deixa de valer.
 Redes profundas são frequentemente chamadas de "caixas-pretas". Em medicina, isso é um problema
 concreto: além da resposta, o profissional precisa saber em que ela se baseou. Os **mapas de ativação
 de classe** (*Class Activation Maps*, CAM), propostos por Zhou et al. (2016), aproveitam a estrutura
-final das redes convolucionais com *pooling* global. Sejam $A^k$ os mapas de características da última
-camada convolucional e $w^c_k$ os pesos da camada linear para a classe $c$. Como o *logit* da classe é
-$z_c = \sum_k w^c_k \cdot \frac{1}{Z}\sum_{i,j} A^k_{ij}$, o mapa
+final das redes convolucionais com *pooling* global. Sejam $A^k$ os mapas de características que entram
+no *pooling* global (na DenseNet-121, a saída do último bloco denso depois da normalização em lote e da
+ReLU finais: 1.024 mapas de 7 × 7 numa entrada de 224 × 224), $Z$ o número de posições de cada mapa
+(7 × 7 = 49) e $w^c_k$ e $b_c$ os pesos e o viés da camada linear para a classe $c$. Como o *logit* da
+classe é $z_c = \sum_k w^c_k \cdot \frac{1}{Z}\sum_{i,j} A^k_{ij} + b_c$, o mapa
 
 $$M^c = \sum_k w^c_k A^k$$
 
-mostra quanto cada posição da imagem contribui para $z_c$. Ampliado para o tamanho da imagem e
+mostra quanto cada posição da imagem contribui para $z_c$ (o viés é uma constante e não depende da
+posição). Ampliado para o tamanho da imagem e
 sobreposto a ela, torna-se um mapa de calor. O CheXNet usou exatamente esse método para localizar as
 doenças.
 
@@ -282,7 +291,10 @@ se o resultado é melhor do que o acaso.
 laudos por processamento de linguagem natural, com uma precisão estimada pelos autores em torno de 90%
 [CONFERIR: valor exato no artigo]. Os autores também publicaram cerca de mil caixas delimitadoras
 marcadas por radiologistas e um primeiro conjunto de resultados de referência, com redes pré-treinadas
-no ImageNet, com AUC média de 0,738 nas 14 classes (valores por classe na Tabela 2 do CheXNet).
+no ImageNet. A versão publicada no CVPR avalia apenas 8 doenças; os resultados para as 14 classes vêm da
+versão revisada do artigo no arXiv (arXiv:1705.02315) e são os reproduzidos na Tabela 2 do CheXNet, com
+AUC média de 0,738, calculada neste trabalho a partir dos valores por classe [CONFERIR: versão do arXiv
+e tabela de onde saem os valores; ao citar as duas versões, a ABNT pede WANG et al., 2017a e 2017b].
 
 **Rajpurkar et al. (2017)**, com o **CheXNet**, treinaram uma DenseNet-121 de 121 camadas, pré-treinada
 no ImageNet, no ChestX-ray14. Para pneumonia, compararam o modelo com quatro radiologistas num conjunto
@@ -296,9 +308,11 @@ menor perda de validação.
 **Irvin et al. (2019)** publicaram o **CheXpert**, com 224.316 radiografias de 65.240 pacientes do
 Stanford Hospital, rotuladas para 14 observações por um rotulador automático que também identifica
 **incerteza** nos laudos ("não se pode excluir pneumonia"). O artigo compara políticas para os rótulos
-incertos: ignorá-los, tratá-los como negativos ou como positivos. O conjunto de validação do CheXpert,
-com cerca de 200 estudos, foi rotulado por consenso de radiologistas, sem incerteza [CONFERIR: número de
-estudos e de radiologistas]; por isso, ele é usado aqui como conjunto de teste externo.
+incertos, entre elas ignorá-los, tratá-los como negativos ou como positivos, e mostra que a melhor
+escolha varia conforme a observação. O conjunto de validação do CheXpert, com 200 estudos de 200
+pacientes, foi anotado de forma independente por três radiologistas; as anotações foram binarizadas e o
+rótulo de referência de cada observação é o voto da maioria, de modo que os rótulos finais não têm a
+categoria "incerto" [CONFERIR no artigo]; por isso, ele é usado aqui como conjunto de teste externo.
 
 **Baltruschat et al. (2019)** compararam sistematicamente abordagens para o ChestX-ray14 (arquiteturas,
 transferência de aprendizado, resolução de entrada, uso de dados não visuais) e mostraram que os
@@ -323,7 +337,7 @@ O Quadro 1 resume os trabalhos mais próximos.
 |---|---|---|---|
 | Wang et al. (2017) | ChestX-ray14 | CNNs pré-treinadas | Dataset, caixas delimitadoras, primeira referência de AUC |
 | Rajpurkar et al. (2017) | ChestX-ray14 | DenseNet-121 | Arquitetura e metodologia de referência; CAM |
-| Irvin et al. (2019) | CheXpert | DenseNet-121 | Conjunto externo; rótulos por consenso na validação |
+| Irvin et al. (2019) | CheXpert | DenseNet-121 | Conjunto externo; rótulos de radiologistas (maioria de três) na validação |
 | Baltruschat et al. (2019) | ChestX-ray14 | ResNet-50 e variações | Efeito da divisão dos dados nos resultados |
 | Zech et al. (2018) | 3 hospitais | DenseNet-121 | Generalização entre hospitais; atalhos |
 | Oakden-Rayner (2020) | ChestX-ray14 | — | Qualidade dos rótulos |

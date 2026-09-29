@@ -2,8 +2,8 @@
 
 ## 5.1 O modelo está na faixa da literatura
 
-O objetivo central do trabalho era mostrar que uma DenseNet-121 pré-treinada no ImageNet e ajustada no
-ChestX-ray14 atinge desempenho competitivo com a literatura. O resultado confirma isso: a AUC média do
+A hipótese do trabalho (Capítulo 1) era que uma DenseNet-121 pré-treinada no ImageNet e ajustada no
+ChestX-ray14 atinge desempenho competitivo com a literatura. O resultado sustenta essa hipótese: a AUC média do
 modelo final, 0,841 (IC95% 0,833–0,848), é igual à do CheXNet (0,8414), e o valor do CheXNet está dentro
 do intervalo de confiança deste trabalho em 11 das 14 classes, incluindo a atelectasia e a pneumonia. Em
 relação à primeira referência publicada para o conjunto (WANG et al., 2017), o modelo é melhor em todas
@@ -21,13 +21,17 @@ de detalhes específicos da divisão ou do treino dos autores, ainda que uma ún
 para afirmar isso.
 
 As três classes em que os resultados divergem merecem um comentário. A efusão pleural ficou acima do
-CheXNet (0,886 contra 0,864). Uma hipótese, que este trabalho não testou diretamente, é a decisão de não
-recortar as bordas da imagem na avaliação, preservando os seios costofrênicos, onde a efusão aparece
-primeiro (Seção 3.3); outra é simplesmente a diferença entre os conjuntos de teste. A infiltração e o
+CheXNet (0,886 contra 0,864). Este trabalho não testou a causa. A explicação mais simples é a diferença
+entre os conjuntos de teste: o valor do CheXNet vem de outra amostra, e só a divisão dos dados já muda os
+resultados (BALTRUSCHAT et al., 2019). As diferenças de treino listadas acima, como o aumento de dados
+mais amplo, também podem contribuir. A decisão de não recortar as bordas da imagem (Seção 3.3) preserva os
+seios costofrênicos, onde a efusão aparece primeiro, em relação ao recorte central de 256 para 224 pixels
+usado em reimplementações comuns; ela não distingue este trabalho do artigo original, porque o CheXNet
+também reduziu a imagem inteira para 224 × 224, sem recorte. A infiltração e o
 enfisema ficaram abaixo. A infiltração é a classe de rótulo mais inespecífico do conjunto e a de menor
 AUC nos trabalhos citados; diferenças pequenas de protocolo mudam seu resultado com facilidade.
 
-## 5.2 Pneumonia: boa ordenação, pouca utilidade isolada
+## 5.2 Pneumonia: ordenação moderada, pouca utilidade isolada
 
 A pneumonia teve a menor AUC entre as três doenças estudadas (0,751), como nos trabalhos citados
 (WANG et al., 2017; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
@@ -36,14 +40,21 @@ laudo que originou o rótulo muitas vezes dependeu de informações que não est
 rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros, e Oakden-Rayner
 (2020) identificou justamente a pneumonia entre as classes de rótulo menos confiável; se parte dos
 rótulos está errada, nenhum modelo consegue uma AUC alta **medida contra esses rótulos**, mesmo que
-acerte a doença. Terceiro, a pneumonia é rara (1,2% do teste, 194 casos), o que torna a estimativa
-incerta (IC95% de 0,714 a 0,787) e o problema, desbalanceado.
+acerte a doença. Terceiro, a pneumonia tem poucos exemplos positivos: só 985 imagens de treino têm o
+rótulo, contra 8.158 de atelectasia e 9.175 de efusão. Para um padrão já ambíguo e com rótulos ruidosos,
+isso pode somar-se aos dois primeiros fatores. A raridade sozinha, porém, não explica a AUC menor: a
+hérnia (172 imagens de treino) chegou a 0,939 e o edema (1.632) a 0,896, e a ponderação de classes do E2
+não mudou a pneumonia de forma significativa (Seção 5.3). A raridade afeta sobretudo a precisão da
+estimativa: com 194 casos no teste, o IC95% vai de 0,714 a 0,787, mas mesmo o limite superior fica
+abaixo da AUC da atelectasia (0,816) e da efusão (0,886).
 
 A AUPRC de 0,044 e o VPP de 2,4% no limiar de Youden mostram a consequência prática. Mesmo ordenando os
-exames bem melhor que o acaso (AUPRC 3,8 vezes a prevalência), a maioria dos exames marcados pelo modelo
-não tem pneumonia. Nesse cenário, o modelo não deveria ser usado para **confirmar** pneumonia; o VPN de
-99,5% sugere, no máximo, um papel de triagem, ajudando a identificar exames com baixa chance da doença,
-e ainda assim com a ressalva de que ele deixou de detectar 31% dos casos nesse limiar. Esse é o tipo de
+exames melhor que o acaso (AUPRC 3,9 vezes a prevalência), a grande maioria dos exames marcados pelo
+modelo não tem pneumonia. Nesse cenário, o modelo não deveria ser usado para **confirmar** pneumonia, e
+também não serve bem para **descartá-la**: o VPN de 99,5% reflete sobretudo a prevalência (sem modelo
+algum, 98,8% dos exames não têm a doença), e ele deixou de detectar 31% dos casos nesse limiar (razão de
+verossimilhança negativa de cerca de 0,46). Um papel de triagem exigiria um limiar com sensibilidade bem
+maior, ao custo de ainda mais alarmes falsos. Esse é o tipo de
 limitação que a AUC, sozinha, esconde, e é o motivo de este trabalho reportar a AUPRC ao lado da
 prevalência.
 
@@ -55,7 +66,8 @@ praticamente empatado na média. Isso é coerente com o que a teoria prevê (Se�
 apenas da ordem dos escores, e multiplicar o peso dos positivos na perda muda sobretudo a escala dos
 escores, empurrando-os para cima. O efeito colateral apareceu na calibração: os escores brutos do E2
 ficaram muito acima da frequência real (Brier da pneumonia dez vezes maior que o do E1). O *Platt
-scaling* corrigiu a escala dos dois modelos, mas não a ordenação, e o E1 continuou melhor. O resultado é
+scaling* corrigiu a escala dos dois modelos; como é uma transformação crescente, ele não muda a
+ordenação, e o E1 continuou melhor na atelectasia e na efusão. O resultado é
 consistente com a escolha do CheXNet, que também treinou as 14 classes sem ponderação.
 
 Um resultado prático dessa análise é que o E1 já sai do treino quase calibrado, e a recalibração só
@@ -65,8 +77,10 @@ vale para a população e a prevalência do NIH.
 
 ## 5.4 O modelo pode estar usando a incidência como atalho?
 
-As três doenças estudadas são bem mais frequentes nos exames AP (cerca de metade dos casos) do que no
-conjunto como um todo (40%), porque exames AP são, em geral, de pacientes internados e mais graves. Um
+Os exames AP são 40% do conjunto, mas concentram cerca de metade dos casos das três doenças estudadas
+(50% a 56%, Tabela 1). Assim, a prevalência dessas doenças nos exames AP é 1,5 a 1,9 vez a dos exames PA
+(15,0% contra 9,8% na efusão, 13,0% contra 8,5% na atelectasia e 1,8% contra 0,9% na pneumonia), porque
+exames AP são, em geral, de pacientes internados e mais graves. Um
 modelo pode aprender a reconhecer que o exame é AP (pela posição do paciente, pela ampliação do coração
 ou pela presença de cabos e dispositivos) e usar isso como indício da doença, o que produziria uma AUC
 alta sem que o modelo reconhecesse a doença em si. Se esse atalho explicasse boa parte do desempenho, a
@@ -77,8 +91,9 @@ exames PA, a AUC foi até maior que a geral (0,908 e 0,828, contra 0,886 e 0,816
 o modelo tem **mais dificuldade nos exames AP** (0,844 e 0,789). Isso tem explicação clínica e técnica:
 no paciente deitado, o derrame pleural não se acumula nos seios costofrênicos e produz um véu difuso, mais
 difícil de ver; e exames portáteis têm pior qualidade de imagem, mais sobreposição de dispositivos e
-pacientes com várias doenças ao mesmo tempo. Ou seja, o modelo funciona pior justamente no grupo de
-pacientes mais graves, o que é importante para qualquer uso prático.
+pacientes com várias doenças ao mesmo tempo. Ou seja, na efusão e na atelectasia o modelo funciona pior
+justamente nos exames AP, que costumam ser de pacientes mais graves, o que é importante para qualquer uso
+prático.
 
 Na pneumonia, o padrão é diferente: a AUC dentro dos exames PA (0,722) e dentro dos AP (0,746) ficaram
 ambas abaixo da geral (0,751). Quando isso acontece, parte da discriminação medida no conjunto todo vem
@@ -112,8 +127,8 @@ antes de qualquer uso clínico.
 [PREENCHER depois do CheXpert. Pontos a discutir:
 - a variação da AUC do NIH para o CheXpert, por classe, com os intervalos;
 - que a diferença mistura dois efeitos: a mudança de hospital e de equipamento (que tende a reduzir a
-  AUC; ZECH et al., 2018) e a mudança da qualidade dos rótulos (radiologistas em consenso no CheXpert,
-  laudos processados automaticamente no NIH, o que pode aumentar a AUC medida);
+  AUC; ZECH et al., 2018) e a mudança da qualidade dos rótulos (voto da maioria de três radiologistas no
+  CheXpert, laudos processados automaticamente no NIH, o que pode aumentar a AUC medida);
 - que os limiares e a calibração ajustados no NIH não valem automaticamente no CheXpert, onde a
   prevalência é outra;
 - as classes com poucos casos, sobre as quais não se conclui nada.]
@@ -158,15 +173,19 @@ Algumas decisões do protocolo foram tomadas para que os números do Capítulo 4
 registrá-las porque são frequentemente omitidas em trabalhos da área:
 
 - a divisão por paciente impede que o modelo reconheça o paciente em vez da doença;
-- o conjunto de teste foi usado uma única vez, depois de a configuração final ser escolhida e registrada
-  com base apenas na validação; limiares e recalibração também foram ajustados só na validação;
-- todos os resultados têm intervalo de confiança, calculado por paciente, e as comparações entre
-  experimentos usam bootstrap pareado;
+- o conjunto de teste só foi usado depois de a configuração final ser escolhida e registrada com base
+  apenas na validação, e todos os experimentos foram avaliados nele com o mesmo protocolo; a escolha do
+  modelo, os limiares e a recalibração saíram só da validação, e o teste serviu apenas para decisões de
+  apresentação que não alteram as métricas de classificação (a camada do Grad-CAM, escolhida pelo
+  *pointing game*, e o nome do escore na interface);
+- as AUCs e AUPRCs têm intervalo de confiança de 95% calculado por bootstrap por paciente, e as
+  comparações entre experimentos usam bootstrap pareado (as métricas no limiar e o escore de Brier são
+  apresentados como estimativas pontuais);
 - a AUPRC e a prevalência acompanham a AUC, para não esconder o problema das classes raras;
 - a configuração final foi repetida com três sementes, para separar efeito da configuração de variação
   aleatória [CONFERIR: manter depois do treino das sementes 43 e 44];
 - as imagens da galeria de mapas de calor foram escolhidas por uma regra fixa, e a localização foi
   medida contra marcações de radiologistas e comparada com uma referência trivial [CONFERIR: manter
   depois de rodar o Grad-CAM oficial];
-- o código tem testes automáticos, e cada experimento registra a configuração, as versões das bibliotecas
-  e o *commit* usado.
+- o código tem testes automáticos, e cada experimento registra a configuração, as versões das principais
+  bibliotecas e o *commit* usado.
