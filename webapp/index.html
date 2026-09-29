@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Raio X de tórax (TCC)</title>
+  <meta name="description" content="Protótipo acadêmico: DenseNet-121 treinada no NIH ChestX-ray14, com mapas de calor Grad-CAM, rodando no navegador.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Detecção de doenças pulmonares em raio X de tórax</h1>
+    <p class="lead">Trabalho de Conclusão de Curso de Rodrigo Fassarella. DenseNet-121 treinada no NIH
+      ChestX-ray14, com mapas de calor Grad-CAM.</p>
+  </header>
+
+  <section id="notes" class="notes" aria-label="Avisos">
+    <p class="disclaimer"><strong>Protótipo acadêmico. Não usar para diagnóstico.</strong></p>
+  </section>
+
+  <main class="grid">
+    <section class="panel" aria-label="Entrada">
+      <label class="upload" for="file">
+        <span class="upload-title">Escolher radiografia de tórax (frontal)</span>
+        <span class="upload-hint">PNG ou JPG</span>
+        <input type="file" id="file" accept="image/png,image/jpeg">
+      </label>
+      <label class="field" for="klass">Doença do mapa de calor
+        <select id="klass"></select>
+      </label>
+      <h2 class="small">Exemplos do conjunto de teste</h2>
+      <div id="examples" class="thumbs"></div>
+    </section>
+
+    <section class="panel" aria-label="Resultado">
+      <p id="status" role="status">Carregando…</p>
+      <div id="result" hidden>
+        <h2 id="summary"></h2>
+        <figure>
+          <canvas id="heatmap" width="224" height="224" aria-label="Mapa de calor Grad-CAM"></canvas>
+          <figcaption id="caption"></figcaption>
+        </figure>
+      </div>
+    </section>
+  </main>
+
+  <section class="panel wide" aria-labelledby="table-title">
+    <h2 id="table-title" class="small"></h2>
+    <div class="table-wrap">
+      <table id="table">
+        <thead><tr><th>Grupo</th><th>Doença</th><th id="value-header"></th><th>Limiar</th><th>Situação</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="selftest" class="panel wide" hidden>
+    <h2 class="small">Autoteste</h2>
+    <p></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Imagem</th><th>Imagem da rede: maior diferença (0–255)</th><th>Escores: maior diferença</th><th>Mapa de calor: maior diferença</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>Código e monografia: <a href="https://github.com/RodrigoFass/tcc-chest-xray">github.com/RodrigoFass/tcc-chest-xray</a>.
+      O modelo roda com ONNX Runtime Web; a imagem não sai do seu computador.</p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

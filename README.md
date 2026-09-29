@@ -21,9 +21,9 @@ mapa de calor Grad-CAM. A especificação completa está em [PLANO_TCC.md](PLANO
 | 2 | Modelo e treino | pronta; E1 e E2 treinados |
 | 3 | Avaliação e experimentos | pronta; E1 a E5 e as seeds 43 e 44 treinados e avaliados (E1 escolhido) |
 | 4 | Grad-CAM | pronta; galerias, caixas e pointing game do E1, camada `denseblock4` |
-| 5 | Demonstração (Gradio) | modelo exportado ("probabilidade estimada"); falta publicar no Hugging Face |
-| 6 | Material para a monografia | capítulos em `docs/monografia/`, completos exceto CheXpert e link da interface |
-| 7 | Validação externa (CheXpert) | código e testes prontos; falta baixar o CheXpert |
+| 5 | Demonstração | pronta; página estática com o modelo no navegador: <https://huggingface.co/spaces/rotriguin/tcc-raio-x> |
+| 6 | Material para a monografia | capítulos em `docs/monografia/`; falta a captura de tela da interface |
+| 7 | Validação externa (CheXpert) | pronta; 202 imagens frontais, 6 classes, rótulos de radiologistas |
 
 ## Instalação local
 
@@ -227,55 +227,84 @@ Precisa do `best.pt`, das imagens e da avaliação de teste (usa o `preds_test.c
 
 ## Demonstração
 
-1. Exportar o modelo para o app (pesos, calibração e algumas imagens de teste como exemplo; a pasta
-   `app/model/` nunca vai para o git). O comando já confere que o app reproduz o `preds_test.csv`:
+A demonstração pública é uma página estática (`webapp/`) em que o modelo roda **no navegador de quem
+acessa**, com ONNX Runtime Web: a imagem não é enviada a nenhum servidor. O Hugging Face passou a cobrar
+pelos Spaces com Gradio, e os Spaces estáticos continuam gratuitos (seção 10 do plano). A página
+reproduz o app Gradio: a mesma frase de resumo, a mesma tabela e o mesmo mapa de calor.
+
+1. Exportar o modelo para a página. Isso gera, em `webapp/model/`, o modelo em ONNX, os limiares, a
+   calibração, os exemplos e o autoteste; a pasta nunca vai para o git. O comando confere que o modelo
+   ONNX reproduz o `preds_test.csv` e o Grad-CAM do Python:
 
    ```bash
-   python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model
+   python -m chestxray.webdemo --config configs/experiments/e1_baseline.yaml --out webapp/model
    ```
 
-   Sem opção, o valor aparece como "escore do modelo". Com `--label probability`, aparece como
-   "probabilidade estimada", o que só vale se as curvas de calibração do teste, depois do Platt,
-   ficarem perto da diagonal nas 3 classes do TCC. Isso foi verificado para o E1 (seção 10 do plano),
-   e o pacote da defesa é exportado assim:
+2. Testar localmente e abrir <http://localhost:8765>. O endereço <http://localhost:8765/?selftest>
+   refaz no navegador o pipeline das imagens de exemplo e compara com o Python: a imagem vista pela
+   rede, os escores e o mapa de calor.
 
    ```bash
-   python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model --label probability
+   python -m http.server 8765 --directory webapp
    ```
 
-2. Rodar localmente (backup para a defesa; `--share` gera um link público temporário):
+3. Publicar no Hugging Face Spaces:
+   - Crie o Space em <https://huggingface.co/new-space> com SDK **Static**, template **Blank** e
+     visibilidade **Public**.
+   - Faça login com um token de escrita.
+   - Envie a pasta `webapp/`, já com o `webapp/model/` exportado:
 
    ```bash
-   python app/app.py
-   ```
-
-3. Publicar no Hugging Face Spaces (CPU gratuita): crie uma conta no Hugging Face, crie o Space em
-   <https://huggingface.co/new-space> (SDK **Gradio**, hardware **CPU basic**) e envie a pasta `app/`
-   (com o `app/model/` já exportado) usando um token de escrita:
-
-   ```bash
-   pip install -U huggingface_hub
    hf auth login
-   hf upload <seu-usuario>/<nome-do-space> app . --repo-type space
+   hf upload <seu-usuario>/<nome-do-space> webapp . --repo-type space
    ```
 
-   O Space instala o pacote `chestxray` direto deste repositório (`app/requirements.txt`); depois do
-   merge, troque `@main` pelo commit usado na defesa. Spaces gratuitos "dormem" sem uso: abra o link
-   alguns minutos antes da apresentação.
+Na página e no app Gradio, o valor aparece como "probabilidade estimada" (`--label probability`, o
+padrão da página). Isso só vale porque as curvas de calibração do E1 no teste, depois do Platt, ficaram
+perto da diagonal nas 3 classes do TCC (seção 10 do plano).
+
+**Versão Gradio (local, backup para a defesa).** Faz a mesma análise em Python:
+
+```bash
+python -m chestxray.demo --config configs/experiments/e1_baseline.yaml --out app/model --label probability
+python app/app.py
+```
+
+`python app/app.py --share` gera um link público temporário.
 
 ## Validação externa no CheXpert
 
-Usa só o conjunto de **validação** do CheXpert (rótulos pelo voto da maioria de três radiologistas, sem incerteza),
-com o modelo treinado no NIH, sem treinar nada. Só imagens frontais e as 7 classes que existem nos dois
-datasets. O download exige cadastro na Stanford.
+Usa só o conjunto de **validação** do CheXpert, com rótulos pelo voto da maioria de três radiologistas,
+sem incerteza. O modelo é o treinado no NIH, sem treinar nada. Entram só as imagens frontais (202, de 200
+pacientes) e as 6 classes que existem nos dois datasets e têm rótulo de radiologista: atelectasia,
+cardiomegalia, efusão, pneumotórax, consolidação e edema.
+
+A Stanford AIMI distribui o CheXpert no Redivis e não disponibiliza mais o `valid.csv` original. Por
+isso, os dados vêm de duas fontes:
+- as imagens da validação vêm do **CheXpert Plus**, cujos próprios rótulos são automáticos e não são
+  usados;
+- os rótulos dos radiologistas são reconstruídos das anotações do **CheXlocalize**, que marcam as
+  observações positivas de cada imagem. O CheXlocalize não anota pneumonia.
+
+Para ter acesso, crie uma conta no Redivis, entre na organização AIMI e aceite o termo de pesquisa nos
+dois conjuntos:
+- <https://stanford.redivis.com/datasets/5yyj-1a9f6ap0x> (CheXpert Plus);
+- <https://stanford.redivis.com/datasets/efx9-5nspnbb4b> (CheXlocalize).
+
+Depois, rode os comandos abaixo. Na primeira vez, o navegador abre para o login no Redivis:
 
 ```bash
+python -m chestxray.data.download_chexpert --out E:/datasets/chexpert
 python -m chestxray.external --config configs/experiments/e1_baseline.yaml --chexpert-root E:/datasets/chexpert
 ```
 
-Gera `results/runs/e1_baseline/preds_chexpert.csv`, `metrics_chexpert.json`, a tabela
-`validacao_externa_chexpert` (AUC no CheXpert ao lado da AUC no teste do NIH) e a figura
-`roc_foco_chexpert`. Classes com menos de 30 casos são marcadas com † (sem conclusão sobre elas).
+O segundo comando também aceita a pasta da distribuição original, com o `valid.csv`, se você a tiver.
+Ele gera:
+- `results/runs/e1_baseline/preds_chexpert.csv` e `metrics_chexpert.json`;
+- a tabela `validacao_externa_chexpert`, com a AUC no CheXpert ao lado da AUC no teste do NIH;
+- a figura `roc_foco_chexpert`.
+
+Classes com menos de 30 casos são marcadas com † (sem conclusão sobre elas).
 
 ## Estrutura
 
@@ -284,7 +313,8 @@ configs/            base.yaml, debug.yaml, paths/ (por ambiente), experiments/
 data/               não versionado, exceto data/splits/
 docs/               rascunhos de texto para a monografia; docs/monografia/ tem os capítulos
 src/chestxray/      pacote Python (config, utils, data/, models/, ...)
-app/                interface Gradio (Fase 5) e arquivos do Hugging Face Space
+app/                interface Gradio (Fase 5), versão local
+webapp/             página estática da demonstração (Hugging Face Space), modelo em ONNX no navegador
 notebooks/          EDA, treino no ambiente escolhido, resultados
 results/            runs/, figures/, tables/
 tests/              pytest

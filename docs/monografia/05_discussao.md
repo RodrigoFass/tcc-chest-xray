@@ -6,7 +6,7 @@ A hipótese do trabalho (Capítulo 1) era que uma DenseNet-121 pré-treinada no 
 ChestX-ray14 atinge desempenho competitivo com a literatura. O resultado sustenta essa hipótese: a AUC média do
 modelo final, 0,841 (IC95% 0,833–0,848), é igual à do CheXNet (0,8414), e o valor do CheXNet está dentro
 do intervalo de confiança deste trabalho em 11 das 14 classes, incluindo a atelectasia e a pneumonia. Em
-relação à primeira referência publicada para o conjunto (WANG et al., 2017), o modelo é melhor em todas
+relação à primeira referência publicada para o conjunto (WANG et al., 2017b), o modelo é melhor em todas
 as classes, com diferenças de 0,05 a 0,17 na AUC.
 
 A comparação, porém, precisa ser feita com cuidado. Os dois trabalhos usaram conjuntos de teste
@@ -34,11 +34,12 @@ AUC nos trabalhos citados; diferenças pequenas de protocolo mudam seu resultado
 ## 5.2 Pneumonia: ordenação moderada, pouca utilidade isolada
 
 A pneumonia teve a menor AUC entre as três doenças estudadas (0,751), como nos trabalhos citados
-(WANG et al., 2017; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
+(WANG et al., 2017b; RAJPURKAR et al., 2017). Três fatores ajudam a explicar. Primeiro, o diagnóstico de pneumonia é clínico-radiológico: a
 imagem de uma pneumonia pode ser idêntica à de uma atelectasia, de um edema ou de uma hemorragia, e o
 laudo que originou o rótulo muitas vezes dependeu de informações que não estão na imagem. Segundo, os
-rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros, e Oakden-Rayner
-(2020) identificou justamente a pneumonia entre as classes de rótulo menos confiável; se parte dos
+rótulos do ChestX-ray14 foram extraídos automaticamente dos laudos e contêm erros. Na revisão visual de
+Oakden-Rayner (2020), só 60% das imagens rotuladas como pneumonia mostravam o achado, um dos valores
+mais baixos entre as classes. Se parte dos
 rótulos está errada, nenhum modelo consegue uma AUC alta **medida contra esses rótulos**, mesmo que
 acerte a doença. Terceiro, a pneumonia tem poucos exemplos positivos: só 985 imagens de treino têm o
 rótulo, contra 8.158 de atelectasia e 9.175 de efusão. Para um padrão já ambíguo e com rótulos ruidosos,
@@ -160,14 +161,30 @@ importou: as duas candidatas geraram mapas quase iguais e taxas de acerto sem di
 
 ## 5.6 Generalização para outro hospital
 
-[PREENCHER depois do CheXpert. Pontos a discutir:
-- a variação da AUC do NIH para o CheXpert, por classe, com os intervalos;
-- que a diferença mistura dois efeitos: a mudança de hospital e de equipamento (que tende a reduzir a
-  AUC; ZECH et al., 2018) e a mudança da qualidade dos rótulos (voto da maioria de três radiologistas no
-  CheXpert, laudos processados automaticamente no NIH, o que pode aumentar a AUC medida);
-- que os limiares e a calibração ajustados no NIH não valem automaticamente no CheXpert, onde a
-  prevalência é outra;
-- as classes com poucos casos, sobre as quais não se conclui nada.]
+No CheXpert, de outro hospital, o modelo manteve a atelectasia e ficou próximo na efusão pleural e no
+edema. Na média das seis classes, a AUC foi 0,041 menor que no teste do NIH, uma queda dentro da
+incerteza de um conjunto de 202 imagens. Não apareceu, portanto, uma perda grande e generalizada de
+desempenho ao mudar de hospital, como a relatada por Zech et al. (2018) para a pneumonia. Essa comparação,
+porém, mistura dois efeitos de sinais opostos.
+
+O primeiro efeito é a **mudança de hospital e de equipamento**, que tende a reduzir a AUC. O segundo é a
+**mudança da qualidade dos rótulos**: no CheXpert, voto da maioria de três radiologistas; no NIH,
+rótulos processados automaticamente a partir dos laudos. Rótulos melhores podem aumentar a AUC medida,
+porque o modelo deixa de ser "punido" por acertar casos rotulados errado.
+
+A consolidação é compatível com o segundo efeito. No NIH, ela é uma das classes de aspecto mais
+inespecífico, com sobreposição à infiltração e à pneumonia, e teve AUC de só 0,783. No CheXpert,
+com rótulos de radiologistas, a AUC foi de 0,911. A melhora sugere que parte do desempenho baixo medido
+no NIH vinha dos rótulos, e não do modelo. A cardiomegalia foi no sentido oposto: caiu de 0,920 para
+0,836. Uma explicação possível, não testada aqui, é a diferença no critério de "coração aumentado"
+entre os laudos do NIH e os radiologistas do CheXpert.
+
+Dois cuidados limitam essas conclusões. Primeiro, os limiares e a calibração ajustados no NIH não valem
+automaticamente no CheXpert, onde a prevalência é bem maior (32% de efusão nas imagens frontais, contra
+12,6% no teste do NIH): a "probabilidade estimada" da interface vale para a população do NIH, como ela
+mesma avisa. Segundo, o pneumotórax, com 7 casos, e a pneumonia, sem rótulos de radiologistas neste
+conjunto, ficam sem avaliação externa. Para a pneumonia, isso quer dizer que o desempenho fora do NIH
+continua desconhecido.
 
 ## 5.7 Limitações
 
@@ -182,7 +199,7 @@ b) **Comparação aproximada com a literatura.** A divisão dos dados e os hiper
 
 c) **Um único hospital no treino.** O modelo foi treinado com imagens de uma única instituição, e modelos
    de radiografia de tórax costumam perder desempenho em outras (ZECH et al., 2018). A validação no
-   CheXpert avalia isso parcialmente, num conjunto pequeno.
+   CheXpert avalia isso parcialmente, num conjunto pequeno e sem a pneumonia.
 
 d) **Possíveis atalhos.** A incidência AP, dispositivos visíveis na imagem e marcações de texto podem
    estar correlacionados com as doenças. A análise por incidência e os mapas de calor investigam isso,
@@ -222,5 +239,7 @@ registrá-las porque são frequentemente omitidas em trabalhos da área:
   aleatória;
 - as imagens da galeria de mapas de calor foram escolhidas por uma regra fixa, e a localização foi
   medida contra marcações de radiologistas e comparada com uma referência trivial;
+- o desenho da validação externa (fonte dos rótulos, classes e configuração principal) foi registrado
+  antes de o modelo ser aplicado ao CheXpert;
 - o código tem testes automáticos, e cada experimento registra a configuração, as versões das principais
   bibliotecas e o *commit* usado.

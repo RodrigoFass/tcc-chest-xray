@@ -3,11 +3,17 @@
     python -m chestxray.external --config configs/experiments/e1_baseline.yaml --chexpert-root E:/datasets/chexpert
     python -m chestxray.external --config configs/experiments/e1_baseline.yaml --evaluate-only
 
-Uses only CheXpert's **validation set** (``valid.csv``): its labels come from a consensus of
-radiologists and have no "uncertain" value, and nothing is trained on CheXpert (plan, Phase 7).
-Only frontal images are scored. Works with both the official download (``CheXpert-v1.0``) and
-the downsampled version (``CheXpert-v1.0-small``): ``--chexpert-root`` is the folder that
-contains that folder (or ``valid.csv`` itself).
+Uses only CheXpert's **validation set**: its labels are the majority vote of three radiologists
+and have no "uncertain" value, and nothing is trained on CheXpert (plan, Phase 7). Only frontal
+images are scored. ``--chexpert-root`` may hold either layout:
+
+- the original download (``CheXpert-v1.0`` or ``CheXpert-v1.0-small``, with ``valid.csv``), in
+  the folder itself or one level below;
+- the one Stanford AIMI distributes today (``python -m chestxray.data.download_chexpert``): the
+  validation images of CheXpert Plus in ``PNG_valid/`` and the radiologist labels rebuilt from
+  CheXlocalize's ground-truth annotations (``CheXlocalize/gt_annotations_val.json``), which list
+  each image's positive observations. CheXlocalize does not annotate Pneumonia, so that class
+  is left out.
 
 Steps:
 
@@ -67,6 +73,17 @@ PREDS_NAME = "preds_chexpert.csv"
 CSV_NAME = "valid.csv"
 MIN_POSITIVES_FOR_CONCLUSIONS = 30
 
+# CheXpert as Stanford AIMI distributes it on Redivis today (plan, section 10), without valid.csv:
+# the validation images come from CheXpert Plus (PNG_valid/) and the radiologist labels from
+# CheXlocalize, whose ground-truth annotations list, for each validation image, the observations
+# with a positive label (the majority vote of three radiologists); an observation absent from an
+# image is negative. CheXlocalize covers 10 observations, and Pneumonia is not one of them.
+CHEXPLUS_IMAGES = "PNG_valid"
+CHEXLOCALIZE_ANNOTATIONS = "CheXlocalize/gt_annotations_val.json"
+CHEXLOCALIZE_OBSERVATIONS = {"Atelectasis", "Cardiomegaly", "Consolidation", "Edema", "Pleural Effusion",
+                             "Pneumothorax", "Enlarged Cardiomediastinum", "Lung Lesion", "Airspace Opacity",
+                             "Support Devices"}
+
 
 def find_valid_csv(root: Path) -> Path:
     for candidate in (root / CSV_NAME, *sorted(root.glob(f"*/{CSV_NAME}"))):
@@ -110,6 +127,44 @@ def load_chexpert(csv_path: Path) -> pd.DataFrame:
     return table
 
 
+def load_chexlocalize(root: Path) -> pd.DataFrame:
+    """Frontal validation images of CheXpert Plus with the CheXlocalize radiologist labels, in the
+    same format as :func:`load_chexpert`; only the classes CheXlocalize annotates get a column.
+    Age, sex and view are not in these files and are left unknown."""
+    annotations = json.loads((root / CHEXLOCALIZE_ANNOTATIONS).read_text(encoding="utf-8"))
+    images_dir = root / CHEXPLUS_IMAGES
+    keys = {"_".join(p.relative_to(images_dir).with_suffix("").parts): p for p in images_dir.rglob("*.png")}
+    orphans = sorted(set(annotations) - set(keys))
+    if orphans:
+        raise ValueError(f"{len(orphans)} annotated images missing from {images_dir}, e.g. {orphans[0]}")
+    classes = [nih for nih, chexpert in CLASS_MAP.items() if chexpert in CHEXLOCALIZE_OBSERVATIONS]
+    rows = []
+    for key, path in sorted(keys.items()):
+        if not key.endswith("_frontal"):
+            continue
+        positives = set(annotations.get(key, {})) - {"img_size"}
+        unknown = positives - CHEXLOCALIZE_OBSERVATIONS
+        if unknown:
+            raise ValueError(f"{key}: unexpected observations {sorted(unknown)}")
+        relative = path.relative_to(root).as_posix()
+        rows.append({"image": relative, "patient_id": int(re.search(r"patient(\d+)", relative).group(1)),
+                     "age": np.nan, "sex": "?", "view": "?",
+                     **{nih: int(CLASS_MAP[nih] in positives) for nih in classes}})
+    return pd.DataFrame(rows)
+
+
+def load_table(root: Path) -> tuple[pd.DataFrame, str]:
+    """The CheXpert validation set in whichever layout ``root`` has: the original download
+    (``valid.csv``) or the current AIMI one (CheXpert Plus images + CheXlocalize labels)."""
+    try:
+        return load_chexpert(find_valid_csv(root)), "valid.csv"
+    except FileNotFoundError:
+        if (root / CHEXLOCALIZE_ANNOTATIONS).is_file() and (root / CHEXPLUS_IMAGES).is_dir():
+            return load_chexlocalize(root), "CheXlocalize"
+        raise FileNotFoundError(f"Neither {CSV_NAME} nor {CHEXPLUS_IMAGES}/ with {CHEXLOCALIZE_ANNOTATIONS} "
+                                f"found under {root}") from None
+
+
 def fit_square(image: Image.Image, mode: str) -> Image.Image:
     image = image.convert("L")
     if mode == "resize" or image.width == image.height:
@@ -123,7 +178,8 @@ def fit_square(image: Image.Image, mode: str) -> Image.Image:
 @torch.no_grad()
 def predict_chexpert(model: torch.nn.Module, cfg: dict, root: Path, fit: str = "resize",
                      batch_size: int = 32) -> pd.DataFrame:
-    table = load_chexpert(find_valid_csv(root))
+    table, source = load_table(root)
+    logger.info("CheXpert labels from %s", source)
     classes = cfg["data"]["classes"]
     device = next(model.parameters()).device
     logits = []
@@ -145,7 +201,8 @@ def evaluate_external(run_dir: Path, results_dir: Path, n_boot: int, seed: int,
                       focus: list[str]) -> tuple[dict, pd.DataFrame]:
     """AUC per shared class on CheXpert next to the NIH test AUC of the same classes."""
     name = run_dir.name
-    classes = list(CLASS_MAP)
+    columns = pd.read_csv(run_dir / PREDS_NAME, nrows=0).columns
+    classes = [c for c in CLASS_MAP if c in columns]  # without valid.csv, no Pneumonia labels
     preds = Predictions(run_dir / PREDS_NAME, classes)
     external = bootstrap_auc_ap(preds, n_boot, seed)
     nih = json.loads((run_dir / "metrics_test.json").read_text(encoding="utf-8"))["classes"]
@@ -174,6 +231,8 @@ def evaluate_external(run_dir: Path, results_dir: Path, n_boot: int, seed: int,
     setup_style()
     fig, ax = plt.subplots(figsize=(6.5, 6))
     for color, c in zip(FOCUS_COLORS, focus):
+        if c not in classes:
+            continue
         k = classes.index(c)
         fpr, tpr, _ = roc_curve(preds.y[:, k], preds.scores[:, k])
         e = external["classes"][c]
@@ -192,7 +251,7 @@ def evaluate_external(run_dir: Path, results_dir: Path, n_boot: int, seed: int,
     metrics = {"experiment": name, "dataset": "CheXpert (validação)", "n_images": len(preds.y),
                "n_patients": int(len(np.unique(preds.patients))),
                "bootstrap": {"samples": n_boot, "seed": seed, "unit": "patient", "level": 0.95},
-               "class_map": CLASS_MAP, **external}
+               "class_map": {c: CLASS_MAP[c] for c in classes}, **external}
     (run_dir / "metrics_chexpert.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     return metrics, shown
 

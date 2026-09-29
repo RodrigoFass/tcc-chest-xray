@@ -239,7 +239,7 @@ compara o escore médio de cada faixa com a fração observada de positivos (pon
 indicam boa calibração), e pelo **escore de Brier** (BRIER, 1950), a média do erro quadrático entre o
 escore e o rótulo (0 ou 1), que combina calibração e discriminação (quanto menor, melhor).
 
-Um modelo descalibrado pode ser corrigido depois do treino. No ***Platt scaling*** (PLATT, 1999),
+Um modelo descalibrado pode ser corrigido depois do treino. No ***Platt scaling*** (PLATT, 2000),
 ajusta-se, para cada classe, uma regressão logística de uma variável sobre o *logit* do modelo,
 $p = \sigma(a z + b)$, usando um conjunto que não foi usado no treino (aqui, a validação). Como a
 transformação é crescente quando $a > 0$, ela não muda a ordem dos escores, e portanto não muda a AUC;
@@ -275,8 +275,10 @@ L^c_{\text{Grad-CAM}} = \mathrm{ReLU}\Big(\sum_k \alpha^c_k A^k\Big).$$
 Quando os mapas $A^k$ são os da última camada antes do *pooling* global seguido de uma camada linear,
 $\partial z_c / \partial A^k_{ij} = w^c_k / Z$ em todas as posições, e portanto $\alpha^c_k = w^c_k / Z$:
 o Grad-CAM é igual ao CAM (com a ReLU) a menos de um fator positivo, que desaparece quando o mapa é
-normalizado para o intervalo [0, 1]. Essa equivalência liga o método usado neste trabalho ao do CheXNet
-e foi verificada numericamente no código (Seção 3.9).
+normalizado para o intervalo [0, 1]. Neste trabalho, essa é uma das duas camadas-alvo comparadas, e a
+equivalência com o CAM do CheXNet foi verificada numericamente no código. A outra camada, a saída do
+último bloco denso antes da normalização em lote final, gera mapas muito parecidos e foi a adotada nas
+figuras e na interface (Seção 3.9).
 
 Um mapa de calor convincente não garante que o modelo "olhou para o lugar certo". Para avaliar a
 localização de forma objetiva, usa-se o ***pointing game*** (ZHANG et al., 2018): conta-se como acerto
@@ -286,20 +288,22 @@ se o resultado é melhor do que o acaso.
 
 ## 2.11 Trabalhos relacionados
 
-**Wang et al. (2017)** construíram o ChestX-ray8, depois ampliado para 14 doenças (ChestX-ray14), com
+**Wang et al. (2017a)** construíram o ChestX-ray8, depois ampliado para 14 doenças (ChestX-ray14), com
 112.120 radiografias frontais de 30.805 pacientes do NIH Clinical Center. Os rótulos foram extraídos dos
-laudos por processamento de linguagem natural, com uma precisão estimada pelos autores em torno de 90%
-[CONFERIR: valor exato no artigo]. Os autores também publicaram cerca de mil caixas delimitadoras
-marcadas por radiologistas e um primeiro conjunto de resultados de referência, com redes pré-treinadas
-no ImageNet. A versão publicada no CVPR avalia apenas 8 doenças; os resultados para as 14 classes vêm da
-versão revisada do artigo no arXiv (arXiv:1705.02315) e são os reproduzidos na Tabela 2 do CheXNet, com
-AUC média de 0,738, calculada neste trabalho a partir dos valores por classe [CONFERIR: versão do arXiv
-e tabela de onde saem os valores; ao citar as duas versões, a ABNT pede WANG et al., 2017a e 2017b].
+laudos por processamento de linguagem natural. Numa amostra de 900 laudos anotados manualmente, o
+método teve precisão, revocação e F1 de 94,4% (WANG et al., 2017b). Os autores também publicaram caixas
+delimitadoras marcadas por radiologistas para oito doenças e um primeiro conjunto de resultados de
+referência, com redes pré-treinadas no ImageNet. A versão publicada no CVPR avalia apenas 8 doenças. Os
+resultados para as 14 classes estão no Apêndice B da versão revisada do artigo no arXiv (WANG et al.,
+2017b, versão 4, Tabela 17: ResNet-50 com divisão aleatória de 70%, 10% e 20% das imagens) e são os
+reproduzidos na Tabela 2 do CheXNet, com AUC média de 0,738, calculada neste trabalho a partir dos
+valores por classe. Na versão 5 do mesmo artigo, de dezembro de 2017, os autores refizeram esses
+resultados na divisão oficial do NIH, com AUC média de 0,745.
 
 **Rajpurkar et al. (2017)**, com o **CheXNet**, treinaram uma DenseNet-121 de 121 camadas, pré-treinada
 no ImageNet, no ChestX-ray14. Para pneumonia, compararam o modelo com quatro radiologistas num conjunto
-de 420 imagens rotuladas por eles, e relataram F1 de 0,435 para o modelo contra 0,387 para a média dos
-radiologistas [CONFERIR: valores]. Estendido às 14 classes, o CheXNet obteve AUC média de 0,841, com
+de 420 imagens rotuladas por eles, e relataram F1 de 0,435 (IC95% 0,387–0,481) para o modelo contra
+0,387 (0,330–0,442) para a média dos radiologistas. Estendido às 14 classes, o CheXNet obteve AUC média de 0,841, com
 0,8094 para atelectasia, 0,8638 para efusão e 0,7680 para pneumonia. Os autores usaram uma divisão
 aleatória própria (70/10/20, sem pacientes em comum), BCE sem ponderação, Adam com taxa inicial de
 0,001, lotes de 16 imagens, apenas espelhamento horizontal como aumento de dados e escolha do modelo pela
@@ -310,23 +314,29 @@ Stanford Hospital, rotuladas para 14 observações por um rotulador automático 
 **incerteza** nos laudos ("não se pode excluir pneumonia"). O artigo compara políticas para os rótulos
 incertos, entre elas ignorá-los, tratá-los como negativos ou como positivos, e mostra que a melhor
 escolha varia conforme a observação. O conjunto de validação do CheXpert, com 200 estudos de 200
-pacientes, foi anotado de forma independente por três radiologistas; as anotações foram binarizadas e o
-rótulo de referência de cada observação é o voto da maioria, de modo que os rótulos finais não têm a
-categoria "incerto" [CONFERIR no artigo]; por isso, ele é usado aqui como conjunto de teste externo.
+pacientes, foi anotado de forma independente por três radiologistas, que classificaram cada observação
+como presente, incerta provável, incerta improvável ou ausente. As anotações foram binarizadas
+(presente e incerta provável como positivo) e o rótulo de referência de cada observação é o voto da
+maioria, de modo que os rótulos finais não têm a categoria "incerto"; por isso, ele é usado aqui como
+conjunto de teste externo. As imagens desse conjunto estão hoje no CheXpert Plus (CHAMBON et al., 2024),
+e as anotações dos radiologistas, no CheXlocalize (SAPORTA et al., 2022), como detalha a Seção 3.10.
 
 **Baltruschat et al. (2019)** compararam sistematicamente abordagens para o ChestX-ray14 (arquiteturas,
 transferência de aprendizado, resolução de entrada, uso de dados não visuais) e mostraram que os
-resultados variam de forma relevante conforme a divisão dos dados, o que torna aproximada a comparação
-entre trabalhos que usam divisões diferentes. **Guendel et al. (2018)** propuseram redes densas com
-informação de localização e avaliaram no ChestX-ray14 com a divisão oficial.
+resultados variam de forma relevante conforme a divisão dos dados: os melhores modelos tiveram AUC média
+de 0,806 na divisão oficial e de 0,822 em divisões aleatórias. Isso torna aproximada a comparação entre
+trabalhos que usam divisões diferentes. **Guendel et al. (2018)** propuseram redes densas com
+informação de localização, treinadas com o ChestX-ray14 e o conjunto PLCO, e ilustram o mesmo efeito: o
+mesmo modelo teve AUC média de 0,807 na divisão oficial e de 0,841 numa divisão aleatória por paciente.
 
 Dois trabalhos questionam o que esses números significam. **Zech et al. (2018)** mostraram que um modelo
 de detecção de pneumonia treinado com dados de alguns hospitais perdeu desempenho em outro hospital e que
-as redes conseguiam identificar de qual hospital e de qual equipamento vinha a imagem, um atalho que pode
-inflar resultados internos. **Oakden-Rayner (2020)** revisou visualmente amostras do ChestX-ray14 e
-encontrou erros frequentes nos rótulos, sobretudo em algumas classes, e imagens em que a doença rotulada
-já estava sendo tratada (por exemplo, pneumotórax com dreno), o que permite ao modelo acertar pelo motivo
-errado. **Litjens et al. (2017)** revisaram o aprendizado profundo em imagens médicas de forma ampla e
+as redes conseguiam identificar de qual hospital vinha a imagem (em mais de 99,9% das radiografias do
+NIH), um atalho que pode inflar resultados internos. **Oakden-Rayner (2020)** revisou visualmente 50 imagens de cada classe do
+ChestX-ray14 e encontrou erros frequentes nos rótulos: em várias classes, boa parte das imagens não
+mostrava o achado rotulado (só 60% na pneumonia e 14% no enfisema). Encontrou também imagens em que a
+doença rotulada já estava sendo tratada: 80% dos casos de pneumotórax tinham dreno torácico, o que
+permite ao modelo acertar pelo motivo errado. **Litjens et al. (2017)** revisaram o aprendizado profundo em imagens médicas de forma ampla e
 destacaram a falta de dados rotulados e a necessidade de interpretabilidade como desafios centrais.
 
 O Quadro 1 resume os trabalhos mais próximos.
@@ -335,14 +345,12 @@ O Quadro 1 resume os trabalhos mais próximos.
 
 | Trabalho | Dados | Modelo | Contribuição para este trabalho |
 |---|---|---|---|
-| Wang et al. (2017) | ChestX-ray14 | CNNs pré-treinadas | Dataset, caixas delimitadoras, primeira referência de AUC |
+| Wang et al. (2017a, 2017b) | ChestX-ray14 | CNNs pré-treinadas | Dataset, caixas delimitadoras, primeira referência de AUC |
 | Rajpurkar et al. (2017) | ChestX-ray14 | DenseNet-121 | Arquitetura e metodologia de referência; CAM |
 | Irvin et al. (2019) | CheXpert | DenseNet-121 | Conjunto externo; rótulos de radiologistas (maioria de três) na validação |
-| Baltruschat et al. (2019) | ChestX-ray14 | ResNet-50 e variações | Efeito da divisão dos dados nos resultados |
+| Baltruschat et al. (2019) | ChestX-ray14 | ResNet-38, 50 e 101 e variações | Efeito da divisão dos dados nos resultados |
 | Zech et al. (2018) | 3 hospitais | DenseNet-121 | Generalização entre hospitais; atalhos |
 | Oakden-Rayner (2020) | ChestX-ray14 | — | Qualidade dos rótulos |
 | Selvaraju et al. (2017) | — | Grad-CAM | Método de interpretabilidade |
 
 Fonte: elaborado pelo autor.
-
-[CONFERIR: arquitetura usada por Baltruschat et al. e por Zech et al.; ajustar o quadro se necessário.]

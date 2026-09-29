@@ -25,9 +25,9 @@ registro do treino) na 14ª época e parou na 19ª, depois de 121,7 minutos. A p
 oitava época (de 0,941 para 1,087 na 19ª), enquanto a AUC ainda melhorava até a 14ª, o que ilustra por que a perda não é um bom critério de parada quando a
 função de perda é ponderada: ela passa a refletir a escala dos escores, e não só a ordenação dos exames.
 
-Sem aumento de dados (E3), o sobreajuste chegou cedo: a AUC de validação atingiu o máximo (0,830) já
+Sem aumento de dados (E3), o sobreajuste chegou cedo: a AUC de validação atingiu o máximo (0,829) já
 na terceira época e, a partir daí, a perda de treino despencou (de 0,138 para 0,063 na oitava época)
-enquanto a perda de validação subia (de 0,146 para 0,175). A parada antecipada encerrou o treino na
+enquanto a perda de validação subia (de 0,145 para 0,175). A parada antecipada encerrou o treino na
 oitava época, depois de 51,6 minutos. O E4, que parte de pesos aleatórios, convergiu devagar: a AUC de
 validação ainda subia na 15ª época (0,809), deu um salto com a primeira redução da taxa de aprendizado
 (0,817 na 18ª) e depois ficou estável até a 30ª, o limite do orçamento, com máximo de 0,817 na 25ª
@@ -101,7 +101,7 @@ Fonte: elaborado pelo autor.
 
 ## 4.3 Comparação com a literatura
 
-A Tabela 4 compara a AUC do E1 com as de Wang et al. (2017) e do CheXNet. O modelo supera a referência
+A Tabela 4 compara a AUC do E1 com as de Wang et al. (2017b) e do CheXNet. O modelo supera a referência
 de Wang et al. nas 14 classes, e a média (0,841) é igual à do CheXNet (0,8414). Por classe, o valor do
 CheXNet está dentro do IC95% deste trabalho em 11 das 14 classes, incluindo atelectasia (0,8094 contra
 0,816, IC 0,802–0,829) e pneumonia (0,7680 contra 0,751, IC 0,714–0,787). A efusão pleural ficou acima
@@ -112,7 +112,7 @@ faixa**, e não que um modelo seja melhor que o outro.
 
 **Tabela 4 – AUC do modelo final comparada à literatura**
 
-| Doença | Wang et al. (2017) | CheXNet (2017) | Este trabalho (IC95%) |
+| Doença | Wang et al. (2017b) | CheXNet (2017) | Este trabalho (IC95%) |
 |---|---|---|---|
 | Atelectasia * | 0,716 | 0,8094 | 0,816 (0,802–0,829) |
 | Cardiomegalia | 0,807 | 0,9248 | 0,920 (0,902–0,935) |
@@ -130,7 +130,8 @@ faixa**, e não que um modelo seja melhor que o outro.
 | Hérnia | 0,767 | 0,9164 | 0,939 (0,862–0,993) |
 | Média (14 classes) | 0,738 | 0,8414 | 0,841 (0,833–0,848) |
 
-Fonte: elaborado pelo autor, com os valores da literatura da Tabela 2 de Rajpurkar et al. (2017)
+Fonte: elaborado pelo autor, com os valores da literatura da Tabela 2 de Rajpurkar et al. (2017); os de
+Wang et al. são os da versão 4 do artigo no arXiv (Seção 2.11)
 (`results/tables/e1_baseline/comparacao_literatura`). * Doenças estudadas.
 
 ## 4.4 Desempenho no limiar de decisão
@@ -283,8 +284,8 @@ depois da terceira época, e o treino terminou em pouco mais da metade do tempo 
 Fonte: elaborado pelo autor (`results/tables/seeds_test`, que traz também a AUPRC).
 
 Trocar só a semente, com a mesma divisão dos dados e a mesma configuração, mudou a AUC média em até
-0,005 e a da pneumonia em até 0,015 (de 0,751 a 0,766). A semente 42, usada nas comparações, ficou no
-meio das três. Essa variação vem do treino (inicialização da camada final, ordem das imagens e sorteios
+0,005 e a da pneumonia em até 0,015 (de 0,751 a 0,766). Na AUC média, a semente 42, usada nas
+comparações, ficou no meio das três. Essa variação vem do treino (inicialização da camada final, ordem das imagens e sorteios
 do aumento de dados), e os intervalos da Tabela 8 não a incluem: o bootstrap pareado considera a amostra
 de teste, mas cada experimento foi treinado uma única vez. Como a diferença entre duas execuções isoladas
 tem desvio-padrão cerca de $\sqrt{2}$ vezes o de uma execução, a variação esperada só pela semente
@@ -307,7 +308,7 @@ pior da divisão principal: AUC média de 0,821, 0,020 abaixo do E1 (IC95% −0,
 significativas na atelectasia (−0,024) e na efusão (−0,009); na pneumonia, a diferença foi de +0,006,
 não significativa (−0,018 a 0,031). O E4 usou todo o orçamento (melhor época na 25ª, fim na 30ª) e levou
 200,3 minutos, mais que o dobro do E1. Ainda assim, 0,821 fica bem acima da referência de Wang et al.
-(0,738, Tabela 4): o ChestX-ray14 é grande o bastante para uma rede treinada do zero aprender boa parte
+(2017b; 0,738, Tabela 4): o ChestX-ray14 é grande o bastante para uma rede treinada do zero aprender boa parte
 da tarefa, e a transferência de aprendizado acelerou a convergência (melhor época na 8ª, contra a 25ª) e
 melhorou o resultado final.
 
@@ -333,9 +334,15 @@ igual à de validação (0,841 contra 0,838), o que indica que a diferença est�
 oficial, e não no treino. Esse conjunto é diferente do resto da base: tem 9,2 imagens por paciente,
 contra 3,6 no conjunto todo, ou seja, concentra pacientes com muitos exames de acompanhamento,
 provavelmente internados, e tem prevalências mais altas (Seção 3.4). Trabalhos que usam a divisão
-oficial também relatam AUCs médias abaixo das obtidas em divisões aleatórias [CONFERIR: citar os valores
-de GUENDEL et al., 2018, e de BALTRUSCHAT et al., 2019, nos artigos]. Como o conjunto de teste é outro,
-o E5 não é comparado lado a lado com os experimentos da divisão principal.
+oficial relatam valores na mesma faixa e a mesma diferença em relação às divisões aleatórias:
+- **Guendel et al. (2018):** AUC média de 0,807 na divisão oficial e de 0,841 numa divisão aleatória
+  por paciente, com o mesmo modelo.
+- **Baltruschat et al. (2019):** o melhor modelo chegou a 0,806 na divisão oficial e a 0,822 em
+  divisões aleatórias.
+
+O E5 (0,811) está, portanto, na faixa desses trabalhos. A diferença de Guendel et al. entre as duas
+divisões é praticamente a observada aqui entre o E5 e o E1 (0,811 contra 0,841). Como o conjunto de
+teste é outro, o E5 não é comparado lado a lado com os experimentos da divisão principal.
 
 ## 4.7 Análise por subgrupos
 
@@ -437,31 +444,76 @@ Fonte: elaborado pelo autor.
 
 ## 4.9 Validação externa no CheXpert
 
-[PREENCHER depois de rodar `python -m chestxray.external ...`.]
+O modelo final foi aplicado, sem novo treino, às 202 imagens frontais (200 pacientes) da validação do
+CheXpert, com os rótulos dos radiologistas (Seção 3.10). A Tabela 13 compara a AUC de cada classe com a
+do teste do NIH.
 
 **Tabela 13 – AUC no conjunto de validação do CheXpert, comparada ao teste do NIH**
 
-[PREENCHER com `results/tables/e1_baseline/validacao_externa_chexpert.md`: casos, AUC no CheXpert com
-IC95%, AUC no teste do NIH e diferença, para as 7 classes em comum; marcar com † as classes com menos de
-30 casos.]
+| Doença | Casos (CheXpert) | AUC CheXpert (IC95%) | AUC NIH teste | Diferença |
+|---|---|---|---|---|
+| Atelectasia * | 75 | 0,810 (0,748–0,868) | 0,816 | −0,006 |
+| Cardiomegalia | 66 | 0,836 (0,775–0,890) | 0,920 | −0,084 |
+| Efusão pleural * | 64 | 0,849 (0,789–0,899) | 0,886 | −0,037 |
+| Pneumotórax | 7 | 0,692 (0,455–0,963) † | 0,888 | −0,196 |
+| Consolidação | 32 | 0,911 (0,867–0,949) | 0,783 | +0,129 |
+| Edema | 42 | 0,841 (0,774–0,904) | 0,896 | −0,055 |
+| Média (6 classes) | | 0,823 (0,777–0,876) | 0,865 | −0,041 |
+
+Fonte: elaborado pelo autor (`results/tables/e1_baseline/validacao_externa_chexpert`). * Doenças
+estudadas. † Menos de 30 casos: reportado, mas sem conclusão. A pneumonia não tem rótulos de
+radiologistas disponíveis nesse conjunto (Seção 3.10).
+
+**Figura 11 – Curvas ROC no CheXpert (validação)**
+
+(`results/figures/e1_baseline/roc_foco_chexpert.png`)
 
 Fonte: elaborado pelo autor.
 
-[PREENCHER: número de imagens frontais e de pacientes; se a AUC caiu, em quais classes, e se a queda é
-maior que a incerteza; lembrar que os rótulos do CheXpert de validação são de radiologistas, enquanto os
-do NIH vêm de laudos processados automaticamente, e que isso pode aumentar ou reduzir a AUC. Registrar
-também o resultado com `--fit pad`, se diferente.]
+Nas duas doenças estudadas com rótulos no CheXpert, o desempenho se manteve na mesma faixa. A
+atelectasia ficou praticamente igual à do teste do NIH (0,810 contra 0,816). A efusão pleural caiu
+0,037, mas a AUC do NIH (0,886) ainda está dentro do IC95% do CheXpert (0,789 a 0,899). O mesmo vale
+para o edema (−0,055; IC até 0,904) e para a média das seis classes (0,823 contra 0,865; IC até 0,876).
+
+Duas classes se afastaram do NIH além da incerteza:
+- **Cardiomegalia:** caiu de 0,920 para 0,836, com o valor do NIH acima do limite superior do intervalo
+  (0,890).
+- **Consolidação:** subiu de 0,783 para 0,911, com o valor do NIH abaixo do limite inferior (0,867).
+
+O pneumotórax, com 7 casos, não permite conclusão. A comparação é aproximada: o intervalo leva em conta
+só a incerteza do CheXpert, e a AUC do NIH também tem a sua.
+
+Como verificação, a análise foi repetida com preenchimento das bordas em preto em vez do
+redimensionamento. Os valores ficaram próximos: média de 0,819; atelectasia, 0,804; efusão, 0,875;
+cardiomegalia, 0,837; consolidação, 0,924; edema, 0,825. As conclusões não mudam.
 
 ## 4.10 Sistema de demonstração
 
-**Figura 11 – Interface de demonstração**
+A Figura 12 mostra a página publicada analisando uma das imagens de exemplo, um verdadeiro positivo de
+efusão pleural do conjunto de teste. A frase de resumo lista as doenças acima do limiar; o mapa de calor
+é o da efusão, com probabilidade estimada de 90,9% (limiar de 11,3%); e a tabela traz as 14 doenças, com
+as três estudadas em destaque. A mensagem acima do resultado informa que a análise foi feita no próprio
+navegador, em 0,6 s.
 
-[PREENCHER: captura de tela da interface no Hugging Face Spaces com um exemplo em que a efusão fica acima
-do limiar, mostrando a frase de resumo, a tabela e o mapa de calor.]
+**Figura 12 – Interface de demonstração publicada no Hugging Face Spaces**
+
+(`results/figures/interface_demo.png`)
 
 Fonte: elaborado pelo autor.
 
-A exportação do modelo para a interface foi conferida contra as predições da avaliação: nas três imagens
-de teste verificadas, a diferença máxima entre os escores da interface e os do arquivo de predições foi
-de 3,6 × 10⁻⁷ (o critério era 10⁻⁴). Cada análise, com o mapa de calor, levou entre 0,3 e 0,4 s em CPU no
-computador de desenvolvimento. [PREENCHER: tempo de resposta medido no Space e link.]
+As verificações da Seção 3.11 passaram com folga:
+
+- **Modelo ONNX contra a avaliação:** nas cinco imagens de teste conferidas, os escores do modelo ONNX
+  diferiram dos do arquivo de predições em no máximo 5,4 × 10⁻⁷, e os mapas de calor diferiram dos do
+  Grad-CAM em Python em no máximo 8,6 × 10⁻⁶.
+- **Autoteste no navegador (quatro imagens de exemplo):** a imagem vista pela rede foi idêntica pixel a
+  pixel, os escores diferiram em no máximo 1,8 × 10⁻⁷ e os mapas de calor em no máximo 6,9 × 10⁻⁶. Os
+  critérios eram 10⁻⁴ e 10⁻³.
+- **Mesmo resultado nas duas versões:** para a mesma imagem, a página e a versão Gradio mostram a mesma
+  frase de resumo e a mesma tabela.
+
+O modelo, com 29 MB, é baixado uma vez quando a página abre. Depois disso, cada análise, com o mapa de
+calor, levou entre 0,3 e 0,6 s no navegador do computador de desenvolvimento (Intel Core i5-10400F), e
+a versão Gradio levou entre 0,3 e 0,4 s em CPU. A página está publicada em <https://huggingface.co/spaces/rotriguin/tcc-raio-x>, e o autoteste,
+rodado no endereço público, deu os mesmos resultados que no computador de desenvolvimento.
+[PREENCHER, opcional: tempo de resposta num celular.]

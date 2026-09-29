@@ -1,7 +1,7 @@
 # RESUMO
 
-A radiografia de tórax é o exame de imagem mais realizado no mundo, mas sua interpretação exige
-especialização e está sujeita à variabilidade entre profissionais. Este trabalho desenvolveu um sistema
+A radiografia de tórax é o exame mais solicitado na investigação de doenças pulmonares, mas sua
+interpretação exige especialização e está sujeita à variabilidade entre profissionais. Este trabalho desenvolveu um sistema
 de apoio à identificação de doenças pulmonares em radiografias de tórax, com foco em pneumonia,
 atelectasia e efusão pleural. Uma rede neural convolucional DenseNet-121, pré-treinada no ImageNet, foi
 ajustada nas 14 doenças do conjunto público NIH ChestX-ray14 (112.120 imagens de 30.805 pacientes), com
@@ -17,10 +17,11 @@ média caiu 0,010 e 0,020, respectivamente. Nos exames em incidência anteropost
 pacientes mais graves, a AUC foi menor que nos posteroanteriores na efusão pleural (0,844 contra 0,908)
 e na atelectasia (0,789 contra 0,828); na pneumonia, não houve diferença clara entre as incidências.
 Os mapas de calor Grad-CAM apontaram para regiões plausíveis, mas o ponto de máximo do mapa caiu dentro
-da marcação do radiologista em só 24% das imagens das três doenças. [PREENCHER: uma frase sobre o
-CheXpert.] O modelo
-foi disponibilizado numa interface web de demonstração, que mostra o valor de cada doença, o limiar de
-decisão e um mapa de calor Grad-CAM. [CONFERIR: manter esta frase só depois de publicar a interface.]
+da marcação do radiologista em só 24% das imagens das três doenças. No conjunto de validação do CheXpert, de outro hospital
+e com rótulos de radiologistas, a AUC média das seis classes em comum foi de 0,823, contra 0,865 no
+teste do NIH, com a atelectasia (0,810) e a efusão pleural (0,849) na mesma faixa. O modelo
+foi disponibilizado numa página web de demonstração, que roda no navegador de quem acessa e mostra a
+probabilidade estimada de cada doença, o limiar de decisão e um mapa de calor Grad-CAM.
 
 **Palavras-chave:** aprendizado profundo; radiografia de tórax; redes neurais convolucionais; DenseNet;
 Grad-CAM.
@@ -30,7 +31,7 @@ para trabalhos acadêmicos.]
 
 # ABSTRACT
 
-Chest radiography is the most frequently performed imaging exam in the world, but its interpretation
+Chest radiography is the most commonly ordered test for pulmonary disorders, but its interpretation
 requires expertise and varies between readers. This work developed a system to support the
 identification of lung diseases on chest X-rays, focusing on pneumonia, atelectasis and pleural effusion.
 A DenseNet-121 convolutional neural network, pretrained on ImageNet, was fine-tuned on the 14 diseases of
@@ -47,8 +48,10 @@ learning, mean AUC dropped by 0.010 and 0.020, respectively. On anteroposterior 
 severely ill patients, AUC was lower than on posteroanterior exams for pleural effusion (0.844 vs. 0.908)
 and atelectasis (0.789 vs. 0.828); for pneumonia, there was no clear difference between views. Grad-CAM heatmaps
 pointed to plausible regions, but the heatmap peak fell inside the radiologist's box in only 24% of the
-images of the three diseases. [TO FILL: one sentence on CheXpert.] The model was made available in a
-web demo that shows each disease's score, the decision threshold and a Grad-CAM heatmap. [TO CHECK: keep
-this sentence only after the demo is published.]
+images of the three diseases. On the CheXpert validation set, from another hospital and
+labeled by radiologists, the mean AUC over the six shared classes was 0.823, against 0.865 on the NIH test
+set, with atelectasis (0.810) and pleural effusion (0.849) in the same range. The model was made available in a
+web demo that runs in the visitor's browser and shows each disease's estimated probability, the decision
+threshold and a Grad-CAM heatmap.
 
 **Keywords:** deep learning; chest radiography; convolutional neural networks; DenseNet; Grad-CAM.
