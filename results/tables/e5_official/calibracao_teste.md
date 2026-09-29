@@ -1,0 +1,16 @@
+| Doença | Brier (escore bruto) | Brier (após Platt) |
+|---|---|---|
+| Atelectasia * | 0,1006 | 0,0986 |
+| Cardiomegalia | 0,0334 | 0,0333 |
+| Efusão pleural * | 0,1158 | 0,1142 |
+| Infiltração | 0,1720 | 0,1667 |
+| Massa | 0,0555 | 0,0541 |
+| Nódulo | 0,0546 | 0,0542 |
+| Pneumonia * | 0,0211 | 0,0210 |
+| Pneumotórax | 0,0776 | 0,0778 |
+| Consolidação | 0,0634 | 0,0626 |
+| Edema | 0,0328 | 0,0322 |
+| Enfisema | 0,0319 | 0,0310 |
+| Fibrose | 0,0161 | 0,0160 |
+| Espessamento pleural | 0,0411 | 0,0402 |
+| Hérnia | 0,0026 | 0,0026 |

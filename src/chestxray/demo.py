@@ -47,9 +47,10 @@ logger = logging.getLogger(__name__)
 LABELS = {"score": "Escore do modelo", "probability": "Probabilidade estimada"}
 DISCLAIMER = "**Protótipo acadêmico. Não usar para diagnóstico.**"
 SCOPE_NOTE = (
-    "O modelo foi treinado com radiografias de tórax frontais de adultos do NIH ChestX-ray14 e só "
-    "avalia 14 doenças. Imagens muito diferentes dessas (foto de tela, criança, incidência lateral, "
-    "outro exame) geram resultados sem sentido."
+    "O modelo foi treinado principalmente com radiografias de tórax frontais de adultos do NIH "
+    "ChestX-ray14 (cerca de 5% das imagens são de menores de 18 anos) e só avalia 14 doenças. Imagens "
+    "muito diferentes dessas (foto de tela, criança pequena, incidência lateral, outro exame) geram "
+    "resultados sem sentido."
 )
 PROBABILITY_NOTE = ("A probabilidade estimada foi calibrada na população do NIH; em outra população, "
                     "com outra prevalência das doenças, ela deixa de valer.")

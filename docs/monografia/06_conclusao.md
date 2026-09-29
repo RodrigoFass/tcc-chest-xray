@@ -17,25 +17,37 @@ b) no teste, a AUC média nas 14 classes foi de 0,841 (IC95% 0,833–0,848); nas
 
 c) os resultados estão na mesma faixa dos do CheXNet (AUC média de 0,8414) e acima dos de Wang et al.
    (2017) em todas as classes, com a ressalva de que a comparação é aproximada, por causa das diferenças
-   de protocolo;
+   de protocolo; na divisão oficial do NIH (E5), a AUC média foi de 0,811 (0,804–0,816), num conjunto de
+   teste mais difícil, que concentra pacientes com muitos exames de acompanhamento;
 
-d) a ponderação de classes não melhorou a AUC e piorou a calibração; [PREENCHER: efeito do aumento de
-   dados (E3) e da transferência de aprendizado (E4), e a variação entre sementes];
+d) a ponderação de classes não melhorou a AUC e piorou a calibração; sem aumento de dados, a AUC média
+   caiu 0,010 e o sobreajuste começou na terceira época; sem transferência de aprendizado, caiu 0,020,
+   com mais que o dobro do tempo de treino; e a repetição da configuração final com três sementes deu
+   desvio-padrão de 0,003 na AUC média e de 0,008 na pneumonia, o que torna frágeis as diferenças
+   pequenas entre experimentos, em especial na pneumonia;
 
 e) o modelo final é bem calibrado já sem ajuste, e o *Platt scaling* corrige a faixa de escores mais
-   altos; o desempenho é pior nos exames AP, típicos de pacientes mais graves, o que é a principal
-   diferença entre subgrupos encontrada;
+   altos; na efusão pleural e na atelectasia, o desempenho é pior nos exames AP, típicos de pacientes
+   mais graves (AUC de 0,844 contra 0,908 nos PA e de 0,789 contra 0,828), o que é a principal diferença
+   entre subgrupos encontrada; na pneumonia, as estimativas das duas incidências (PA 0,722; AP 0,746) têm
+   intervalos que se sobrepõem e ficaram ambas abaixo da AUC geral;
 
-f) [PREENCHER: resultado do Grad-CAM e do *pointing game*];
+f) os mapas de calor Grad-CAM apontam para regiões plausíveis nos acertos, mas o pico do mapa caiu
+   dentro da caixa do radiologista em só 15 de 62 imagens das três doenças (24%), acima do centro da
+   imagem na atelectasia e na efusão, mas não na pneumonia;
 
 g) [PREENCHER: resultado no CheXpert];
 
 h) a interface foi publicada [PREENCHER: link] e reproduz os escores da avaliação.
 
-A hipótese do trabalho, de que uma DenseNet-121 com transferência de aprendizado atinge no ChestX-ray14
-desempenho competitivo com a literatura, foi confirmada. Mais importante que o número final, porém, é o
+A hipótese do trabalho, apresentada no Capítulo 1, de que uma DenseNet-121 com transferência de
+aprendizado atinge no ChestX-ray14 desempenho competitivo com a literatura, foi sustentada pelos
+resultados, no sentido definido ali: o modelo ficou na mesma faixa do CheXNet, numa comparação que é
+aproximada porque os conjuntos de teste são diferentes. Mais importante que o número final, porém, é o
 que a avaliação detalhada revelou: a AUC, sozinha, esconde que a pneumonia é detectada com valor
-preditivo positivo muito baixo; o desempenho cai no grupo de pacientes mais graves; e os valores do
+preditivo positivo muito baixo; na efusão e na atelectasia, o desempenho cai nos exames AP, que costumam
+ser de pacientes internados e mais graves, e os exames AP recebem escores mais altos mesmo sem doença
+rotulada; os mapas de calor indicam regiões amplas, sem localizar os achados com precisão; e os valores do
 modelo só podem ser lidos como probabilidades depois de verificada a calibração, e apenas para a
 população em que ela foi verificada. Esses são os pontos que separam um bom resultado em um conjunto
 público de uma ferramenta que possa, um dia, ser útil na prática.

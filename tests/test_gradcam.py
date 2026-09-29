@@ -85,7 +85,7 @@ def test_gradcam_on_last_relu_equals_cam(setup):
         features = explainer.model.relu(explainer.model.features(inf.prepare_image(image, cfg).unsqueeze(0)))[0]
         cam = torch.einsum("c,chw->hw", explainer.model.classifier.weight[k], features).clamp(min=0).numpy()
     expected = scale_cam_image(cam[None], (64, 64))[0]
-    np.testing.assert_allclose(explainer.heatmap(image, "Atelectasis"), expected, atol=1e-4)
+    np.testing.assert_allclose(explainer.heatmap(image, "Atelectasis", layer="relu"), expected, atol=1e-4)
     explainer.close()
 
 

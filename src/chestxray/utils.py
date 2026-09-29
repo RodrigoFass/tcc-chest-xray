@@ -85,6 +85,11 @@ def setup_logging(log_file: str | Path | None = None, level: int = logging.INFO)
     root.setLevel(level)
 
     formatter = logging.Formatter(LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
+    # A Windows console or pipe may use a code page without characters such as "−" (the tables
+    # use it): replace them, instead of losing the whole record to an encoding error
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if reconfigure is not None:
+        reconfigure(errors="replace")
     handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
     if log_file is not None:
         Path(log_file).parent.mkdir(parents=True, exist_ok=True)

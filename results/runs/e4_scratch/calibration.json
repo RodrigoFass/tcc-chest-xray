@@ -1,0 +1,90 @@
+{
+  "fitted_on": "val",
+  "n_val_images": 16812,
+  "classes": {
+    "Atelectasis": {
+      "threshold": 0.0794936,
+      "threshold_calibrated": 0.08845016305949446,
+      "platt_a": 0.8010808092940133,
+      "platt_b": -0.3706618843540725
+    },
+    "Cardiomegaly": {
+      "threshold": 0.022704,
+      "threshold_calibrated": 0.02969322804968672,
+      "platt_a": 0.8718751325994704,
+      "platt_b": -0.20648240351364355
+    },
+    "Effusion": {
+      "threshold": 0.105687,
+      "threshold_calibrated": 0.11545419987018354,
+      "platt_a": 0.8422849066624303,
+      "platt_b": -0.23743869134230317
+    },
+    "Infiltration": {
+      "threshold": 0.201458,
+      "threshold_calibrated": 0.2074062113970847,
+      "platt_a": 0.8622344026509414,
+      "platt_b": -0.1531566535099473
+    },
+    "Mass": {
+      "threshold": 0.0367997,
+      "threshold_calibrated": 0.048275109761120726,
+      "platt_a": 0.7861184884918605,
+      "platt_b": -0.4148625216006873
+    },
+    "Nodule": {
+      "threshold": 0.059943,
+      "threshold_calibrated": 0.06469792170966145,
+      "platt_a": 0.7917397436215767,
+      "platt_b": -0.491840094593405
+    },
+    "Pneumonia": {
+      "threshold": 0.0120799,
+      "threshold_calibrated": 0.01627239927494043,
+      "platt_a": 0.789215398590919,
+      "platt_b": -0.6261275458048394
+    },
+    "Pneumothorax": {
+      "threshold": 0.0226865,
+      "threshold_calibrated": 0.037103229248544645,
+      "platt_a": 0.7748407703022878,
+      "platt_b": -0.3404873689743416
+    },
+    "Consolidation": {
+      "threshold": 0.0360364,
+      "threshold_calibrated": 0.04308122297812155,
+      "platt_a": 0.8035593475820777,
+      "platt_b": -0.4597141970383745
+    },
+    "Edema": {
+      "threshold": 0.0135311,
+      "threshold_calibrated": 0.015732515300745063,
+      "platt_a": 0.8336359970955888,
+      "platt_b": -0.5605857012117458
+    },
+    "Emphysema": {
+      "threshold": 0.0158634,
+      "threshold_calibrated": 0.020549837303876925,
+      "platt_a": 0.7918961873416431,
+      "platt_b": -0.5953887341169091
+    },
+    "Fibrosis": {
+      "threshold": 0.0174073,
+      "threshold_calibrated": 0.019885644799471698,
+      "platt_a": 0.8353899636540763,
+      "platt_b": -0.5282886052146945
+    },
+    "Pleural_Thickening": {
+      "threshold": 0.0222024,
+      "threshold_calibrated": 0.026624765020302327,
+      "platt_a": 0.8049237749341394,
+      "platt_b": -0.5522090213850736
+    },
+    "Hernia": {
+      "threshold": 0.000913506,
+      "threshold_calibrated": 0.0009898735188744482,
+      "platt_a": 0.7884954330746369,
+      "platt_b": -1.399598648643429
+    }
+  }
+}

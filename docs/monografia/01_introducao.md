@@ -1,12 +1,17 @@
 # 1 INTRODUÇÃO
 
-A radiografia de tórax é o exame de imagem mais realizado no mundo. Ela é barata, rápida, amplamente
+A radiografia de tórax é o exame de imagem mais realizado no mundo [CONFERIR: citar fonte. Candidata,
+a verificar antes de usar: RAOOF, S. et al. Interpretation of plain chest roentgenogram. **Chest**,
+v. 141, n. 2, p. 545-558, 2012]. Ela é barata, rápida, amplamente
 disponível e expõe o paciente a uma dose baixa de radiação, o que a torna o primeiro exame na
 investigação de queixas respiratórias, no acompanhamento de pacientes internados e na triagem de
 doenças como pneumonia, derrame pleural e tuberculose. A interpretação dessas imagens, porém, está
 longe de ser simples: estruturas anatômicas se sobrepõem numa projeção bidimensional, achados
 diferentes produzem aspectos parecidos, e a leitura depende da experiência de quem laudou. A
-variabilidade entre radiologistas na interpretação de radiografias de tórax é bem documentada, e em
+variabilidade entre radiologistas na interpretação de radiografias de tórax é bem documentada
+[CONFERIR: citar fonte. Candidata, a verificar antes de usar: HOPSTAKEN, R. M. et al. Inter-observer
+variation in the interpretation of chest radiographs for pneumonia in community-acquired lower
+respiratory tract infections. **Clinical Radiology**, v. 59, n. 8, p. 743-752, 2004], e em
 muitas regiões simplesmente não há radiologistas suficientes para laudar todos os exames em tempo
 hábil [CONFERIR: se quiser um número sobre a distribuição de radiologistas no Brasil, citar uma fonte
 como a Demografia Médica no Brasil (CFM/USP)].
@@ -33,9 +38,13 @@ isso, métodos de interpretabilidade, como o Grad-CAM (SELVARAJU et al., 2017), 
 esperada desse tipo de sistema.
 
 Este trabalho reproduz e estende a abordagem do CheXNet com atenção a esses pontos: divisão dos dados
-por paciente, intervalos de confiança para todas as métricas, comparação estatística entre variações
-do modelo, análise por subgrupos de pacientes, calibração das saídas, mapas de calor avaliados contra
-marcações de radiologistas e validação em um conjunto de dados de outra instituição.
+por paciente, intervalos de confiança por bootstrap por paciente para a AUC e a AUPRC, comparação
+estatística entre variações do modelo, análise por subgrupos de pacientes, calibração das saídas, mapas
+de calor avaliados contra marcações de radiologistas e validação em um conjunto de dados de outra
+instituição. A hipótese do trabalho é que uma DenseNet-121 pré-treinada no ImageNet e ajustada no
+ChestX-ray14 atinge AUC competitiva com a literatura (WANG et al., 2017; RAJPURKAR et al., 2017),
+entendida como resultados na mesma faixa, já que a comparação entre divisões diferentes dos dados é
+aproximada.
 
 ## 1.1 Objetivo geral
 
@@ -89,7 +98,9 @@ pouco explorada no Brasil [CONFERIR: se possível, apoiar com uma referência br
 
 O sistema é uma prova de conceito acadêmica. Ele **não é um dispositivo médico**, não foi validado
 clinicamente e não deve ser usado para decidir sobre pacientes. O modelo avalia apenas as 14 doenças
-rotuladas no ChestX-ray14, em radiografias frontais de adultos; não detecta outras condições (como
+rotuladas no ChestX-ray14, em radiografias frontais, pensado para adultos (a base inclui poucos exames
+de menores de 18 anos, 4,7% das imagens, e o desempenho nesse grupo não foi avaliado separadamente); não
+detecta outras condições (como
 tuberculose ou fraturas) e não usa informações clínicas do paciente. Os rótulos de treino vêm de laudos
 processados automaticamente e contêm erros, o que limita o desempenho que qualquer modelo treinado
 nessa base pode atingir e medir.

@@ -1,0 +1,69 @@
+experiment: e3_noaug
+seed: 42
+paths:
+  splits_dir: C:\Users\Rodrigo\Desktop\faculdade\TCC\data\splits
+  results_dir: C:\Users\Rodrigo\Desktop\faculdade\TCC\results
+  raw_dir: E:\datasets\nih
+  data_dir: C:\Users\Rodrigo\Desktop\faculdade\TCC\data\nih256
+  runs_dir: C:\Users\Rodrigo\Desktop\faculdade\TCC\results\runs
+  checkpoint_dir: C:\Users\Rodrigo\Desktop\faculdade\TCC\checkpoints
+data:
+  classes:
+  - Atelectasis
+  - Cardiomegaly
+  - Effusion
+  - Infiltration
+  - Mass
+  - Nodule
+  - Pneumonia
+  - Pneumothorax
+  - Consolidation
+  - Edema
+  - Emphysema
+  - Fibrosis
+  - Pleural_Thickening
+  - Hernia
+  focus_classes:
+  - Pneumonia
+  - Atelectasis
+  - Effusion
+  stored_size: 256
+  image_size: 224
+  max_images: null
+split:
+  strategy: patient_random
+  train_frac: 0.7
+  val_frac: 0.15
+  test_frac: 0.15
+  seed: 42
+augmentation:
+  enabled: false
+  crop_scale:
+  - 0.85
+  - 1.0
+  crop_ratio:
+  - 0.95
+  - 1.05
+  hflip_p: 0.5
+  rotation_degrees: 10
+  brightness: 0.2
+model:
+  name: densenet121
+  pretrained: true
+  memory_efficient: false
+train:
+  device: auto
+  max_epochs: 30
+  batch_size: 32
+  num_workers: 4
+  amp: true
+  lr: 0.0001
+  scheduler:
+    factor: 0.1
+    patience: 1
+  early_stopping_patience: 5
+  pos_weight: false
+  pos_weight_max: null
+eval:
+  bootstrap_samples: 1000
+  bootstrap_seed: 42

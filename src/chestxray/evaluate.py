@@ -87,8 +87,14 @@ def fmt(value: float, decimals: int = 3) -> str:
 
 
 def fmt_ci(value: float, ci: list[float], decimals: int = 3) -> str:
-    """'0,820 (0,810–0,830)'"""
-    return f"{fmt(value, decimals)} ({fmt(ci[0], decimals)}–{fmt(ci[1], decimals)})"
+    """'0,820 (0,810–0,830)'. A number that would round to zero keeps one more decimal
+    ('-0,0003' instead of '-0,000'), so the reader sees on which side of zero a limit falls."""
+
+    def show(v: float) -> str:
+        near_zero = v is not None and not np.isnan(v) and v != 0 and round(abs(v), decimals) == 0
+        return fmt(v, decimals + 1 if near_zero else decimals)
+
+    return f"{show(value)} ({show(ci[0])}–{show(ci[1])})"
 
 
 class Predictions:
