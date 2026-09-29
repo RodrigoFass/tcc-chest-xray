@@ -36,3 +36,10 @@ results/runs/debug/
 
 # Demo model bundle (python -m chestxray.demo): weights and NIH example images
 app/model/
+
+# Web demo bundle (python -m chestxray.webdemo): ONNX weights and NIH example images
+webapp/model/
+
+# CheXpert predictions carry the per-image radiologist labels, which the Stanford research agreement
+# does not allow redistributing; only aggregate metrics and tables are versioned
+results/runs/*/preds_chexpert.csv

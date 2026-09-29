@@ -28,8 +28,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-data = ["kaggle>=1.6,<1.7"]  # 1.7.x buffers the whole download in memory
+data = ["kaggle>=1.6,<1.7", "redivis>=0.20"]  # kaggle 1.7.x buffers the whole download in memory
 app = ["gradio>=4.0"]
+web = ["onnx>=1.17", "onnxscript>=0.2", "onnxruntime>=1.20"]
 dev = ["pytest>=8.0"]
 notebooks = ["notebook>=7.0", "nbconvert>=7.0", "ipykernel>=6.0"]
 
