@@ -38,7 +38,15 @@ os próprios artigos (numa revisão completa em 29/09/2026). A figura da interfa
 1. **Modelo da UVV:** confirmar o modelo ABNT exigido (pergunta 5 da seção 9 do plano), o limite de
    palavras do resumo e o nome do orientador.
 2. **Orientador:** confirmar se cabe citar a Resolução CNS nº 510/2016 na seção de aspectos éticos (3.13).
-3. **Figuras de rascunho:** trocar a Figura 1 (em texto) por um diagrama desenhado e escolher as figuras
-   da análise exploratória (Seção 3.2).
-4. **Voz do autor:** revisar o texto na sua própria voz. Este rascunho é um ponto de partida, e a banca
+3. **Voz do autor:** revisar o texto na sua própria voz. Este rascunho é um ponto de partida, e a banca
    vai perguntar sobre cada decisão descrita aqui.
+
+## Figuras
+
+As figuras 1 a 15 seguem a ordem do texto:
+- a Figura 1 (fluxo do trabalho) é desenhada por `python -m chestxray.diagram`;
+- as Figuras 2 a 4 são da análise exploratória (`python -m chestxray.eda`);
+- as demais vêm da avaliação, do Grad-CAM, da validação externa e da interface.
+
+As figuras exploratórias que repetem a Tabela 1 (prevalência, fração AP e idade e sexo) ficam para o
+apêndice.

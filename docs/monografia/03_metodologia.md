@@ -18,21 +18,9 @@ a interface de demonstração.
 
 **Figura 1 – Fluxo do trabalho**
 
-```
-NIH ChestX-ray14 (112.120 imagens)
-  └─ pré-processamento: tons de cinza, 256 × 256
-      └─ divisão por paciente: treino 70% | validação 15% | teste 15%
-          ├─ treino da DenseNet-121 (E1–E4 e sementes; o E5 usa a divisão oficial)
-          │    └─ validação: parada antecipada, limiares, Platt e escolha da configuração (E1),
-          │       feita antes de qualquer predição de teste
-          └─ teste (só depois da escolha; cada modelo avaliado uma vez)
-               ├─ todos os experimentos: AUC, AUPRC, limiares, calibração, subgrupos
-               │  (IC95% por bootstrap) e diferenças pareadas
-               └─ modelo escolhido (E1): Grad-CAM, caixas dos radiologistas, pointing game,
-                  validação externa no CheXpert e interface web de demonstração
-```
+(`results/figures/fluxo_trabalho.png`)
 
-Fonte: elaborado pelo autor. [Substituir por um diagrama desenhado na versão final.]
+Fonte: elaborado pelo autor.
 
 ## 3.2 Conjunto de dados
 
@@ -86,9 +74,46 @@ etária (Seção 3.8.4).
 Fonte: elaborado pelo autor a partir de Wang et al. (2017a) (`results/tables/eda_contagens_por_classe.csv`).
 Em negrito, as três doenças estudadas.
 
-As figuras da análise exploratória (`results/figures/eda_*`) mostram a prevalência das classes, a
-coocorrência entre doenças, a distribuição de idade e sexo, o número de imagens por paciente, a fração
-de exames AP e exemplos de imagens [inserir as figuras escolhidas].
+A Figura 2 mostra exemplos de imagens do conjunto com um único rótulo, sorteadas com semente fixa: duas
+sem achados e duas de cada doença estudada. Os exemplos mostram a variedade da base. Há exames em PA e
+em AP, estes muitas vezes portáteis, com a marcação "PORTABLE" e cabos sobre o tórax, inclusive entre os
+exames sem achados. Há também diferenças de posicionamento do paciente e de exposição.
+
+**Figura 2 – Exemplos de imagens do NIH ChestX-ray14 com um único rótulo**
+
+(`results/figures/eda_exemplos.png`)
+
+Fonte: elaborado pelo autor a partir de Wang et al. (2017a).
+
+A Figura 3 mostra quantas imagens cada paciente tem. A maioria dos pacientes (56,8%) tem uma única
+imagem, mas os exames de acompanhamento se concentram em poucos pacientes: os 8,3% de pacientes com dez
+ou mais imagens reúnem 47,9% das imagens do conjunto, e um único paciente tem 184. É essa concentração
+que torna necessária a divisão por paciente (Seção 3.4). Numa divisão por imagem, os exames de um mesmo
+paciente, muito parecidos entre si, cairiam no treino e no teste.
+
+**Figura 3 – Número de imagens por paciente**
+
+(`results/figures/eda_imagens_por_paciente.png`)
+
+Fonte: elaborado pelo autor.
+
+A Figura 4 mostra a coocorrência entre as doenças: quantas imagens têm, ao mesmo tempo, cada par de
+rótulos. O problema é multirrótulo, e as doenças estudadas raramente aparecem sozinhas. Só 22,5% das
+imagens com pneumonia (322 de 1.431) não têm outro rótulo; 42,3% têm também infiltração, 23,8% edema,
+18,8% efusão pleural e 18,3% atelectasia. Na efusão e na atelectasia, as imagens com um único rótulo são
+29,7% e 36,5%. Essa sobreposição pode refletir tanto a coexistência real de doenças quanto a
+dificuldade de distinguir achados parecidos nos laudos, e volta a aparecer na discussão da pneumonia
+(Seção 5.2).
+
+**Figura 4 – Coocorrência das doenças no NIH ChestX-ray14**
+
+(`results/figures/eda_coocorrencia.png`; na diagonal, o total de cada classe)
+
+Fonte: elaborado pelo autor.
+
+As demais figuras da análise exploratória (prevalência das classes, fração de exames AP por classe e
+distribuição de idade e sexo) repetem informações da Tabela 1 e do texto acima e vão para o apêndice
+(`results/figures/eda_prevalencia.png`, `eda_ap_pa.png` e `eda_idade_sexo.png`).
 
 Três imagens não contêm anatomia visível, apenas um fundo uniforme: uma delas rotulada como atelectasia
 (00007160_002.png) e duas como sem achados (00010007_121.png e 00012249_001.png). Elas foram mantidas,
@@ -393,7 +418,7 @@ usadas no treino e na avaliação (torchvision, NumPy, pandas, scikit-learn, Pil
 Matplotlib, seaborn e PyYAML), o modelo da GPU e o *commit* do código ficam registrados junto com cada
 experimento (arquivo `environment.json`); as demais dependências têm versão fixada em `requirements.txt`.
 
-O código é organizado como um pacote Python, com configurações em YAML, e tem 150 testes automáticos.
+O código é organizado como um pacote Python, com configurações em YAML, e tem cerca de 150 testes automáticos.
 Eles verificam, entre outras coisas:
 - que nenhum paciente aparece em dois conjuntos;
 - que as métricas coincidem com as da biblioteca scikit-learn;
